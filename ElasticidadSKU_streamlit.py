@@ -119,6 +119,6 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                 with col2:
                     st.markdown("## Insight")
-                    st.info(res["Insight"])
+                    st.markdown(res["Insight"])
 
                

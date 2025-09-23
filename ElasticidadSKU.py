@@ -240,7 +240,7 @@ class ElasticidadCB:
             - Responde en español.
             - Sé ejecutivo y breve.
             - Usa viñetas claras.
-            - Da explicaciones pero, no seas extenso y enfocate en conclusiones de elasticidad. Tus respuestas deben dar valor al negocio.
+            - Da explicaciones pero, no seas extenso y enfócate en conclusiones de elasticidad. Tus respuestas deben dar valor al negocio.
 
             Incluye:
             1. Variables significativas.
