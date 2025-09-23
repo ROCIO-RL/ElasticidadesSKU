@@ -241,7 +241,7 @@ class ElasticidadCB:
             - Sé ejecutivo y breve.
             - Usa viñetas claras.
             - Da explicaciones pero, no seas extenso.
-            - Tus respuestas deben dar valor al negocio, es devir en cada viñeta da una breve aportacion.
+            - Tus respuestas deben dar valor al negocio, es devir en cada viñeta da una muy breve aportacion, no des parrafos comppletos ni extensos.
 
             Incluye:
             1. Variables significativas.
