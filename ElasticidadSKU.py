@@ -244,7 +244,8 @@ class ElasticidadCB:
         """
 
         prompt = PromptTemplate.from_template(template)
-        llm = Ollama(model=model_name, temperature=0.5)
+        #llm = Ollama(model=model_name, temperature=0.5)
+        llm = Ollama(model_name="llama3", api_url="https://api.ollama.com/generate", temperature=0.5)
         chain = prompt | llm
 
         resultado = chain.invoke({
