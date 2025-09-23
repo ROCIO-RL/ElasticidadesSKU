@@ -122,16 +122,15 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown(
                                 f"""
                                 <div style="
-                                    border: 2px solid #4CAF50;  /* Color del borde */
-                                    padding: 10px;              /* Espacio interno */
-                                    border-radius: 8px;         /* Esquinas redondeadas */
-                                    background-color: #f9f9f9;  /* Color de fondo */
-                                    margin: 10px 0px;           /* Margen arriba y abajo */
+                                    border: 2px solid white;   /* Borde blanco */
+                                    padding: 10px;             /* Espacio interno */
+                                    border-radius: 8px;        /* Esquinas redondeadas */
+                                    background-color: transparent;  /* Fondo transparente */
+                                    margin: 10px 0px;          /* Margen arriba y abajo */
                                 ">
                                     {res["Insight"]}
                                 </div>
                                 """,
                                 unsafe_allow_html=True
                             )
-
                
