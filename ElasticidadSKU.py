@@ -239,8 +239,9 @@ class ElasticidadCB:
             Tu tarea:
             - Responde en español.
             - Sé ejecutivo y breve.
-            - Usa máximo 5 viñetas claras.
-            - No des explicaciones largas ni párrafos extensos.
+            - Usa viñetas claras.
+            - Da explicaciones pero, no seas extenso.
+            - Tus respuestas deben dar valor al negocio.
 
             Incluye:
             1. Variables significativas.
