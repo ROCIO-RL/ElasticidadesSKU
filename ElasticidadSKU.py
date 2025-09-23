@@ -240,8 +240,8 @@ class ElasticidadCB:
             - Responde en español.
             - Sé ejecutivo y breve.
             - Usa viñetas claras.
-            - Da explicaciones pero, no seas extenso.
-            - Tus respuestas deben dar valor al negocio, es devir en cada viñeta da una muy breve aportacion, no des parrafos comppletos ni extensos.
+            - Da explicaciones pero, no seas extenso y enfocate en conclusiones de elasticidad.
+            - Tus respuestas deben dar valor al negocio, es decir en cada viñeta da una muy breve aportacion, no des parrafos completos ni extensos.
 
             Incluye:
             1. Variables significativas.
@@ -258,7 +258,7 @@ class ElasticidadCB:
 
             # Llamada al modelo
             completion = client.chat.completions.create(
-                model=model_name,  # por defecto llama3 en HF
+                model=model_name,  
                 messages=[{"role": "user", "content": template}],
             )
 
