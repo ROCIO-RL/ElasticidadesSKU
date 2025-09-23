@@ -259,6 +259,7 @@ class ElasticidadCB:
             completion = client.chat.completions.create(
                 model=model_name,  
                 messages=[{"role": "user", "content": template}],
+                temperature=0.3 
             )
 
             resultado = completion.choices[0].message.content.strip()
