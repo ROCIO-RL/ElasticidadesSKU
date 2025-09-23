@@ -112,7 +112,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown("## Resumen")
                     df_sku =df_resultados[['Intercepto','Coef. Precio','Coef. Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
                     st.dataframe(df_sku)
-                    st.markdown("#### ")
+                    st.markdown("")
                     st.markdown("## Gráfico")
                     if sku in graficos:
                         st.pyplot(graficos[sku]) 
