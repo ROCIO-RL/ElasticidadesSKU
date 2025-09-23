@@ -12,6 +12,7 @@ llm = Ollama(model="llama3")
 pd.options.display.float_format = '{:,.2f}'.format
 import os
 
+from openai import OpenAI
 import streamlit as st
 
 
@@ -217,44 +218,48 @@ class ElasticidadCB:
         return fig  # <-- devolvemos la figura
 
     
-    def genera_insight(self, model_name="llama3"):
-        if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
-            raise ValueError("Ejecuta .calcula_elasticidad() antes de generar el insight.")
+    def genera_insight(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
+            if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
+                raise ValueError("Ejecuta .calcula_elasticidad() antes de generar el insight.")
 
-        coef_pval = "\n".join(
-            f"- {var}: coef = {self.coeficientes[var]:.4f}, p = {self.pvalores[var]:.4g}"
-            for var in self.coeficientes.index
-        )
+            
+            coef_pval = "\n".join(
+                f"- {var}: coef = {self.coeficientes[var]:.4f}, p = {self.pvalores[var]:.4g}"
+                for var in self.coeficientes.index
+            )
 
-        template = """Eres un analista mexicano experto en econometría.
-        Has corrido un modelo log-log de elasticidad de precios para un SKU.
-        Estos son los resultados:
-        - R²: {r2}
-        - Coeficientes y p-values:
-        {coef_pval}
+            
+            template = f"""Eres un analista mexicano experto en econometría.
+            Has corrido un modelo log-log de elasticidad de precios para un SKU.
+            Estos son los resultados:
+            - R²: {self.r2:.4f}
+            - Coeficientes y p-values:
+            {coef_pval}
 
-        Explica de forma clara y ejecutiva:
-        1. Qué variables son significativas.
-        2. Cuál tiene mayor impacto.
-        3. Calidad del ajuste (basado en R²).
-        4. Qué implicaciones estratégicas hay para precios y clima.
+            Explica de forma clara y ejecutiva:
+            1. Qué variables son significativas.
+            2. Cuál tiene mayor impacto.
+            3. Calidad del ajuste (basado en R²).
+            4. Qué implicaciones estratégicas hay para precios y clima.
 
-        Redacta como un insight breve para negocio, sin jerga técnica innecesaria.
-        Responde únicamente en español.
-        """
+            Redacta como un insight breve para negocio, sin jerga técnica innecesaria.
+            Responde únicamente en español.
+            """
 
-        prompt = PromptTemplate.from_template(template)
-        #llm = Ollama(model=model_name, temperature=0.5)
-        llm = Ollama(model_name="llama3", api_url="https://api.ollama.com/generate", temperature=0.5)
-        chain = prompt | llm
+            client = OpenAI(
+                base_url="https://router.huggingface.co/v1",
+                api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN"], 
+            )
 
-        resultado = chain.invoke({
-            "r2": f"{self.r2:.4f}",
-            "coef_pval": coef_pval
-        })
+            # Llamada al modelo
+            completion = client.chat.completions.create(
+                model=model_name,  # por defecto llama3 en HF
+                messages=[{"role": "user", "content": template}],
+            )
 
-        #print("Insight:\n")
-        print(resultado.strip())
-        return resultado.strip()
+            resultado = completion.choices[0].message.content.strip()
+
+            print(resultado)
+            return resultado
     
 
