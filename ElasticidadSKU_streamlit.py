@@ -122,7 +122,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown(
                                 f"""
                                 <div style="
-                                    border: 2px solid white;   /* Borde blanco */
+                                    border: .5px solid white;   /* Borde blanco */
                                     padding: 10px;             /* Espacio interno */
                                     border-radius: 8px;        /* Esquinas redondeadas */
                                     background-color: transparent;  /* Fondo transparente */
