@@ -228,23 +228,27 @@ class ElasticidadCB:
                 for var in self.coeficientes.index
             )
 
-            
             template = f"""Eres un analista mexicano experto en econometría.
             Has corrido un modelo log-log de elasticidad de precios para un SKU.
-            Estos son los resultados:
+
+            Resultados del modelo:
             - R²: {self.r2:.4f}
             - Coeficientes y p-values:
             {coef_pval}
 
-            Explica de forma clara y ejecutiva:
-            1. Qué variables son significativas.
-            2. Cuál tiene mayor impacto.
-            3. Calidad del ajuste (basado en R²).
-            4. Qué implicaciones estratégicas hay para precios y clima.
+            Tu tarea:
+            - Responde en español.
+            - Sé ejecutivo y breve.
+            - Usa máximo 5 viñetas claras.
+            - No des explicaciones largas ni párrafos extensos.
 
-            Redacta como un insight breve para negocio, sin jerga técnica innecesaria.
-            Responde únicamente en español.
+            Incluye:
+            1. Variables significativas.
+            2. Variable con mayor impacto.
+            3. Calidad del ajuste (R²).
+            4. Implicaciones estratégicas de precios y clima.
             """
+
 
             client = OpenAI(
                 base_url="https://router.huggingface.co/v1",
