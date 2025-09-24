@@ -78,9 +78,11 @@ elif opcion == "Capturar Manualmente":
 
     # Botón para agregar
     if st.button("Agregar SKU a la lista"):
+        prod = sku_row.split(" - ")[1] 
         sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
         st.session_state.manual_layout.append({
             "SKU": sku_val,
+            "PropstNombre":prod,
             "Canal": canal,
             "Clima": clima
         })
