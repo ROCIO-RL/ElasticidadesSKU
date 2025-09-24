@@ -46,29 +46,35 @@ elif opcion == "Capturar Manualmente":
     df_productos =  pd.read_sql(query,conn)
     conn.close()
     st.markdown("Agrega un SKU, selecciona canal y clima:")
+    # --- FILTROS EN UNA FILA ---
+    col1, col2, col3, col4 = st.columns(4)
 
-    # Filtros jerárquicos
-    marca = st.selectbox("Marca", sorted(df_productos["MARCA"].unique()))
+    with col1:
+        marca = st.selectbox("Marca", sorted(df_productos["MARCA"].unique()))
 
-    agrupaciones = df_productos[df_productos["MARCA"] == marca]["AGRUPACION_PAUTA"].unique()
-    agrupacion = st.selectbox("Agrupación Pauta", sorted(agrupaciones))
+    with col2:
+        agrupaciones = df_productos[df_productos["MARCA"] == marca]["AGRUPACION_PAUTA"].unique()
+        agrupacion = st.selectbox("Agrupación", sorted(agrupaciones))
 
-    productos_base = df_productos[
-        (df_productos["MARCA"] == marca) & 
-        (df_productos["AGRUPACION_PAUTA"] == agrupacion)
-    ]["PRODUCTO_BASE"].unique()
-    producto_base = st.selectbox("Producto Base", sorted(productos_base))
+    with col3:
+        productos_base = df_productos[
+            (df_productos["MARCA"] == marca) &
+            (df_productos["AGRUPACION_PAUTA"] == agrupacion)
+        ]["PRODUCTO_BASE"].unique()
+        producto_base = st.selectbox("Producto Base", sorted(productos_base))
 
-    skus_filtrados = df_productos[
-        (df_productos["MARCA"] == marca) &
-        (df_productos["AGRUPACION_PAUTA"] == agrupacion) &
-        (df_productos["PRODUCTO_BASE"] == producto_base)
-    ][["SKU", "PRODUCTO"]]
+    with col4:
+        skus_filtrados = df_productos[
+            (df_productos["MARCA"] == marca) &
+            (df_productos["AGRUPACION_PAUTA"] == agrupacion) &
+            (df_productos["PRODUCTO_BASE"] == producto_base)
+        ][["SKU", "PRODUCTO"]]
 
-    sku_row = st.selectbox(
-        "Selecciona SKU",
-        skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['PRODUCTO']}", axis=1)
-    )
+        sku_row = st.selectbox(
+            "SKU",
+            skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['PRODUCTO']}", axis=1)
+        )
+
 
     canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
     clima = st.checkbox("¿Considerar Clima?", value=True)
@@ -123,9 +129,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'SKU': sku,
                     'Canal': canal,
                     'Producto': prod,
-                    'Intercepto': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 2),
-                    'Coef. Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
-                    'Coef. Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
+                    #intercepto
+                    'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
+                    #coeficientes
+                    'Afectación Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
+                    'Afectación Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
                     'Pvalue Intercepto': safe_round(elasticidad.pvalores.get('Intercept'), 4),
                     'Pvalue Precio': safe_round(elasticidad.pvalores.get('Precio'), 4),
                     'Pvalue Clima': safe_round(elasticidad.pvalores.get('CLIMA'), 4),
@@ -166,7 +174,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown(
                                 f"""
                                 <div style="
-                                    border: .1px solid gray;   /* Borde gris */
+                                    border: .05px solid gray;   /* Borde gris */
                                     padding: 10px;             /* Espacio interno */
                                     border-radius: 8px;        /* Esquinas redondeadas */
                                     background-color: transparent;  /* Fondo transparente */
