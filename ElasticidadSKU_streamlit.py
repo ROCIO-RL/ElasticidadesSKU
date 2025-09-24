@@ -179,7 +179,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 - 🌦️ **Impacto del clima:** {af_clima}.   
                                 Cuando el clima se considera, las ventas suben en promedio **{af_clima}** unidades
                                 - 📈 **Calidad del modelo (R²):** {r2}.  
-                                El modelo explica un **{r2*100}** de la variacion de la venta.
+                                El modelo explica un **{r2*100}**% de la variacion de la venta.
                                 """)
                     st.markdown("")
                     st.markdown("## Gráfico")
