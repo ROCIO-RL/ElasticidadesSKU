@@ -177,7 +177,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 - 💰 **Elasticidad precio:** {af_precio}.  
                                 Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio}**%.  
                                 - 🌦️ **Impacto del clima:** {af_clima}.   
-                                Por cada 1% de incremento en la temperatura el sellout se beneficia en un **{af_clima:.2%}%**.
+                                Por cada 1% de incremento en la temperatura el sellout se beneficia en un **{af_clima:.2%}**.
                                 - 📈 **Calidad del modelo (R²):** {r2}.  
                                 El modelo explica un **{r2*100}**% de la variacion de la venta.
                                 """)
