@@ -241,7 +241,7 @@ class ElasticidadCB:
                             - Usa viñetas claras y lenguaje comprensible.
                             - Enfócate en conclusiones de elasticidad y cómo afectan el negocio.
                             - Explica cómo un incremento en el precio o cambios en el clima impactan las unidades vendidas.
-                            - Recuerda que los resultados están en **escala logarítmica**; para interpretar en unidades, transforma con e^(coeficiente) cuando corresponda.
+                            - Recuerda que los resultados están en **escala logarítmica**; para interpretar en unidades, transforma con e^(coeficiente) para el intercepto.
 
                             Incluye en tu análisis:
                             1. Variables **significativas** (p-value < 0.05).
