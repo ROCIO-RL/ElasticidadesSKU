@@ -167,7 +167,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 with col1:
                     st.markdown("## Resumen")
                     df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
-                    #st.dataframe(df_sku)
+                    st.dataframe(df_sku)
                     st.markdown(f"""
                                 📦 **Producto:** {prod}  
                                 🆔 **SKU:** {sku}  
@@ -177,7 +177,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 - 💰 **Elasticidad precio:** {af_precio}.  
                                 Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio}**%.  
                                 - 🌦️ **Impacto del clima:** {af_clima}.   
-                                Cuando el clima se considera, las ventas suben en promedio **{af_clima}** unidades
+                                Por cada 1% de incremento en la temperatura el sellout se beneficia en un **{af_clima:.2%}%**.
                                 - 📈 **Calidad del modelo (R²):** {r2}.  
                                 El modelo explica un **{r2*100}**% de la variacion de la venta.
                                 """)
