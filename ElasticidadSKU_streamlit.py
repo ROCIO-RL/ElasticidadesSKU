@@ -162,7 +162,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 
                 with col1:
                     st.markdown("## Resumen")
-                    df_sku =df_resultados[['Intercepto','Coef. Precio','Coef. Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
+                    df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
                     st.dataframe(df_sku)
                     st.markdown("")
                     st.markdown("## Gráfico")
