@@ -240,10 +240,9 @@ class ElasticidadCB:
             - Responde en español.
             - Sé ejecutivo y breve, pero considera que no todos tienen conocimiento de regresiones, usa un lenguaje comprensible para cualquier area.
             - Usa viñetas claras.
-            - Recuerda que el intercepto que te mando esta en logaritmo, para representar la venta base hay que aplicarle exponente.
             - Da explicaciones pero, no seas extenso y enfócate en conclusiones de elasticidad. Tus respuestas deben dar valor al negocio.
-            -Explica la relacion entre incremento de precio y cambio en las unidades.
-            -Genera un escenario con un incremento y decremento del 5% al precio y estima el cambio en unidades (Recuerda que los resultados estan en escala logaritmica)
+            - Explica la relacion entre incremento de precio y cambio en las unidades.
+            - Recuerda que los resultados estan en escala logaritmica
 
             Incluye:
             1. Variables significativas.
