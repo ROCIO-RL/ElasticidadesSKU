@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import snowflake.connector
 from ElasticidadSKU import ElasticidadCB
 
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
@@ -25,35 +25,73 @@ if opcion == "Subir Layout":
             layout = pd.read_excel(archivo)
         st.success("Layout cargado correctamente")
         st.dataframe(layout)
+
 elif opcion == "Capturar Manualmente":
+    # PRODUCTOS 
+    conn = snowflake.connector.connect(
+        user=st.secrets["snowflake"]["user"],
+        password=st.secrets["snowflake"]["password"],
+        account=st.secrets["snowflake"]["account"],
+        database=st.secrets["snowflake"]["database"],
+        schema=st.secrets["snowflake"]["schema"]
+        )
+
+    query = f"""SELECT MRCNOMBRE AS MARCA,
+                    AGPPAUTANOMBRE AS AGRUPACION_PAUTA,
+                    PRONOMBRE AS PRODUCTO_BASE,
+                    PROPSTCODBARRAS AS SKU, 
+                    PROPSTNOMBRE AS PRODUCTO
+                FROM PRD_CNS_MX.DM.VW_DIM_PRODUCTO"""
+    df_productos =  pd.read_sql(query,conn)
+    conn.close()
     st.markdown("Agrega un SKU, selecciona canal y clima:")
 
-    # Entradas
-    sku = st.text_input("SKU (código de barras)")
+    # Filtros jerárquicos
+    marca = st.selectbox("Marca", sorted(df_productos["MARCA"].unique()))
+
+    agrupaciones = df_productos[df_productos["MARCA"] == marca]["AGRUPACION_PAUTA"].unique()
+    agrupacion = st.selectbox("Agrupación Pauta", sorted(agrupaciones))
+
+    productos_base = df_productos[
+        (df_productos["MARCA"] == marca) & 
+        (df_productos["AGRUPACION_PAUTA"] == agrupacion)
+    ]["PRODUCTO_BASE"].unique()
+    producto_base = st.selectbox("Producto Base", sorted(productos_base))
+
+    skus_filtrados = df_productos[
+        (df_productos["MARCA"] == marca) &
+        (df_productos["AGRUPACION_PAUTA"] == agrupacion) &
+        (df_productos["PRODUCTO_BASE"] == producto_base)
+    ][["SKU", "PRODUCTO"]]
+
+    sku_row = st.selectbox(
+        "Selecciona SKU",
+        skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['PRODUCTO']}", axis=1)
+    )
+
     canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
     clima = st.checkbox("¿Considerar Clima?", value=True)
 
-    # Inicializar lista en session_state si no existe
+    # Inicializar lista en session_state
     if "manual_layout" not in st.session_state:
         st.session_state.manual_layout = []
 
-    # Botón para agregar SKU a la lista temporal
+    # Botón para agregar
     if st.button("Agregar SKU a la lista"):
-        if sku:  # Solo si hay valor
-            st.session_state.manual_layout.append({
-                "SKU": sku,
-                "Canal": canal,
-                "Clima": clima
-            })
-            st.success(f"SKU {sku} agregado a la lista.")
-        else:
-            st.warning("Debes ingresar un SKU válido.")
+        sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
+        st.session_state.manual_layout.append({
+            "SKU": sku_val,
+            "Canal": canal,
+            "Clima": clima
+        })
+        st.success(f"SKU {sku_val} agregado a la lista.")
 
-    # Mostrar la tabla de SKUs capturados hasta el momento
+    # Mostrar tabla acumulada
     if st.session_state.manual_layout:
         st.markdown("### SKUs capturados:")
         layout = pd.DataFrame(st.session_state.manual_layout)
         st.dataframe(layout)
+
 
 
 # Procesar layout
