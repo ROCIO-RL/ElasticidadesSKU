@@ -242,7 +242,7 @@ class ElasticidadCB:
             - Usa viñetas claras.
             - Da explicaciones pero, no seas extenso y enfócate en conclusiones de elasticidad. Tus respuestas deben dar valor al negocio.
             - Explica la relacion entre incremento de precio y cambio en las unidades.
-            - Recuerda que los resultados estan en escala logaritmica
+            - Recuerda que los resultados estan en escala logaritmica, para transformar es necesario hacer e^(variables)
 
             Incluye:
             1. Variables significativas.
