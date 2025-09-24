@@ -106,6 +106,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             sku = row["SKU"]
             canal = row["Canal"]
             temp = row["Clima"]
+            prod = row["PropstNombre"]
 
             try:
                 elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp)
@@ -120,6 +121,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 resultados.append({
                     'SKU': sku,
                     'Canal': canal,
+                    'Producto': prod,
                     'Intercepto': safe_round(elasticidad.coeficientes.get('Intercept'), 2),
                     'Coef. Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
                     'Coef. Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
@@ -143,8 +145,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
         st.subheader(" Gráficos e Insights por SKU")
         for res in resultados:
             sku = res["SKU"]
+            prod = res["Producto"]
             
-            with st.expander(f" SKU {sku} - Canal {res['Canal']}"):
+            with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
                 
                 col1, col2 = st.columns([2, 1]) 
                 
