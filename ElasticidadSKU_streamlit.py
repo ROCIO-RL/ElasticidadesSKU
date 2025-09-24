@@ -175,7 +175,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                                 - 📊 **Ventas base esperadas:** {venta_base:,} unidades (sin considerar precio ni clima).  
                                 - 💰 **Elasticidad precio:** {af_precio}.  
-                                Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2%}**.  
+                                Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio}**%.  
                                 - 🌦️ **Impacto del clima:** {af_clima}.   
                                 Cuando el clima se considera, las ventas suben en promedio **{af_clima}** unidades
                                 - 📈 **Calidad del modelo (R²):** {r2}.  
