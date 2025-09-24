@@ -215,7 +215,7 @@ class ElasticidadCB:
         fig.legend(loc='upper left', bbox_to_anchor=(0.12, 0.90))
         plt.xticks(rotation=45)
         
-        return fig  # <-- devolvemos la figura
+        return fig 
 
     
     def genera_insight(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):

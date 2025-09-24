@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import snowflake.connector
 from ElasticidadSKU import ElasticidadCB
+import numpy as np
 
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
 
@@ -122,7 +123,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'SKU': sku,
                     'Canal': canal,
                     'Producto': prod,
-                    'Intercepto': safe_round(elasticidad.coeficientes.get('Intercept'), 2),
+                    'Intercepto': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 2),
                     'Coef. Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
                     'Coef. Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
                     'Pvalue Intercepto': safe_round(elasticidad.pvalores.get('Intercept'), 4),
