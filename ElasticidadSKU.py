@@ -228,28 +228,30 @@ class ElasticidadCB:
                 for var in self.coeficientes.index
             )
 
-            template = f"""Eres un analista mexicano experto en econometría.
-            Has corrido un modelo log-log de elasticidad de precios para un SKU.
+            template = f"""Eres un analista mexicano experto en econometría. 
+                            Has corrido un modelo log-log de elasticidad de precios para un SKU.
 
-            Resultados del modelo:
-            - R²: {self.r2:.4f}
-            - Coeficientes y p-values:
-            {coef_pval}
+                            Resultados del modelo:
+                            - R²: {self.r2:.4f}
+                            - Coeficientes y p-values: {coef_pval}
 
-            Tu tarea:
-            - Responde en español.
-            - Sé ejecutivo y breve, pero considera que no todos tienen conocimiento de regresiones, usa un lenguaje comprensible para cualquier area.
-            - Usa viñetas claras.
-            - Da explicaciones pero, no seas extenso y enfócate en conclusiones de elasticidad. Tus respuestas deben dar valor al negocio.
-            - Explica la relacion entre incremento de precio y cambio en las unidades.
-            - Recuerda que los resultados estan en escala logaritmica, para transformar es necesario hacer e^(variables)
+                            Tu tarea:
+                            - Responde en español.
+                            - Sé ejecutivo, breve y claro; tu audiencia puede no tener conocimiento técnico de regresiones.
+                            - Usa viñetas claras y lenguaje comprensible.
+                            - Enfócate en conclusiones de elasticidad y cómo afectan el negocio.
+                            - Explica cómo un incremento en el precio o cambios en el clima impactan las unidades vendidas.
+                            - Recuerda que los resultados están en **escala logarítmica**; para interpretar en unidades, transforma con e^(coeficiente) cuando corresponda.
 
-            Incluye:
-            1. Variables significativas.
-            2. Variable con mayor impacto.
-            3. Calidad del ajuste (R²).
-            4. Implicaciones estratégicas de precios y clima.
-            """
+                            Incluye en tu análisis:
+                            1. Variables **significativas** (p-value < 0.05).
+                            2. Variable con **mayor impacto** sobre las ventas.
+                            3. **Calidad del ajuste** (R²) de manera comprensible.
+                            4. **Implicaciones estratégicas** para precios y clima.
+
+                            Prioriza conclusiones accionables para la toma de decisiones, no detalles técnicos innecesarios.
+
+                          """
 
 
             client = OpenAI(
