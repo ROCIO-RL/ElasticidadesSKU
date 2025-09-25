@@ -212,7 +212,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown("## Gráfico")
                     if sku in graficos:
                         st.pyplot(graficos[sku]) 
-                    if sku in dispersion:
+                    if sku in graficos_dispersion:
                         st.pyplot(graficos_dispersion[sku])    
 
                 with col2:
