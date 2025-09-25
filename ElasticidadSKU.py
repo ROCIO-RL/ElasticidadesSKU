@@ -221,32 +221,33 @@ class ElasticidadCB:
     def grafica_dispersion(self):
         """
         Genera un gráfico de dispersión (scatter plot) 
-        de Ventas (UNIDADESDESP) vs Sellout.
+        de Ventas (UNIDADESDESP) vs Precio.
         """
         fig, ax = plt.subplots(figsize=(10, 6))
 
         # Verificamos que existan las columnas necesarias
-        if 'UNIDADESDESP' not in self.data_grafico.columns or 'SELLOUT' not in self.data_grafico.columns:
-            raise ValueError("El DataFrame debe contener las columnas 'UNIDADESDESP' y 'SELLOUT'.")
+        if 'UNIDADESDESP' not in self.data_grafico.columns or 'Precio' not in self.data_grafico.columns:
+            raise ValueError("El DataFrame debe contener las columnas 'UNIDADESDESP' y 'Precio'.")
 
         # Gráfico de dispersión
         ax.scatter(
+            self.data_grafico['Precio'],
             self.data_grafico['UNIDADESDESP'],
-            self.data_grafico['SELLOUT'],
             alpha=0.7,
             color='royalblue',
             edgecolors='black'
         )
 
         # Etiquetas y título
-        ax.set_xlabel("Unidades vendidas (UNIDADESDESP)")
-        ax.set_ylabel("Sellout")
-        ax.set_title("Dispersión: Ventas vs Sellout")
+        ax.set_xlabel("Precio")
+        ax.set_ylabel("Unidades vendidas (UNIDADESDESP)")
+        ax.set_title("Dispersión: Precio vs Ventas")
 
         # Cuadrícula ligera
         ax.grid(True, linestyle='--', alpha=0.6)
 
         return fig
+
 
 
     
