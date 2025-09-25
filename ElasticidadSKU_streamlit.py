@@ -144,7 +144,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 elasticidad.consulta_sellout()
                 elasticidad.calcula_elasticidad()
                 fig = elasticidad.grafica()
+                dispersion = elasticidad.grafica_dispersion()
                 graficos[sku] = fig
+                dispersion[sku] = dispersion
                 insight = elasticidad.genera_insight()
                 def safe_round(value, dec=4):
                     return round(value, dec) if value is not None else None
@@ -209,6 +211,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown("## Gráfico")
                     if sku in graficos:
                         st.pyplot(graficos[sku]) 
+                    if sku in dispersion:
+                        st.pyplot(dispersion[sku])    
 
                 with col2:
                     st.markdown("## Insight")

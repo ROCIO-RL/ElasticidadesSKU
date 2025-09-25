@@ -216,6 +216,38 @@ class ElasticidadCB:
         plt.xticks(rotation=45)
         
         return fig 
+    
+
+    def grafica_dispersion(self):
+        """
+        Genera un gráfico de dispersión (scatter plot) 
+        de Ventas (UNIDADESDESP) vs Sellout.
+        """
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        # Verificamos que existan las columnas necesarias
+        if 'UNIDADESDESP' not in self.data_grafico.columns or 'SELLOUT' not in self.data_grafico.columns:
+            raise ValueError("El DataFrame debe contener las columnas 'UNIDADESDESP' y 'SELLOUT'.")
+
+        # Gráfico de dispersión
+        ax.scatter(
+            self.data_grafico['UNIDADESDESP'],
+            self.data_grafico['SELLOUT'],
+            alpha=0.7,
+            color='royalblue',
+            edgecolors='black'
+        )
+
+        # Etiquetas y título
+        ax.set_xlabel("Unidades vendidas (UNIDADESDESP)")
+        ax.set_ylabel("Sellout")
+        ax.set_title("Dispersión: Ventas vs Sellout")
+
+        # Cuadrícula ligera
+        ax.grid(True, linestyle='--', alpha=0.6)
+
+        return fig
+
 
     
     def genera_insight(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
