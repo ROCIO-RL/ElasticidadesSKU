@@ -78,7 +78,15 @@ elif opcion == "Capturar Manualmente":
 
     canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
     clima = st.checkbox("¿Considerar Clima?", value=True)
-    precio_act = st.number_input("Si conoces el precio agregalo", min_value=0.0, step=0.1)
+    precio_act = st.text_input("Si conoces el precio agregalo", min_value=0.0, step=0.1)
+
+    # Validamos que sea número
+    if precio_act.replace(".", "", 1).isdigit():  
+        precio = float(precio_act)
+    elif precio_act == "":
+        precios =""
+    else:
+        st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
 
     # Inicializar lista en session_state
     if "manual_layout" not in st.session_state:
@@ -93,7 +101,7 @@ elif opcion == "Capturar Manualmente":
             "PropstNombre":prod,
             "Canal": canal,
             "Clima": clima,
-            "Precio Actual": precio_act
+            "Precio Actual": precio
         })
         st.success(f"SKU {sku_val} agregado a la lista.")
 
