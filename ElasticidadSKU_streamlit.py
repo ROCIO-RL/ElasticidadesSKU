@@ -195,7 +195,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 with col1:
                     st.markdown("## Resumen")
                     df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
-                    st.dataframe(df_sku)
+                    #st.dataframe(df_sku)
                     st.markdown(f"""
                                 📦 **Producto:** {prod}  
                                 🆔 **SKU:** {sku}  
@@ -209,7 +209,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 - 📈 **Calidad del modelo (R²):** {r2}.  
                                 El modelo explica un **{r2*100}**% de la variacion de la venta.
                                 """)
-                    st.markdown("")
+                    #st.markdown("")
                     st.markdown("## Gráfico")
                     if sku in graficos:
                         st.pyplot(graficos[sku]) 

@@ -243,7 +243,6 @@ class ElasticidadCB:
         y_pred = model.predict(X)
         ax.plot(X, y_pred, color='red', linewidth=1, label='Tendencia')
 
-        # Etiquetas y título
         ax.set_xlabel("Precio")
         ax.set_ylabel("Unidades vendidas")
         ax.set_title("Dispersión: Precio vs Ventas")
