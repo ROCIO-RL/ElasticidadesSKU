@@ -93,20 +93,31 @@ elif opcion == "Capturar Manualmente":
         # Validamos que sea número
         if precio_act.replace(".", "", 1).isdigit():  
             precio = float(precio_act)
+            prod = sku_row.split(" - ")[1] 
+            sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
+            st.session_state.manual_layout.append({
+                "SKU": sku_val,
+                "PropstNombre":prod,
+                "Canal": canal,
+                "Clima": clima,
+                "Precio Actual": precio
+            })
+            st.success(f"SKU {sku_val} agregado a la lista.")
         elif precio_act == "":
             precio =""
+            prod = sku_row.split(" - ")[1] 
+            sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
+            st.session_state.manual_layout.append({
+                "SKU": sku_val,
+                "PropstNombre":prod,
+                "Canal": canal,
+                "Clima": clima,
+                "Precio Actual": precio
+            })
+            st.success(f"SKU {sku_val} agregado a la lista.")
         else:
             st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
-        prod = sku_row.split(" - ")[1] 
-        sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
-        st.session_state.manual_layout.append({
-            "SKU": sku_val,
-            "PropstNombre":prod,
-            "Canal": canal,
-            "Clima": clima,
-            "Precio Actual": precio
-        })
-        st.success(f"SKU {sku_val} agregado a la lista.")
+        
 
     # Mostrar tabla acumulada
     if st.session_state.manual_layout:
