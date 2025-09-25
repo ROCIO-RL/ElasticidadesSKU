@@ -77,7 +77,7 @@ elif opcion == "Capturar Manualmente":
 
 
     canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
-    clima = st.checkbox("¿Considerar Clima?", value=True)
+    
     precio_act = st.text_input("Si conoces el precio agregalo")
 
     # Validamos que sea número
@@ -87,6 +87,8 @@ elif opcion == "Capturar Manualmente":
         precio =""
     else:
         st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
+
+    clima = st.checkbox("¿Considerar Clima?", value=True)    
 
     # Inicializar lista en session_state
     if "manual_layout" not in st.session_state:
