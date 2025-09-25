@@ -84,7 +84,7 @@ elif opcion == "Capturar Manualmente":
     if precio_act.replace(".", "", 1).isdigit():  
         precio = float(precio_act)
     elif precio_act == "":
-        precios =""
+        precio =""
     else:
         st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
 
