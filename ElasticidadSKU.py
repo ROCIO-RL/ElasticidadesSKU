@@ -235,7 +235,7 @@ class ElasticidadCB:
         y = self.data_grafico['UNIDADESDESP'].values
 
         # Scatter plot
-        ax.scatter(X, y, alpha=0.7, color='royalblue', edgecolors='blue')
+        ax.scatter(X, y, alpha=0.7, color='royalblue', edgecolors='gray')
 
         # Línea de tendencia
         model = LinearRegression()
@@ -246,7 +246,7 @@ class ElasticidadCB:
         # Etiquetas y título
         ax.set_xlabel("Precio")
         ax.set_ylabel("Unidades vendidas")
-        ax.set_title("Dispersión: Precio vs Ventas con línea de tendencia")
+        ax.set_title("Dispersión: Precio vs Ventas")
         ax.legend()
 
         # Cuadrícula
