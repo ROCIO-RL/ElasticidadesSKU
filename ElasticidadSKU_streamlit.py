@@ -139,8 +139,13 @@ elif opcion == "Capturar Manualmente":
                 if row["SKU"] not in skus_para_eliminar
             ]
             st.success(f"Se eliminaron {len(skus_para_eliminar)} SKU(s)")
-            st.experimental_rerun()  # recarga la app para actualizar la tabla
 
+            # Volver a crear el dataframe actualizado
+            if st.session_state.manual_layout:
+                layout_df = pd.DataFrame(st.session_state.manual_layout)
+                st.dataframe(layout_df)
+            else:
+                st.info("No quedan SKUs capturados")
 
 
 # Procesar layout
