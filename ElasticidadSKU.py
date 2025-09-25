@@ -7,6 +7,7 @@ import statsmodels.formula.api as smf
 from snowflake.connector.pandas_tools import write_pandas
 import snowflake.connector
 from langchain.prompts import PromptTemplate
+from sklearn.linear_model import LinearRegression
 from langchain_community.llms import Ollama
 llm = Ollama(model="llama3")
 pd.options.display.float_format = '{:,.2f}'.format
@@ -220,8 +221,8 @@ class ElasticidadCB:
 
     def grafica_dispersion(self):
         """
-        Genera un gráfico de dispersión (scatter plot) 
-        de Ventas (UNIDADESDESP) vs Precio.
+        Genera un gráfico de dispersión de Ventas (UNIDADESDESP) vs Precio,
+        con línea de tendencia en rojo.
         """
         fig, ax = plt.subplots(figsize=(10, 6))
 
@@ -229,21 +230,26 @@ class ElasticidadCB:
         if 'UNIDADESDESP' not in self.data_grafico.columns or 'Precio' not in self.data_grafico.columns:
             raise ValueError("El DataFrame debe contener las columnas 'UNIDADESDESP' y 'Precio'.")
 
-        # Gráfico de dispersión
-        ax.scatter(
-            self.data_grafico['Precio'],
-            self.data_grafico['UNIDADESDESP'],
-            alpha=0.7,
-            color='royalblue',
-            edgecolors='black'
-        )
+        # Datos
+        X = self.data_grafico['Precio'].values.reshape(-1, 1)
+        y = self.data_grafico['UNIDADESDESP'].values
+
+        # Scatter plot
+        ax.scatter(X, y, alpha=0.7, color='royalblue', edgecolors='black')
+
+        # Línea de tendencia
+        model = LinearRegression()
+        model.fit(X, y)
+        y_pred = model.predict(X)
+        ax.plot(X, y_pred, color='red', linewidth=2, label='Tendencia')
 
         # Etiquetas y título
         ax.set_xlabel("Precio")
         ax.set_ylabel("Unidades vendidas (UNIDADESDESP)")
-        ax.set_title("Dispersión: Precio vs Ventas")
+        ax.set_title("Dispersión: Precio vs Ventas con línea de tendencia")
+        ax.legend()
 
-        # Cuadrícula ligera
+        # Cuadrícula
         ax.grid(True, linestyle='--', alpha=0.6)
 
         return fig

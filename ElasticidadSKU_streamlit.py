@@ -5,6 +5,7 @@ import snowflake.connector
 from ElasticidadSKU import ElasticidadCB
 import numpy as np
 
+
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
 
 st.title("Elasticidades por SKU")
