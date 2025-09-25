@@ -121,31 +121,23 @@ elif opcion == "Capturar Manualmente":
             st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
         
 
-    if st.session_state.manual_layout:
-        st.markdown("### SKUs capturados:")
-        layout_df = pd.DataFrame(st.session_state.manual_layout)
-        st.dataframe(layout_df)
+# Tabla y eliminación
+st.markdown("### SKUs capturados:")
+if st.session_state.manual_layout:
+    layout_df = pd.DataFrame(st.session_state.manual_layout)
+    st.dataframe(layout_df)
 
-        # Selector para eliminar
-        skus_para_eliminar = st.multiselect(
-            "Selecciona los SKUs a eliminar",
-            options=[row["SKU"] for row in st.session_state.manual_layout]
-        )
+    skus_para_eliminar = st.multiselect(
+        "Selecciona los SKUs a eliminar",
+        options=[row["SKU"] for row in st.session_state.manual_layout]
+    )
 
-        if st.button("Eliminar seleccionados") and skus_para_eliminar:
-            # Filtrar los SKUs que no queremos eliminar
-            st.session_state.manual_layout = [
-                row for row in st.session_state.manual_layout
-                if row["SKU"] not in skus_para_eliminar
-            ]
-            st.success(f"Se eliminaron {len(skus_para_eliminar)} SKU(s)")
-
-            # Volver a crear el dataframe actualizado
-            if st.session_state.manual_layout:
-                layout_df = pd.DataFrame(st.session_state.manual_layout)
-                st.dataframe(layout_df)
-            else:
-                st.info("No quedan SKUs capturados")
+    if st.button("Eliminar seleccionados") and skus_para_eliminar:
+        st.session_state.manual_layout = [
+            row for row in st.session_state.manual_layout
+            if row["SKU"] not in skus_para_eliminar
+        ]
+        st.success(f"Se eliminaron {len(skus_para_eliminar)} SKU(s)")
 
 
 # Procesar layout
