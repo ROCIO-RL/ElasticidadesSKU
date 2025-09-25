@@ -80,13 +80,7 @@ elif opcion == "Capturar Manualmente":
     
     precio_act = st.text_input("Si conoces el precio agregalo")
 
-    # Validamos que sea número
-    if precio_act.replace(".", "", 1).isdigit():  
-        precio = float(precio_act)
-    elif precio_act == "":
-        precio =""
-    else:
-        st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
+    
 
     clima = st.checkbox("¿Considerar Clima?", value=True)    
 
@@ -96,6 +90,13 @@ elif opcion == "Capturar Manualmente":
 
     # Botón para agregar
     if st.button("Agregar SKU a la lista"):
+        # Validamos que sea número
+        if precio_act.replace(".", "", 1).isdigit():  
+            precio = float(precio_act)
+        elif precio_act == "":
+            precio =""
+        else:
+            st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
         prod = sku_row.split(" - ")[1] 
         sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
         st.session_state.manual_layout.append({
