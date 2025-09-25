@@ -78,7 +78,7 @@ elif opcion == "Capturar Manualmente":
 
     canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
     clima = st.checkbox("¿Considerar Clima?", value=True)
-    precio_act = st.text_input("Si conoces el precio agregalo", min_value=0.0, step=0.1)
+    precio_act = st.text_input("Si conoces el precio agregalo")
 
     # Validamos que sea número
     if precio_act.replace(".", "", 1).isdigit():  
