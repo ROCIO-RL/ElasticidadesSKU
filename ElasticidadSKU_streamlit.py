@@ -131,6 +131,7 @@ elif opcion == "Capturar Manualmente":
 if layout is not None and st.button("Ejecutar Análisis"):
     resultados = []
     graficos = {}
+    graficos_dispersion = {}
 
     with st.spinner("Calculando elasticidades"):
         for _, row in layout.iterrows():
@@ -146,7 +147,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 fig = elasticidad.grafica()
                 dispersion = elasticidad.grafica_dispersion()
                 graficos[sku] = fig
-                dispersion[sku] = dispersion
+                graficos_dispersion[sku] = dispersion
                 insight = elasticidad.genera_insight()
                 def safe_round(value, dec=4):
                     return round(value, dec) if value is not None else None
@@ -212,7 +213,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     if sku in graficos:
                         st.pyplot(graficos[sku]) 
                     if sku in dispersion:
-                        st.pyplot(dispersion[sku])    
+                        st.pyplot(graficos_dispersion[sku])    
 
                 with col2:
                     st.markdown("## Insight")
