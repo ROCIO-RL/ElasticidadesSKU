@@ -82,7 +82,8 @@ elif opcion == "Capturar Manualmente":
         canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
     with col2:
         precio_act = st.text_input("Si conoces el precio agregalo")
-    with col3:    
+    with col3:  
+        st.markdown("Clima")  
         clima = st.checkbox("¿Considerar Clima?", value=True)    
 
     # Inicializar lista en session_state
