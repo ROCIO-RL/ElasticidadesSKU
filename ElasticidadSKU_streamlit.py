@@ -76,14 +76,14 @@ elif opcion == "Capturar Manualmente":
             skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['PRODUCTO']}", axis=1)
         )
 
+    col1, col2, col3 = st.columns(3)
 
-    canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
-    
-    precio_act = st.text_input("Si conoces el precio agregalo")
-
-    
-
-    clima = st.checkbox("¿Considerar Clima?", value=True)    
+    with col1:
+        canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
+    with col2:
+        precio_act = st.text_input("Si conoces el precio agregalo")
+    with col3:    
+        clima = st.checkbox("¿Considerar Clima?", value=True)    
 
     # Inicializar lista en session_state
     if "manual_layout" not in st.session_state:
