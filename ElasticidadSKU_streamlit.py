@@ -76,7 +76,7 @@ elif opcion == "Capturar Manualmente":
             skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['PRODUCTO']}", axis=1)
         )
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
