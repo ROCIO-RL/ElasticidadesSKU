@@ -224,7 +224,7 @@ class ElasticidadCB:
         Genera un gráfico de dispersión de Ventas (UNIDADESDESP) vs Precio,
         con línea de tendencia en rojo.
         """
-        fig, ax = plt.subplots(figsize=(10, 6))
+        fig, ax = plt.subplots(figsize=(14, 6))
 
         # Verificamos que existan las columnas necesarias
         if 'UNIDADESDESP' not in self.data_grafico.columns or 'Precio' not in self.data_grafico.columns:
