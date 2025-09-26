@@ -38,12 +38,14 @@ elif opcion == "Capturar Manualmente":
         schema=st.secrets["snowflake"]["schema"]
         )
 
-    query = f"""SELECT MRCNOMBRE AS MARCA,
+    query = f"""SELECT DISTINCT 
+                    MRCNOMBRE AS MARCA,
                     AGPPAUTANOMBRE AS AGRUPACION_PAUTA,
                     PRONOMBRE AS PRODUCTO_BASE,
                     PROPSTCODBARRAS AS SKU, 
                     PROPSTNOMBRE AS PRODUCTO
-                FROM PRD_CNS_MX.DM.VW_DIM_PRODUCTO"""
+                FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
+                LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID"""
     df_productos =  pd.read_sql(query,conn)
     conn.close()
     st.markdown("Agrega un SKU, selecciona canal y clima:")
