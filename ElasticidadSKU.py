@@ -228,7 +228,7 @@ class ElasticidadCB:
             yaxis=dict(title="Unidades", side='left', showgrid=False),
             yaxis2=dict(title="Precio", overlaying='y', side='right'),
             yaxis3=dict(title="Clima (escala visual)", 
-                        overlaying='y', side='right', position=1.05, showgrid=False),
+                        overlaying='y', side='right', position=0.95, showgrid=False),
             bargap=0.2,
             legend=dict(orientation='h', yanchor="bottom", y=1.05, xanchor="center", x=0.5),
             hovermode="x unified",
