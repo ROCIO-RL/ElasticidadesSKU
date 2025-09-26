@@ -217,7 +217,7 @@ class ElasticidadCB:
                 fill='tozeroy',
                 mode='none',
                 name='Clima (normalizada)',
-                fillcolor='rgba(0, 127, 255, 0.2)',
+                fillcolor='rgba(0, 160, 220, 0.2)',
                 yaxis='y3'
             ))
 
