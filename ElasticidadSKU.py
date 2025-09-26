@@ -238,7 +238,7 @@ class ElasticidadCB:
 
         return fig
 
-    def grafica_dispersion_interactiva(self):
+    def grafica_dispersion(self):
         df = self.data_grafico.copy()
 
         if 'UNIDADESDESP' not in df.columns or 'Precio' not in df.columns:
