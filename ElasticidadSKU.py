@@ -203,7 +203,7 @@ class ElasticidadCB:
             y=df['Precio'],
             name='Precio GLI',
             mode='lines+markers',
-            line=dict(color='black'),
+            line=dict(color='red'),
             yaxis='y2'
         ))
 
@@ -217,7 +217,7 @@ class ElasticidadCB:
                 fill='tozeroy',
                 mode='none',
                 name='Clima (normalizada)',
-                fillcolor='rgba(255, 99, 71, 0.2)',
+                fillcolor='rgba(38, 48, 101, 0.2)',
                 yaxis='y3'
             ))
 
