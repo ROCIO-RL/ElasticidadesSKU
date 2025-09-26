@@ -217,7 +217,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             """)
                     #st.markdown("")
                 #col1, col2 = st.columns([2, 1]) 
-                col1, col2 = st.columns(4)
+                col1, col2 = st.columns(2)
                 with col1:
                     if sku in graficos:
                         st.plotly_chart(graficos[sku], use_container_width=True)
