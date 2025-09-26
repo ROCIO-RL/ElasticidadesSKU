@@ -49,7 +49,7 @@ elif opcion == "Capturar Manualmente":
     df_productos =  pd.read_sql(query,conn)
     conn.close()
     st.markdown("Agrega un SKU, selecciona canal y clima:")
-    # --- FILTROS EN UNA FILA ---
+
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -213,11 +213,13 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 El modelo explica un **{r2*100}**% de la variacion de la venta.
                                 """)
                     #st.markdown("")
-                    st.markdown("## Gráfico")
+                
                     if sku in graficos:
-                        st.pyplot(graficos[sku]) 
+                        st.plotly_chart(graficos[sku], use_container_width=True)
+
                     if sku in graficos_dispersion:
-                        st.pyplot(graficos_dispersion[sku])    
+                        st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
+
 
                 with col2:
                     st.markdown("## Insight")

@@ -12,7 +12,7 @@ from langchain_community.llms import Ollama
 llm = Ollama(model="llama3")
 pd.options.display.float_format = '{:,.2f}'.format
 import os
-
+import plotly.graph_objects as go
 from openai import OpenAI
 import streamlit as st
 
@@ -174,82 +174,112 @@ class ElasticidadCB:
         self.coeficientes = modelo.params
         self.pvalores = modelo.pvalues
     
+
+
     def grafica(self):
-        self.data_grafico['Fecha'] = pd.to_datetime(
-            self.data_grafico['ANIO'].astype(str) + 
-            self.data_grafico['SEMNUMERO'].astype(str).str.zfill(2) + '1', format='%G%V%u'
+        df = self.data_grafico.copy()
+
+        # Crear columna de fecha
+        df['Fecha'] = pd.to_datetime(
+            df['ANIO'].astype(str) +
+            df['SEMNUMERO'].astype(str).str.zfill(2) + '1', 
+            format='%G%V%u'
         )
-        
-        fig, ax1 = plt.subplots(figsize=(14,6))
-        
-        # Barras de unidades
-        ax1.bar(self.data_grafico['Fecha'], self.data_grafico['UNIDADESDESP'], 
-                color='lightgray', label='Unidades', width=5.0)
-        ax1.set_xlabel('Semana')
-        ax1.set_ylabel('Unidades', color='gray')
-        ax1.tick_params(axis='y', labelcolor='gray')
-        
-        # Línea de precio
-        ax2 = ax1.twinx()
-        ax2.plot(self.data_grafico['Fecha'], self.data_grafico['Precio'], 
-                color='black', label='Precio GLI')
-        precio_min = self.data_grafico['Precio'].min()
-        precio_max = self.data_grafico['Precio'].max()
-        rango = precio_max - precio_min
-        margen_inf = max(precio_min - 0.4*rango, 0)
-        margen_sup = precio_max + 0.1*rango
-        ax2.set_ylim(margen_inf, margen_sup)
-        
-        # Línea de clima si existe
-        if 'CLIMA' in self.data_grafico.columns:
-            ax3 = ax1.twinx()
-            ax3.spines["right"].set_position(("outward", 60))  
-            temp_norm = (self.data_grafico['CLIMA'] - self.data_grafico['CLIMA'].min()) / \
-                        (self.data_grafico['CLIMA'].max() - self.data_grafico['CLIMA'].min())
-            ax3.fill_between(self.data_grafico['Fecha'], temp_norm, 
-                            alpha=0.25, color='lightcoral', label='CLIMA (normalizada)')
-            ax3.set_ylabel('Clima (escala visual)', color='red')
-            ax3.tick_params(axis='y', labelcolor='red')
-        
-        plt.title('Unidades vendidas vs Precio propio y clima')
-        fig.tight_layout()
-        fig.legend(loc='upper left', bbox_to_anchor=(0.12, 0.90))
-        plt.xticks(rotation=45)
-        
-        return fig 
-    
 
-    def grafica_dispersion(self):
-        """
-        Genera un gráfico de dispersión de Ventas (UNIDADESDESP) vs Precio,
-        con línea de tendencia en rojo.
-        """
-        fig, ax = plt.subplots(figsize=(14, 6))
+        # Eje de barras (unidades)
+        fig = go.Figure()
 
-        # Verificamos que existan las columnas necesarias
-        if 'UNIDADESDESP' not in self.data_grafico.columns or 'Precio' not in self.data_grafico.columns:
+        fig.add_trace(go.Bar(
+            x=df['Fecha'],
+            y=df['UNIDADESDESP'],
+            name='Unidades',
+            marker_color='lightgray',
+            yaxis='y1'
+        ))
+
+        # Eje de línea (precio)
+        fig.add_trace(go.Scatter(
+            x=df['Fecha'],
+            y=df['Precio'],
+            name='Precio GLI',
+            mode='lines+markers',
+            line=dict(color='black'),
+            yaxis='y2'
+        ))
+
+        # Eje clima (si existe)
+        if 'CLIMA' in df.columns:
+            temp_norm = (df['CLIMA'] - df['CLIMA'].min()) / \
+                        (df['CLIMA'].max() - df['CLIMA'].min())
+            fig.add_trace(go.Scatter(
+                x=df['Fecha'],
+                y=temp_norm,
+                fill='tozeroy',
+                mode='none',
+                name='Clima (normalizada)',
+                fillcolor='rgba(255, 99, 71, 0.2)',
+                yaxis='y3'
+            ))
+
+        # Layout con múltiples ejes
+        fig.update_layout(
+            title="Unidades vendidas vs Precio propio y Clima",
+            xaxis=dict(title="Semana"),
+            yaxis=dict(title="Unidades", side='left', showgrid=False),
+            yaxis2=dict(title="Precio", overlaying='y', side='right'),
+            yaxis3=dict(title="Clima (escala visual)", 
+                        overlaying='y', side='right', position=1.05, showgrid=False),
+            bargap=0.2,
+            legend=dict(orientation='h', yanchor="bottom", y=1.05, xanchor="center", x=0.5),
+            hovermode="x unified",
+            template="plotly_white",
+            height=600
+        )
+
+        return fig
+
+    def grafica_dispersion_interactiva(self):
+        df = self.data_grafico.copy()
+
+        if 'UNIDADESDESP' not in df.columns or 'Precio' not in df.columns:
             raise ValueError("El DataFrame debe contener las columnas 'UNIDADESDESP' y 'Precio'.")
 
-        # Datos
-        X = self.data_grafico['Precio'].values.reshape(-1, 1)
-        y = self.data_grafico['UNIDADESDESP'].values
+        X = df['Precio'].values.reshape(-1, 1)
+        y = df['UNIDADESDESP'].values
 
-        # Scatter plot
-        ax.scatter(X, y, alpha=0.7, color='royalblue', edgecolors='gray')
-
-        # Línea de tendencia
+        # Modelo de tendencia
         model = LinearRegression()
         model.fit(X, y)
         y_pred = model.predict(X)
-        ax.plot(X, y_pred, color='red', linewidth=1, label='Tendencia')
 
-        ax.set_xlabel("Precio")
-        ax.set_ylabel("Unidades vendidas")
-        ax.set_title("Dispersión: Precio vs Ventas")
-        ax.legend()
+        fig = go.Figure()
 
-        # Cuadrícula
-        ax.grid(True, linestyle='--', alpha=0.3)
+        # Scatter
+        fig.add_trace(go.Scatter(
+            x=df['Precio'],
+            y=df['UNIDADESDESP'],
+            mode='markers',
+            name='Datos',
+            marker=dict(color='royalblue', size=8, line=dict(width=0.5, color='gray')),
+            hovertemplate="Precio: %{x}<br>Unidades: %{y}<extra></extra>"
+        ))
+
+        # Línea de tendencia
+        fig.add_trace(go.Scatter(
+            x=df['Precio'],
+            y=y_pred,
+            mode='lines',
+            name='Tendencia',
+            line=dict(color='red', width=2)
+        ))
+
+        fig.update_layout(
+            title="Dispersión: Precio vs Ventas",
+            xaxis_title="Precio",
+            yaxis_title="Unidades vendidas",
+            template="plotly_white",
+            height=600
+        )
 
         return fig
 
