@@ -196,48 +196,49 @@ if layout is not None and st.button("Ejecutar Análisis"):
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
                 
-                col1, col2 = st.columns([2, 1]) 
                 
-                with col1:
-                    st.markdown("## Resumen")
-                    df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
-                    #st.dataframe(df_sku)
-                    st.markdown(f"""
-                                📦 **Producto:** {prod}  
-                                🆔 **SKU:** {sku}  
-                                🏬 **Canal:** {canal}  
+                
+                
+                st.markdown("## Resumen")
+                df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
+                #st.dataframe(df_sku)
+                st.markdown(f"""
+                            📦 **Producto:** {prod}  
+                            🆔 **SKU:** {sku}  
+                            🏬 **Canal:** {canal}  
 
-                                - 📊 **Ventas base esperadas:** {venta_base:,} unidades (sin considerar precio ni clima).  
-                                - 💰 **Elasticidad precio:** {af_precio}.  
-                                Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio}**%.  
-                                - 🌦️ **Impacto del clima:** {af_clima}.   
-                                Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
-                                - 📈 **Calidad del modelo (R²):** {r2}.  
-                                El modelo explica un **{r2*100}**% de la variacion de la venta.
-                                """)
+                            - 📊 **Ventas base esperadas:** {venta_base:,} unidades (sin considerar precio ni clima).  
+                            - 💰 **Elasticidad precio:** {af_precio}.  
+                            Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio}**%.  
+                            - 🌦️ **Impacto del clima:** {af_clima}.   
+                            Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
+                            - 📈 **Calidad del modelo (R²):** {r2}.  
+                            El modelo explica un **{r2*100}**% de la variacion de la venta.
+                            """)
                     #st.markdown("")
-                
+                col1, col2 = st.columns([2, 1]) 
+                with col1:
                     if sku in graficos:
                         st.plotly_chart(graficos[sku], use_container_width=True)
-
+                with col2:
                     if sku in graficos_dispersion:
                         st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
 
 
-                with col2:
-                    st.markdown("## Insight")
-                    st.markdown(
-                                f"""
-                                <div style="
-                                    border: .05px solid gray;   /* Borde gris */
-                                    padding: 10px;             /* Espacio interno */
-                                    border-radius: 8px;        /* Esquinas redondeadas */
-                                    background-color: transparent;  /* Fondo transparente */
-                                    margin: 10px 0px;          /* Margen arriba y abajo */
-                                ">
-                                    {res["Insight"]}
-                                </div>
-                                """,
-                                unsafe_allow_html=True
-                            )
-               
+                
+                st.markdown("## Insight")
+                st.markdown(
+                            f"""
+                            <div style="
+                                border: .05px solid gray;   /* Borde gris */
+                                padding: 10px;             /* Espacio interno */
+                                border-radius: 8px;        /* Esquinas redondeadas */
+                                background-color: transparent;  /* Fondo transparente */
+                                margin: 10px 0px;          /* Margen arriba y abajo */
+                            ">
+                                {res["Insight"]}
+                            </div>
+                            """,
+                            unsafe_allow_html=True
+                        )
+            
