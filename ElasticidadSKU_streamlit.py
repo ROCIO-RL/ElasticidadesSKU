@@ -45,7 +45,10 @@ elif opcion == "Capturar Manualmente":
                     PROPSTCODBARRAS AS SKU, 
                     PROPSTNOMBRE AS PRODUCTO
                 FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
-                LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID"""
+                LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
+                LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
+                LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
+                    WHERE t.anio >= 2023"""
     df_productos =  pd.read_sql(query,conn)
     conn.close()
     st.markdown("Agrega un SKU, selecciona canal y clima:")
