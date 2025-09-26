@@ -203,7 +203,7 @@ class ElasticidadCB:
             y=df['Precio'],
             name='Precio GLI',
             mode='lines+markers',
-            line=dict(color='red'),
+            line=dict(color='red',width=2),
             yaxis='y2'
         ))
 
