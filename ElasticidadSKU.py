@@ -287,45 +287,75 @@ class ElasticidadCB:
 
     
 
-    def grafico_demanda(self, precio_actual, pasos_atras=5, pasos_adelante=5, incremento=5):
+    def grafico_demanda(self, precio_actual, variable_precio, pasos_atras=5, pasos_adelante=5, incremento=5, otras_vars=None):
         """
         Genera un gráfico interactivo y una tabla de demanda estimada alrededor de un precio actual.
-        
+
         Parámetros:
-        - precio_actual: precio base (float)
-        - pasos_atras: cantidad de precios menores a simular (int)
-        - pasos_adelante: cantidad de precios mayores a simular (int)
-        - incremento: tamaño del salto de precio (float)
-        
+        ----------
+        - precio_actual: float
+            Precio base desde donde partirán las simulaciones.
+        - variable_precio: str
+            Nombre de la variable de precio principal que se va a variar (por ej. 'XL-3 XTRA 12').
+        - pasos_atras: int
+            Número de pasos hacia precios menores.
+        - pasos_adelante: int
+            Número de pasos hacia precios mayores.
+        - incremento: float
+            Valor de cada salto en el precio.
+        - otras_vars: dict
+            Diccionario con valores fijos para las otras variables (por ejemplo: {'Clima': 20, 'Tabcin Active 12': 75})
+
         Retorna:
-        -
-        - fig: gráfico Plotly
+        -------
+        - fig: objeto Plotly Figure
         - df_pred: DataFrame con precios y demanda estimada
         """
-        
-        # Generar lista de precios alrededor del precio actual
+
+        if otras_vars is None:
+            otras_vars = {}
+
+        # Lista de precios a simular
         precios = [precio_actual + i*incremento for i in range(-pasos_atras, pasos_adelante+1)]
-        
-        # Calcular demanda usando la fórmula de regresión logarítmica
-        # df = self.data_grafico (opcional si quieres mostrar algo más)
-        intercepto = self.coeficientes['Intercepto']
-        coef_xl3 = self.coeficientes.get('XL-3 XTRA 12', 0)
-        coef_tabcin = self.coeficientes.get('Tabcin Active 12', 0)
-        coef_clima = self.coeficientes.get('Clima', 0)
-        
-        # Aquí usamos la fórmula similar a tu Excel: exp(intercept + ln(precio)*coef + ...)
+
+        # Inicializamos la tabla
         demanda_estim = []
+
         for precio in precios:
-            demanda = np.exp(intercepto + np.log(precio)*coef_xl3 + np.log(self.precio_tabcin)*coef_tabcin + self.clima*coef_clima)
+            # Comenzamos con el intercepto
+            valor_lineal = self.coeficientes.get('Intercepto', 0)
+
+            for var, coef in self.coeficientes.items():
+                if var == 'Intercepto':
+                    continue
+
+                # Usar el precio actual si es la variable que estamos variando
+                if var == variable_precio:
+                    valor_variable = precio
+                    valor_lineal += np.log(valor_variable) * coef
+                else:
+                    # Tomar de otras_vars o por defecto 1
+                    valor_variable = otras_vars.get(var, 1)
+                    # Si el nombre sugiere que es un precio, usar log
+                    if isinstance(valor_variable, (int, float)) and valor_variable > 0:
+                        valor_lineal += np.log(valor_variable) * coef
+                    else:
+                        valor_lineal += valor_variable * coef
+
+            # Convertimos la suma lineal en demanda
+            demanda = np.exp(valor_lineal)
             demanda_estim.append(demanda)
-        
+
+        # Crear DataFrame de resultados
         df_pred = pd.DataFrame({
             'Precio': precios,
             'Demanda Estimada': demanda_estim
         })
-        
-        # Gráfico interactivo
+
+        # Crear gráfico interactivo
         fig = go.Figure()
+
+        # Curva de demanda
         fig.add_trace(go.Scatter(
             x=df_pred['Precio'],
             y=df_pred['Demanda Estimada'],
@@ -333,25 +363,26 @@ class ElasticidadCB:
             name='Demanda estimada',
             marker=dict(color='royalblue', size=8)
         ))
-        
+
+        # Punto del precio actual
         fig.add_trace(go.Scatter(
             x=[precio_actual],
             y=[df_pred.loc[df_pred['Precio']==precio_actual, 'Demanda Estimada'].values[0]],
             mode='markers',
             name='Precio Actual',
-            marker=dict(color='red', size=10)
+            marker=dict(color='red', size=10, symbol='diamond')
         ))
-        
+
         fig.update_layout(
-            title="Estimación de Demanda alrededor del Precio Actual",
+            title=f"Estimación de Demanda vs Precio ({variable_precio})",
             xaxis_title="Precio",
             yaxis_title="Demanda estimada",
             template="plotly_white",
             height=600
         )
-        
+
         return fig, df_pred
-    
+        
     def genera_insight(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
             if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
                 raise ValueError("Ejecuta .calcula_elasticidad() antes de generar el insight.")
@@ -435,7 +466,7 @@ class ElasticidadCB:
         4. Implicaciones estratégicas para precios y clima.
         """
 
-        from openai import OpenAI
+        
 
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
