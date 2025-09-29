@@ -285,7 +285,71 @@ class ElasticidadCB:
         return fig
 
 
+    
 
+    def grafico_demanda(self, precio_actual, pasos_atras=5, pasos_adelante=5, incremento=5):
+        """
+        Genera un gráfico interactivo y una tabla de demanda estimada alrededor de un precio actual.
+        
+        Parámetros:
+        - precio_actual: precio base (float)
+        - pasos_atras: cantidad de precios menores a simular (int)
+        - pasos_adelante: cantidad de precios mayores a simular (int)
+        - incremento: tamaño del salto de precio (float)
+        
+        Retorna:
+        - fig: gráfico Plotly
+        - df_pred: DataFrame con precios y demanda estimada
+        """
+        
+        # Generar lista de precios alrededor del precio actual
+        precios = [precio_actual + i*incremento for i in range(-pasos_atras, pasos_adelante+1)]
+        
+        # Calcular demanda usando la fórmula de regresión logarítmica
+        # df = self.data_grafico (opcional si quieres mostrar algo más)
+        intercepto = self.coeficientes['Intercepto']
+        coef_xl3 = self.coeficientes.get('XL-3 XTRA 12', 0)
+        coef_tabcin = self.coeficientes.get('Tabcin Active 12', 0)
+        coef_clima = self.coeficientes.get('Clima', 0)
+        
+        # Aquí usamos la fórmula similar a tu Excel: exp(intercept + ln(precio)*coef + ...)
+        demanda_estim = []
+        for precio in precios:
+            demanda = np.exp(intercepto + np.log(precio)*coef_xl3 + np.log(self.precio_tabcin)*coef_tabcin + self.clima*coef_clima)
+            demanda_estim.append(demanda)
+        
+        df_pred = pd.DataFrame({
+            'Precio': precios,
+            'Demanda Estimada': demanda_estim
+        })
+        
+        # Gráfico interactivo
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(
+            x=df_pred['Precio'],
+            y=df_pred['Demanda Estimada'],
+            mode='lines+markers',
+            name='Demanda estimada',
+            marker=dict(color='royalblue', size=8)
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=[precio_actual],
+            y=[df_pred.loc[df_pred['Precio']==precio_actual, 'Demanda Estimada'].values[0]],
+            mode='markers',
+            name='Precio Actual',
+            marker=dict(color='red', size=10)
+        ))
+        
+        fig.update_layout(
+            title="Estimación de Demanda alrededor del Precio Actual",
+            xaxis_title="Precio",
+            yaxis_title="Demanda estimada",
+            template="plotly_white",
+            height=600
+        )
+        
+        return fig, df_pred
     
     def genera_insight(self, model_name="meta-llama/Meta-Llama-3-8B-Instruct"):
             if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
