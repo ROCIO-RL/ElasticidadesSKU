@@ -298,6 +298,7 @@ class ElasticidadCB:
         - incremento: tamaño del salto de precio (float)
         
         Retorna:
+        -
         - fig: gráfico Plotly
         - df_pred: DataFrame con precios y demanda estimada
         """
