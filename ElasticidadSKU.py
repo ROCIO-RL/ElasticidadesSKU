@@ -341,3 +341,51 @@ class ElasticidadCB:
             return resultado
     
 
+    def genera_insight_op(self, model_name="openai/gpt-oss-120b"):
+        if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
+            raise ValueError("Ejecuta .calcula_elasticidad() antes de generar el insight.")
+
+        coef_pval = "\n".join(
+            f"- {var}: coef = {self.coeficientes[var]:.4f}, p = {self.pvalores[var]:.4g}"
+            for var in self.coeficientes.index
+        )
+
+        template = f"""Eres un analista mexicano experto en econometría. 
+        Has corrido un modelo log-log de elasticidad de precios para un SKU.
+
+        Resultados del modelo:
+        - R²: {self.r2:.4f}
+        - Coeficientes y p-values: {coef_pval}
+
+        Tu tarea:
+        - Responde en español, con viñetas claras.
+        - Sé ejecutivo, breve y claro; tu audiencia puede no tener conocimiento técnico de regresiones.
+        - Enfócate en conclusiones de elasticidad y cómo afectan el negocio.
+        - Explica cómo un incremento en el precio o cambios en el clima impactan las unidades vendidas.
+        - Recuerda que los resultados están en **escala logarítmica**; para interpretar en unidades, usa e^(coeficiente) para el intercepto.
+        - Incluye:
+        1. Variables significativas (p-value < 0.05).
+        2. Variable con mayor impacto sobre las ventas.
+        3. Calidad del ajuste (R²) explicada en lenguaje simple.
+        4. Implicaciones estratégicas para precios y clima.
+        """
+
+        from openai import OpenAI
+
+        client = OpenAI(
+            base_url="https://router.huggingface.co/v1",
+            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN"],
+        )
+
+        completion = client.chat.completions.create(
+            model=model_name,
+            messages=[{"role": "user", "content": template}],
+            temperature=0.3,
+        )
+
+        resultado = completion.choices[0].message.content.strip()
+        print(resultado)
+        return resultado
+
+    
+
