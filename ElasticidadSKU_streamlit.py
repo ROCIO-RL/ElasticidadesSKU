@@ -202,19 +202,21 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 st.markdown("## Resumen")
                 df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
                 #st.dataframe(df_sku)
+                
                 st.markdown(f"""
                             📦 **Producto:** {prod}  
                             🆔 **SKU:** {sku}  
                             🏬 **Canal:** {canal}  
 
-                            - 📊 **Ventas base esperadas:** {venta_base:,} unidades (sin considerar precio ni clima).  
-                            - 💰 **Elasticidad precio:** {af_precio}.  
-                            Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio}**%.  
-                            - 🌦️ **Impacto del clima:** {af_clima}.   
+                            - 📊 **Ventas base esperadas:** {venta_base:,.2f} unidades.  
+                            - 💰 **Elasticidad precio:** {af_precio:.2f}.  
+                            Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
+                            - 🌦️ **Impacto del clima:** {af_clima:.2f}.  
                             Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
-                            - 📈 **Calidad del modelo (R²):** {r2}.  
-                            El modelo explica un **{r2*100}**% de la variacion de la venta.
+                            - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
+                            El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                             """)
+
                     #st.markdown("")
                 #col1, col2 = st.columns([2, 1]) 
                 col1, col2 = st.columns(2)
