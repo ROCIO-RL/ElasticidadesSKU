@@ -211,7 +211,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             - 📊 **Ventas base esperadas:** {venta_base:,.2f} unidades.  
                             - 💰 **Elasticidad precio:** {af_precio:.2f}.  
                             Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
-                            - 🌦️ **Impacto del clima:** {af_clima:.2f}.  
+                            - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
                             Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
                             - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                             El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
