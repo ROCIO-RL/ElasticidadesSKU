@@ -341,7 +341,7 @@ class ElasticidadCB:
             return resultado
     
 
-    def genera_insight_op(self, model_name="openai/gpt-oss-120b"):
+    def genera_insight_op(self, model_name="deepseek-ai/deepseek-llm-67b-chat"):
         if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
             raise ValueError("Ejecuta .calcula_elasticidad() antes de generar el insight.")
 
