@@ -323,10 +323,10 @@ class ElasticidadCB:
 
         for precio in precios:
             # Comenzamos con el intercepto
-            valor_lineal = self.coeficientes.get('Intercepto', 0)
+            valor_lineal = self.coeficientes.get('Intercept', 0)
 
             for var, coef in self.coeficientes.items():
-                if var == 'Intercepto':
+                if var == 'Intercept':
                     continue
 
                 # Usar el precio actual si es la variable que estamos variando
