@@ -237,7 +237,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
 
                 
-                st.plotly_chart(fig)
+                #st.plotly_chart(fig)
                 #st.dataframe(df)
 
                 st.markdown("## Insight")
