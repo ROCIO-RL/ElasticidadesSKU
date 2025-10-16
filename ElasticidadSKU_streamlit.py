@@ -229,45 +229,50 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         beta_precio = elasticidad.coeficientes.get('Precio')
                         beta_clima = elasticidad.coeficientes.get('CLIMA')
                         clima_valor = 20  # valor promedio o puedes obtenerlo del layout
-                        st.markdown(intercepto)
-                        st.markdown(beta_precio)
-                        st.markdown(beta_clima)
+                        #st.markdown(intercepto)
+                        #st.markdown(beta_precio)
+                        #st.markdown(beta_clima)
 
-                        # Rango de precios (por ejemplo, -20% a +20%)
-                        precios = np.arange(precio_actual * 0.8, precio_actual * 1.2 + 0.5, 0.5)
 
-                        # Calcular demanda esperada
-                        demanda = np.exp(intercepto + (np.log(precios) * beta_precio) + (np.log(clima_valor) * beta_clima))
-                        demanda_df = pd.DataFrame({
-                            "Precio": precios,
-                            "Demanda Estimada": demanda,
-                            "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
-                        })
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            # Rango de precios (por ejemplo, -20% a +20%)
+                            precios = np.arange(precio_actual * 0.8, precio_actual * 1.2 + 0.5, 0.5)
 
-                        st.markdown("### 📈 Simulación de Demanda vs. Precio")
-                        st.dataframe(demanda_df.style.format({
-                            "Precio": "{:,.2f}",
-                            "Demanda Estimada": "{:,.0f}",
-                            "Δ Demanda %": "{:+.1f}%"
-                        }))
+                            # Calcular demanda esperada
+                            demanda = np.exp(intercepto + (np.log(precios) * beta_precio) + (np.log(clima_valor) * beta_clima))
+                            demanda_df = pd.DataFrame({
+                                "Precio": precios,
+                                "Demanda Estimada": demanda,
+                                "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
+                            })
 
-                        # Gráfico interactivo
-                        fig_demanda = px.line(
-                            demanda_df,
-                            x="Precio",
-                            y="Demanda Estimada",
-                            markers=True,
-                            title=f"Curva de Demanda - {prod}",
-                        )
-                        fig_demanda.add_scatter(
-                            x=[precio_actual],
-                            y=[demanda[precios == precio_actual][0]],
-                            mode='markers+text',
-                            text=["Precio Actual"],
-                            textposition="top center",
-                            marker=dict(color='red', size=10)
-                        )
-                        st.plotly_chart(fig_demanda, use_container_width=True)
+                            st.markdown("### 📈 Simulación de Demanda vs. Precio")
+                            st.dataframe(demanda_df.style.format({
+                                "Precio": "{:,.2f}",
+                                "Demanda Estimada": "{:,.0f}",
+                                "Δ Demanda %": "{:+.1f}%"
+                            }))
+
+
+                        with col2:
+                            # Gráfico interactivo
+                            fig_demanda = px.line(
+                                demanda_df,
+                                x="Precio",
+                                y="Demanda Estimada",
+                                markers=True,
+                                title=f"Curva de Demanda - {prod}",
+                            )
+                            fig_demanda.add_scatter(
+                                x=[precio_actual],
+                                y=[demanda[precios == precio_actual][0]],
+                                mode='markers+text',
+                                text=["Precio Actual"],
+                                textposition="top center",
+                                marker=dict(color='red', size=10)
+                            )
+                            st.plotly_chart(fig_demanda, use_container_width=True)
                     except Exception as e:
                         st.warning(f"No se pudo generar la simulación de demanda: {e}")
                 else:
