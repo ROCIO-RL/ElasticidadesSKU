@@ -229,6 +229,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         beta_precio = elasticidad.coeficientes.get('Precio')
                         beta_clima = elasticidad.coeficientes.get('CLIMA')
                         clima_valor = 20  # valor promedio o puedes obtenerlo del layout
+                        st.markdown(intercepto)
+                        st.markdown(beta_precio)
+                        st.markdown(beta_clima)
 
                         # Rango de precios (por ejemplo, -20% a +20%)
                         precios = np.arange(precio_actual * 0.8, precio_actual * 1.2 + 0.5, 0.5)
