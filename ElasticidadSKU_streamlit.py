@@ -194,6 +194,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             venta_base = res['Venta Base']
             af_precio = res['Afectación Precio']
             af_clima = res['Afectación Clima']
+            af_clima = 0 if pd.isna(af_clima) else af_clima
             r2 = res['R cuadrada']
             precio = res['Precio Actual']
             intercepto = res['intercepto']
