@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import snowflake.connector
 from ElasticidadSKU import ElasticidadCB
 import numpy as np
-
+import plotly.express as px
 
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
 
@@ -204,7 +204,53 @@ if layout is not None and st.button("Ejecutar Análisis"):
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
                 
-                
+                if precioact != "":
+                    try:
+                        precio_actual = float(precioact)
+                        intercepto = elasticidad.coeficientes.get('Intercept')
+                        beta_precio = elasticidad.coeficientes.get('Precio')
+                        beta_clima = elasticidad.coeficientes.get('CLIMA')
+                        clima_valor = 20  # valor promedio o puedes obtenerlo del layout
+
+                        # Rango de precios (por ejemplo, -20% a +20%)
+                        precios = np.arange(precio_actual * 0.8, precio_actual * 1.2 + 0.5, 0.5)
+
+                        # Calcular demanda esperada
+                        demanda = np.exp(intercepto + (np.log(precios) * beta_precio) + (clima_valor * beta_clima))
+                        demanda_df = pd.DataFrame({
+                            "Precio": precios,
+                            "Demanda Estimada": demanda,
+                            "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
+                        })
+
+                        st.markdown("### 📈 Simulación de Demanda vs. Precio")
+                        st.dataframe(demanda_df.style.format({
+                            "Precio": "{:,.2f}",
+                            "Demanda Estimada": "{:,.0f}",
+                            "Δ Demanda %": "{:+.1f}%"
+                        }))
+
+                        # Gráfico interactivo
+                        fig_demanda = px.line(
+                            demanda_df,
+                            x="Precio",
+                            y="Demanda Estimada",
+                            markers=True,
+                            title=f"Curva de Demanda - {prod}",
+                        )
+                        fig_demanda.add_scatter(
+                            x=[precio_actual],
+                            y=[demanda[precios == precio_actual][0]],
+                            mode='markers+text',
+                            text=["Precio Actual"],
+                            textposition="top center",
+                            marker=dict(color='red', size=10)
+                        )
+                        st.plotly_chart(fig_demanda, use_container_width=True)
+                    except Exception as e:
+                        st.warning(f"No se pudo generar la simulación de demanda: {e}")
+                else:
+                    st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                 
                 
                 st.markdown("## Resumen")
