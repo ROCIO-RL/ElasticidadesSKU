@@ -237,7 +237,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         col1, col2 = st.columns(2)
                         with col1:
                             # Rango de precios (por ejemplo, -20% a +20%)
-                            precios = np.arange(precio_actual * 0.8, precio_actual * 1.2 + 0.5, 0.5)
+                            precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
 
                             # Calcular demanda esperada
                             demanda = np.exp(intercepto + (np.log(precios) * beta_precio) + (np.log(clima_valor) * beta_clima))
