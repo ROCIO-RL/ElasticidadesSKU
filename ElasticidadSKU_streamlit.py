@@ -267,7 +267,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             )
                             st.plotly_chart(fig_demanda, use_container_width=True)
                     except Exception as e:
-                        st.warning(f"No se pudo generar la simulación de demanda: {e}")
+                        st.markdown(f"No se pudo generar la simulación de demanda")
                 else:
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                 
