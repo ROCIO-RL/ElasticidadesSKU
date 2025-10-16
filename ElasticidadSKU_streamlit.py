@@ -216,10 +216,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                             El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                             """)
-                precioact = precio
-                if precioact != "":
+                
+                if precio != "":
                     try:
-                        precio_actual = float(precioact)
+                        precio_actual = float(precio)
                         intercepto = elasticidad.coeficientes.get('Intercept')
                         beta_precio = elasticidad.coeficientes.get('Precio')
                         beta_clima = elasticidad.coeficientes.get('CLIMA')
