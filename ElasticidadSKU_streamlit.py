@@ -207,14 +207,13 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 st.markdown("## Resumen")
                 df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
                 #st.dataframe(df_sku)
-                intercept = elasticidad.coeficientes.get('Intercept')
-                expintercept= np.exp(intercept)
+            
                 st.markdown(f"""
                             📦 **Producto:** {prod}  
                             🆔 **SKU:** {sku}  
                             🏬 **Canal:** {canal}  
 
-                            - 📊 **Ventas base esperadas:** {expintercept:,} unidades.  
+                            - 📊 **Ventas base esperadas:** {venta_base:,} unidades.  
                             - 💰 **Elasticidad precio:** {af_precio:.2f}.  
                             Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
                             - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
