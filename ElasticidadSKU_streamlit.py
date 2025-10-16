@@ -234,7 +234,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         precios = np.arange(precio_actual * 0.8, precio_actual * 1.2 + 0.5, 0.5)
 
                         # Calcular demanda esperada
-                        demanda = np.exp(intercepto + (np.log(precios) * np.log(beta_precio)) + (np.log(clima_valor) * np.log(beta_clima)))
+                        demanda = np.exp(intercepto + (np.log(precios) * beta_precio) + (np.log(clima_valor) * beta_clima))
                         demanda_df = pd.DataFrame({
                             "Precio": precios,
                             "Demanda Estimada": demanda,
