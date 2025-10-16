@@ -157,13 +157,6 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 graficos[sku] = fig
                 graficos_dispersion[sku] = dispersion
                 insight = elasticidad.genera_insight_op()
-                '''fig, df = elasticidad.grafico_demanda(
-                            precio_actual=precioact,
-                            variable_precio=prod,
-                            pasos_atras=6,
-                            pasos_adelante=6,
-                            incremento=3
-                        )'''
                 def safe_round(value, dec=4):
                     return round(value, dec) if value is not None else None
 
