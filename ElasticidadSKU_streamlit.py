@@ -164,6 +164,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'SKU': sku,
                     'Canal': canal,
                     'Producto': prod,
+                    'Pecio Actual':precioact,
                     #intercepto
                     'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
                     #coeficientes
@@ -194,6 +195,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             af_precio = res['Afectación Precio']
             af_clima = res['Afectación Clima']
             r2 = res['R cuadrada']
+            precio = res['Precio Actual']
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
@@ -214,7 +216,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                             El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                             """)
-                
+                precioact = precio
                 if precioact != "":
                     try:
                         precio_actual = float(precioact)
