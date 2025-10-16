@@ -165,7 +165,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Canal': canal,
                     'Producto': prod,
                     'Precio Actual':precioact,
-                    #intercepto
+                    'intercepto':safe_round(elasticidad.coeficientes.get('Intercept'), 4),
                     'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
                     #coeficientes
                     'Afectación Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
@@ -196,6 +196,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             af_clima = res['Afectación Clima']
             r2 = res['R cuadrada']
             precio = res['Precio Actual']
+            intercepto = res['intercepto']
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
@@ -220,7 +221,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 if precio != "":
                     try:
                         precio_actual = float(precio)
-                        intercepto = elasticidad.coeficientes.get('Intercept')
+                        #intercepto = elasticidad.coeficientes.get('Intercept')
                         beta_precio = elasticidad.coeficientes.get('Precio')
                         beta_clima = elasticidad.coeficientes.get('CLIMA')
                         clima_valor = 20  # valor promedio o puedes obtenerlo del layout
