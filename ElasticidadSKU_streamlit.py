@@ -222,12 +222,12 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     try:
                         precio_actual = float(precio)
                         #intercepto = elasticidad.coeficientes.get('Intercept')
-                        beta_precio = elasticidad.coeficientes.get('Precio')
-                        beta_clima = elasticidad.coeficientes.get('CLIMA')
+                        #beta_precio = elasticidad.coeficientes.get('Precio')
+                        #beta_clima = elasticidad.coeficientes.get('CLIMA')
                         clima_valor = 20  # valor promedio o puedes obtenerlo del layout
                         st.markdown(intercepto)
-                        #st.markdown(beta_precio)
-                        #st.markdown(beta_clima)
+                        st.markdown(af_precio)
+                        st.markdown(af_clima)
 
 
                         col1, col2 = st.columns(2)
@@ -236,7 +236,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
 
                             # Calcular demanda esperada
-                            demanda = np.exp(intercepto + (np.log(precios) * beta_precio) + (np.log(clima_valor) * beta_clima))
+                            demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
                             demanda_df = pd.DataFrame({
                                 "Precio": precios,
                                 "Demanda Estimada": demanda,
