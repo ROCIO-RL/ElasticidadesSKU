@@ -164,7 +164,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'SKU': sku,
                     'Canal': canal,
                     'Producto': prod,
-                    'Pecio Actual':precioact,
+                    'Precio Actual':precioact,
                     #intercepto
                     'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
                     #coeficientes
