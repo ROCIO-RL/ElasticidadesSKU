@@ -203,6 +203,24 @@ if layout is not None and st.button("Ejecutar Análisis"):
             r2 = res['R cuadrada']
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
+
+                st.markdown("## Resumen")
+                df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
+                #st.dataframe(df_sku)
+                
+                st.markdown(f"""
+                            📦 **Producto:** {prod}  
+                            🆔 **SKU:** {sku}  
+                            🏬 **Canal:** {canal}  
+
+                            - 📊 **Ventas base esperadas:** {venta_base:,} unidades.  
+                            - 💰 **Elasticidad precio:** {af_precio:.2f}.  
+                            Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
+                            - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
+                            Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
+                            - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
+                            El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
+                            """)
                 
                 if precioact != "":
                     try:
@@ -216,7 +234,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         precios = np.arange(precio_actual * 0.8, precio_actual * 1.2 + 0.5, 0.5)
 
                         # Calcular demanda esperada
-                        demanda = np.exp(intercepto + (np.log(precios) * beta_precio) + (clima_valor * beta_clima))
+                        demanda = np.exp(intercepto + (np.log(precios) * np.log(beta_precio)) + (np.log(clima_valor) * np.log(beta_clima)))
                         demanda_df = pd.DataFrame({
                             "Precio": precios,
                             "Demanda Estimada": demanda,
@@ -253,23 +271,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                 
                 
-                st.markdown("## Resumen")
-                df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
-                #st.dataframe(df_sku)
                 
-                st.markdown(f"""
-                            📦 **Producto:** {prod}  
-                            🆔 **SKU:** {sku}  
-                            🏬 **Canal:** {canal}  
-
-                            - 📊 **Ventas base esperadas:** {venta_base:,} unidades.  
-                            - 💰 **Elasticidad precio:** {af_precio:.2f}.  
-                            Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
-                            - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
-                            Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
-                            - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
-                            El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
-                            """)
 
                     #st.markdown("")
                 #col1, col2 = st.columns([2, 1]) 
