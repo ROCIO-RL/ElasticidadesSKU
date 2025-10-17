@@ -277,13 +277,13 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         # Si se capturó costo, calculamos la utilidad
                         if costoact not in ("", None) and str(costoact).replace(".", "", 1).isdigit():
                             costo_actual = float(costoact)
-                            demanda_df["Utilidad"] = demanda_df["Demanda Estimada"] * (demanda_df["Precio"] - costo_actual)
+                            demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"] )- (demanda_df["Demanda Estimada"] *costo_actual)
 
                             # Localizamos la utilidad máxima
                             max_utilidad = demanda_df["Utilidad"].max()
 
                             # Mostrar con formato y resaltado verde en la utilidad máxima
-                            st.markdown("### 💵 Simulación de Demanda, Precio y Utilidad")
+                            st.markdown("### Simulación de Demanda, Precio y Utilidad")
                             st.dataframe(
                                 demanda_df.style
                                 .format({
