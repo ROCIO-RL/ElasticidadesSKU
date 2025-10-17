@@ -437,7 +437,7 @@ class ElasticidadCB:
             return resultado
     
 
-    def genera_insight_op(self, model_name="deepseek-ai/DeepSeek-V3.1-Terminus"):
+    def genera_insight_op(self, model_name="deepseek-ai/DeepSeek-V3.1-Terminus",precio=None,df=None):
         if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
             raise ValueError("Ejecuta .calcula_elasticidad() antes de generar el insight.")
 
@@ -448,7 +448,9 @@ class ElasticidadCB:
 
         template = f"""Eres un analista mexicano experto en econometría. 
         Has corrido un modelo log-log de elasticidad de precios para un SKU.
-
+        Primero:
+        A partir de la tabla de demanda:{df}, donde el precio actual es ${precio}, ayudame a dar una propuesta ideal de precio para mi producto. Si no cuento con esta informacion omite este paso.
+        Segundo:
         Resultados del modelo:
         - R²: {self.r2:.4f}
         - Coeficientes y p-values: {coef_pval}

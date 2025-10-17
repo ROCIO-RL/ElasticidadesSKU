@@ -220,6 +220,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             precio = res['Precio Actual']
             intercepto = res['intercepto']
             costoact = res['Costo Actual']
+            insight = res['Insight']
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
@@ -322,7 +323,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             )
 
 
-
+                        insight = elasticidad.genera_insight_op(precio=precio,df=demanda_df)
                         col1, col2 = st.columns(2)
                         with col1:
                             # Gráfico interactivo
@@ -368,7 +369,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 
                 #st.plotly_chart(fig)
                 #st.dataframe(df)
-
+                
+                
                 st.markdown("## Insight")
                 st.markdown(
                             f"""
@@ -379,7 +381,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 background-color: transparent;  /* Fondo transparente */
                                 margin: 10px 0px;          /* Margen arriba y abajo */
                             ">
-                                {res["Insight"]}
+                                {insight}
+                                
                             </div>
                             """,
                             unsafe_allow_html=True
