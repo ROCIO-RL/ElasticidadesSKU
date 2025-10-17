@@ -290,10 +290,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             costo_actual = None
 
                         if costo_actual is not None:
-                            costo_actual = float(costoact)
-                            demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"] )- (demanda_df["Demanda Estimada"] *costo_actual)
+                            demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
+                                demanda_df["Demanda Estimada"] * costo_actual
+                            )
 
-                            # Mostrar tabla con utilidad y resaltar máximo
                             max_utilidad = demanda_df["Utilidad"].max()
 
                             def highlight_max(s):
@@ -307,21 +307,20 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                     "Precio": "{:,.2f}",
                                     "Demanda Estimada": "{:,.0f}",
                                     "Δ Demanda %": "{:+.1f}%",
-                                    "Utilidad": "{:,.2f}"
+                                    "Utilidad": "{:,.2f}",
                                 })
                                 .apply(highlight_max, subset=["Utilidad"])
                             )
-
                         else:
-                            # Caso original: sin costo
                             st.markdown("### 📈 Simulación de Demanda vs. Precio")
                             st.dataframe(
                                 demanda_df.style.format({
                                     "Precio": "{:,.2f}",
                                     "Demanda Estimada": "{:,.0f}",
-                                    "Δ Demanda %": "{:+.1f}%"
+                                    "Δ Demanda %": "{:+.1f}%",
                                 })
                             )
+
 
 
                         col1, col2 = st.columns(2)
