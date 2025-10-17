@@ -89,7 +89,7 @@ elif opcion == "Capturar Manualmente":
         precio_act = st.text_input("Precio (opcional)")
     with col3:
         costo_act = st.text_input("Costo (opcional)")
-    with col3:  
+    with col4:  
         st.markdown("Clima")  
         clima = st.checkbox("¿Considerar Clima?", value=True)    
 
