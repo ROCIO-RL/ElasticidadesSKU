@@ -256,18 +256,56 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                         # Calcular demanda esperada
                         demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
+                        #demanda_df = pd.DataFrame({
+                        #    "Precio": precios,
+                        #    "Demanda Estimada": demanda,
+                        #    "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
+                        #})
+
+                        #st.markdown("### 📈 Simulación de Demanda vs. Precio")
+                        #st.dataframe(demanda_df.style.format({
+                        #    "Precio": "{:,.2f}",
+                        #    "Demanda Estimada": "{:,.0f}",
+                        #    "Δ Demanda %": "{:+.1f}%"
+                        #}))
                         demanda_df = pd.DataFrame({
                             "Precio": precios,
                             "Demanda Estimada": demanda,
                             "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
                         })
 
-                        st.markdown("### 📈 Simulación de Demanda vs. Precio")
-                        st.dataframe(demanda_df.style.format({
-                            "Precio": "{:,.2f}",
-                            "Demanda Estimada": "{:,.0f}",
-                            "Δ Demanda %": "{:+.1f}%"
-                        }))
+                        # Si se capturó costo, calculamos la utilidad
+                        if costoact not in ("", None) and str(costoact).replace(".", "", 1).isdigit():
+                            costo_actual = float(costoact)
+                            demanda_df["Utilidad"] = demanda_df["Demanda Estimada"] * (demanda_df["Precio"] - costo_actual)
+
+                            # Localizamos la utilidad máxima
+                            max_utilidad = demanda_df["Utilidad"].max()
+
+                            # Mostrar con formato y resaltado verde en la utilidad máxima
+                            st.markdown("### 💵 Simulación de Demanda, Precio y Utilidad")
+                            st.dataframe(
+                                demanda_df.style
+                                .format({
+                                    "Precio": "{:,.2f}",
+                                    "Demanda Estimada": "{:,.0f}",
+                                    "Δ Demanda %": "{:+.1f}%",
+                                    "Utilidad": "{:,.2f}"
+                                })
+                                .apply(lambda x: ["background-color: lightgreen" if v == max_utilidad else "" 
+                                                for v in x["Utilidad"]] if "Utilidad" in x else "", axis=1)
+                            )
+                        else:
+                            # Caso original: sin costo
+                            st.markdown("### 📈 Simulación de Demanda vs. Precio")
+                            st.dataframe(
+                                demanda_df.style.format({
+                                    "Precio": "{:,.2f}",
+                                    "Demanda Estimada": "{:,.0f}",
+                                    "Δ Demanda %": "{:+.1f}%"
+                                })
+                            )
+
 
                         col1, col2 = st.columns(2)
                         with col1:
