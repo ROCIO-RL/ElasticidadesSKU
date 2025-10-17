@@ -279,7 +279,17 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         })
 
                         # Si se capturó costo, calculamos la utilidad
-                        if costoact not in ("", None) and str(costoact).replace(".", "", 1).isdigit():
+
+
+                        # Verificamos si el costo es un número válido
+                        if isinstance(costoact, (int, float)) and not pd.isna(costoact):
+                            costo_actual = float(costoact)
+                        elif isinstance(costoact, str) and costoact.strip() != "" and costoact.replace(".", "", 1).isdigit():
+                            costo_actual = float(costoact)
+                        else:
+                            costo_actual = None
+
+                        if costo_actual is not None:
                             costo_actual = float(costoact)
                             demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"] )- (demanda_df["Demanda Estimada"] *costo_actual)
 
@@ -288,7 +298,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                             def highlight_max(s):
                                 is_max = s == s.max()
-                                return ["background-color: lightgreen" if v else "" for v in is_max]
+                                return ["background-color: green" if v else "" for v in is_max]
 
                             st.markdown("### Simulación de Demanda, Precio y Utilidad")
                             st.dataframe(
