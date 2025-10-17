@@ -221,6 +221,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             intercepto = res['intercepto']
             costoact = res['Costo Actual']
             #insight = res['Insight']
+            insight = ""
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
@@ -380,8 +381,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 border-radius: 8px;        /* Esquinas redondeadas */
                                 background-color: transparent;  /* Fondo transparente */
                                 margin: 10px 0px;          /* Margen arriba y abajo */
-                            ">
-                                {insight}
+                            ">{insight}
                                 
                             
                             """,
