@@ -225,7 +225,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                             El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                             """)
-                
+                col1, col2 = st.columns(2)
                 if precio != "":
                     try:
                         precio_actual = float(precio)
@@ -238,28 +238,28 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         st.markdown(af_clima)
 
 
-                        col1, col2 = st.columns(2)
+                        
+                        
+                        # Rango de precios (por ejemplo, -20% a +20%)
+                        precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
+
+                        # Calcular demanda esperada
+                        demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
+                        demanda_df = pd.DataFrame({
+                            "Precio": precios,
+                            "Demanda Estimada": demanda,
+                            "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
+                        })
+
+                        st.markdown("### 📈 Simulación de Demanda vs. Precio")
+                        st.dataframe(demanda_df.style.format({
+                            "Precio": "{:,.2f}",
+                            "Demanda Estimada": "{:,.0f}",
+                            "Δ Demanda %": "{:+.1f}%"
+                        }))
+
+
                         with col1:
-                            # Rango de precios (por ejemplo, -20% a +20%)
-                            precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
-
-                            # Calcular demanda esperada
-                            demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
-                            demanda_df = pd.DataFrame({
-                                "Precio": precios,
-                                "Demanda Estimada": demanda,
-                                "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
-                            })
-
-                            st.markdown("### 📈 Simulación de Demanda vs. Precio")
-                            st.dataframe(demanda_df.style.format({
-                                "Precio": "{:,.2f}",
-                                "Demanda Estimada": "{:,.0f}",
-                                "Δ Demanda %": "{:+.1f}%"
-                            }))
-
-
-                        with col2:
                             # Gráfico interactivo
                             fig_demanda = px.line(
                                 demanda_df,
@@ -277,23 +277,23 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 marker=dict(color='red', size=10)
                             )
                             st.plotly_chart(fig_demanda, use_container_width=True)
+                            with col2:
+                                if sku in graficos_dispersion:
+                                    st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
                     except Exception as e:
                         st.markdown(f"No se pudo generar la simulación de demanda")
                 else:
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                 
                 
-                
+                 
 
                     #st.markdown("")
                 #col1, col2 = st.columns([2, 1]) 
-                col1, col2 = st.columns(2)
-                with col1:
-                    if sku in graficos:
-                        st.plotly_chart(graficos[sku], use_container_width=True)
-                with col2:
-                    if sku in graficos_dispersion:
-                        st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
+               
+                if sku in graficos:
+                    st.plotly_chart(graficos[sku], use_container_width=True)
+               
 
 
                 
