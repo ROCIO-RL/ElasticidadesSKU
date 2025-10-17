@@ -285,10 +285,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     except Exception as e:
                         st.markdown(f"No se pudo generar la simulación de demanda")
                 else:
+                    
+                    if sku in graficos_dispersion:
+                        st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
-                    with col2:
-                        if sku in graficos_dispersion:
-                            st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
                 
                 
                  
