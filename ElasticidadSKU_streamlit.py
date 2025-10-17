@@ -383,7 +383,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             ">
                                 {insight}
                                 
-                            </div>
+                            
                             """,
                             unsafe_allow_html=True
                         )

@@ -448,29 +448,49 @@ class ElasticidadCB:
             for var in self.coeficientes.index
         )
 
-        template = f"""Eres un analista mexicano experto en econometría. 
-        Has corrido un modelo log-log de elasticidad de precios para un SKU.
-        Primero:
-        A partir de la tabla de demanda:{df}, donde el precio actual es ${precio}, ayudame a dar una propuesta ideal de precio para mi producto, además de un rango alternaticvo y ventaja. Si no cuento con esta informacion omite este paso.
-        Segundo:
-        Resultados del modelo:
+        template = f"""Contexto: Eres un Econometrista Senior que se especializa en transformar resultados estadísticos complejos en recomendaciones estratégicas claras y accionables para la alta dirección. Tu estilo es directo, ejecutivo y basado en datos.
+
+        Instrucciones para tu Respuesta:
+
+        Formato: Usa solo viñetas (-). No incluyas introducciones, conclusiones o texto de relleno.
+
+        Lenguaje: Exclusivamente en español. Evita toda jerga técnica innecesaria. Si usas un término técnico (como "p-value"), explícalo brevemente entre paréntesis de inmediato.
+
+        Extensión: Máximo 6 viñetas en total. Sé brutalmente conciso.
+
+        Tarea 1: Recomendación de Precio (Si los datos están disponibles)
+
+        Si se proporciona la tabla de demanda{df} y el precio actual{precio}, procede:
+
+        - Precio Ideal Propuesto: [Precio específico].
+
+        - Rango Alternativo: [Rango de precios, ej. $X - $Y]. Ventaja: [Beneficio clave, ej. 'mejora el margen sin perder volumen significativo'].
+
+        Tarea 2: Análisis del Modelo Log-Log (Siempre requerido)
+        Analiza los resultados proporcionados 
         - R²: {self.r2:.4f}
-        - Coeficientes y p-values: {coef_pval}
+        - ¿Coeficientes y p-values: {coef_pval} y responde estrictamente en este orden y formato:
 
-        Tu tarea:
-        - Responde en español, con viñetas claras.
-        - Sé ejecutivo, breve y claro; tu audiencia puede no tener conocimiento técnico de regresiones.
-        - Enfócate en conclusiones de elasticidad y cómo afectan el negocio.
-        - Explica cómo un incremento en el precio o cambios en el clima impactan las unidades vendidas.
-        - Recuerda que los resultados están en **escala logarítmica**; para interpretar en unidades, usa e^(coeficiente) para el intercepto.
-        - Incluye de manera breve:
-        1. Variables significativas (p-value < 0.05).
-        2. Variable con mayor impacto sobre las ventas.
-        3. Calidad del ajuste (R²) explicada en lenguaje simple.
-        4. Implicaciones estratégicas para precios y clima.
-        """
+        - Variables Significativas: Lista solo las variables con p-value < 0.05 (es decir, cuya relación con las ventas es estadísticamente confiable). Ej: - Precio (p-value: 0.01).
 
-        
+        - Impacto Principal: Identifica la una variable del modelo con el coeficiente más alto (en valor absoluto). Traduce su impacto a un lenguaje claro:
+
+        Ejemplo para Precio: - La variable con mayor impacto es el Precio. Por cada 1% que aumentes el precio, las ventas caerán aproximadamente un [Valor Absoluto del Coeficiente]%.
+
+        - Calidad del Modelo (R²): - El modelo explica aproximadamente un [R²*100]% de las variaciones en la demanda. [Interpretación breve: ej. "Ajuste sólido" si R² > 0.7, "Ajuste moderado" si R² > 0.5, etc.].
+
+        - Implicación Estratégica - Precio: Da una recomendación concreta y breve basada en la elasticidad-precio.
+
+        Si es elástica (coef. precio < -1): - Estrategia de precio: Cuidado con las alzas. Una subida de precio generará una caída *más que proporcional* en las unidades vendidas, reduciendo ingresos totales.
+
+        Si es inelástica (coef. precio entre -1 y 0): - Estrategia de precio: Oportunidad de margen. Puedes aumentar el precio; la caída en ventas será menos que proporcional, aumentando los ingresos totales.
+
+        - Implicación Estratégica - Otras Variables (ej. Clima): Si hay variables significativas además del precio, elige la más importante y da una recomendación.
+
+        Ejemplo para Temperatura: - Acción Comercial: En días con mayor temperatura, espera un aumento de ~[e^(coeficiente)]% en ventas. Asegura stock y visibilidad en tienda.
+
+        Si faltan datos para la Tarea 1, omítela y comienza directamente con la Tarea 2."""
+                
 
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
