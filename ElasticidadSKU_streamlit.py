@@ -102,7 +102,11 @@ elif opcion == "Capturar Manualmente":
         # Validamos que sea número
         if precio_act.replace(".", "", 1).isdigit():  
             precio = float(precio_act)
-            costo = float(costo_act)
+            # Solo convierte costo si tiene un valor numérico
+            if costo_act and costo_act.replace(".", "", 1).isdigit():
+                costo = float(costo_act)
+            else:
+                costo = ""
             prod = sku_row.split(" - ")[1] 
             sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
             st.session_state.manual_layout.append({
