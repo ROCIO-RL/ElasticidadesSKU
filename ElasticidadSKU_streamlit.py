@@ -86,7 +86,9 @@ elif opcion == "Capturar Manualmente":
     with col1:
         canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
     with col2:
-        precio_act = st.text_input("Si conoces el precio agregalo")
+        precio_act = st.text_input("Precio (opcional)")
+    with col3:
+        costo_act = st.text_input("Costo (opcional)")
     with col3:  
         st.markdown("Clima")  
         clima = st.checkbox("¿Considerar Clima?", value=True)    
@@ -100,6 +102,7 @@ elif opcion == "Capturar Manualmente":
         # Validamos que sea número
         if precio_act.replace(".", "", 1).isdigit():  
             precio = float(precio_act)
+            costo = float(costo_act)
             prod = sku_row.split(" - ")[1] 
             sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
             st.session_state.manual_layout.append({
@@ -107,11 +110,13 @@ elif opcion == "Capturar Manualmente":
                 "PropstNombre":prod,
                 "Canal": canal,
                 "Clima": clima,
-                "Precio Actual": precio
+                "Precio Actual": precio,
+                "Costo Actual": costo
             })
             st.success(f"SKU {sku_val} agregado a la lista.")
         elif precio_act == "":
             precio =""
+            costo =""
             prod = sku_row.split(" - ")[1] 
             sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
             st.session_state.manual_layout.append({
@@ -119,7 +124,8 @@ elif opcion == "Capturar Manualmente":
                 "PropstNombre":prod,
                 "Canal": canal,
                 "Clima": clima,
-                "Precio Actual": precio
+                "Precio Actual": precio,
+                "Costo Actual": costo
             })
             st.success(f"SKU {sku_val} agregado a la lista.")
         else:
@@ -147,6 +153,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             temp = row["Clima"]
             prod = row["PropstNombre"]
             precioact = row["Precio Actual"]
+            costoact = row['Costo Actual']
 
             try:
                 elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp)
@@ -165,6 +172,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Canal': canal,
                     'Producto': prod,
                     'Precio Actual':precioact,
+                    'Costo Actual': costoact
                     'intercepto':safe_round(elasticidad.coeficientes.get('Intercept'), 4),
                     #'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
                     'Venta Base': safe_round(
@@ -207,6 +215,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             r2 = res['R cuadrada']
             precio = res['Precio Actual']
             intercepto = res['intercepto']
+            costo = ['Costo Actual']
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
