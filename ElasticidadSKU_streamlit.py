@@ -172,7 +172,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Canal': canal,
                     'Producto': prod,
                     'Precio Actual':precioact,
-                    'Costo Actual': costoact
+                    'Costo Actual': costoact,
                     'intercepto':safe_round(elasticidad.coeficientes.get('Intercept'), 4),
                     #'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
                     'Venta Base': safe_round(
