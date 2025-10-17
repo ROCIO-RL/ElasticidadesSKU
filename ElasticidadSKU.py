@@ -437,7 +437,7 @@ class ElasticidadCB:
             return resultado
     
 
-    def genera_insight_op(self, model_name="deepseek-ai/DeepSeek-V3.1-Terminus-GGUF",precio=None,df=None):
+    def genera_insight_op(self, model_name="deepseek-ai/DeepSeek-V3.1-Terminus",precio=None,df=None):
         #DeepSeek-V3.1-Terminus
         #DeepSeek-V3.1-Terminus-GGUF
         #DeepSeek-V3.1-Base
