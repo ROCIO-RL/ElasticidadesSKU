@@ -240,50 +240,30 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 if precio != "":
                     try:
                         precio_actual = float(precio)
-                        #intercepto = elasticidad.coeficientes.get('Intercept')
-                        #beta_precio = elasticidad.coeficientes.get('Precio')
-                        #beta_clima = elasticidad.coeficientes.get('CLIMA')
-                        clima_valor = 20  # valor promedio o puedes obtenerlo del layout
-                        #st.markdown(intercepto)
-                        #st.markdown(af_precio)
-                        #st.markdown(af_clima)
+                        costo_actual = float(costoact) if str(costoact).replace(".", "", 1).isdigit() else None
 
+                        clima_valor = 20  # valor promedio o fijo
+                        if intercepto is None or af_precio is None:
+                            st.warning(f"No hay coeficientes válidos para calcular la demanda del SKU {sku}.")
+                            continue
 
-                        
-                        
-                        # Rango de precios (por ejemplo, -20% a +20%)
                         precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
-
-                        # Calcular demanda esperada
                         demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
-                        #demanda_df = pd.DataFrame({
-                        #    "Precio": precios,
-                        #    "Demanda Estimada": demanda,
-                        #    "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
-                        #})
 
-                        #st.markdown("### 📈 Simulación de Demanda vs. Precio")
-                        #st.dataframe(demanda_df.style.format({
-                        #    "Precio": "{:,.2f}",
-                        #    "Demanda Estimada": "{:,.0f}",
-                        #    "Δ Demanda %": "{:+.1f}%"
-                        #}))
+                        ref_idx = (np.abs(precios - precio_actual)).argmin()
+                        demanda_ref = demanda[ref_idx]
+
                         demanda_df = pd.DataFrame({
                             "Precio": precios,
                             "Demanda Estimada": demanda,
-                            "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
+                            "Δ Demanda %": (demanda / demanda_ref - 1) * 100
                         })
 
-                        # Si se capturó costo, calculamos la utilidad
-                        if costoact not in ("", None) and str(costoact).replace(".", "", 1).isdigit():
-                            costo_actual = float(costoact)
-                            demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"] )- (demanda_df["Demanda Estimada"] *costo_actual)
-
-                            # Localizamos la utilidad máxima
+                        # Si se capturó costo
+                        if costo_actual is not None:
+                            demanda_df["Utilidad"] = demanda_df["Demanda Estimada"] * (demanda_df["Precio"] - costo_actual)
                             max_utilidad = demanda_df["Utilidad"].max()
-
-                            # Mostrar con formato y resaltado verde en la utilidad máxima
-                            st.markdown("### Simulación de Demanda, Precio y Utilidad")
+                            st.markdown("### 💵 Simulación de Demanda, Precio y Utilidad")
                             st.dataframe(
                                 demanda_df.style
                                 .format({
@@ -296,7 +276,6 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                                 for v in x["Utilidad"]] if "Utilidad" in x else "", axis=1)
                             )
                         else:
-                            # Caso original: sin costo
                             st.markdown("### 📈 Simulación de Demanda vs. Precio")
                             st.dataframe(
                                 demanda_df.style.format({
@@ -306,31 +285,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 })
                             )
 
-
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            # Gráfico interactivo
-                            fig_demanda = px.line(
-                                demanda_df,
-                                x="Precio",
-                                y="Demanda Estimada",
-                                markers=True,
-                                title=f"Curva de Demanda - {prod}",
-                            )
-                            fig_demanda.add_scatter(
-                                x=[precio_actual],
-                                y=[demanda[precios == precio_actual][0]],
-                                mode='markers+text',
-                                text=["Precio Actual"],
-                                textposition="top center",
-                                marker=dict(color='red', size=10)
-                            )
-                            st.plotly_chart(fig_demanda, use_container_width=True)
-                            with col2:
-                                if sku in graficos_dispersion:
-                                    st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
                     except Exception as e:
-                        st.markdown(f"No se pudo generar la simulación de demanda")
+                        st.error(f"No se pudo generar la simulación de demanda ({e})")
+
                 else:
                     
                     if sku in graficos_dispersion:
