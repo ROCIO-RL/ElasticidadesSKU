@@ -279,7 +279,7 @@ class ElasticidadCB:
             xaxis_title="Precio",
             yaxis_title="Unidades vendidas",
             template="plotly_white",
-            height=400
+            height=500
         )
 
         return fig
