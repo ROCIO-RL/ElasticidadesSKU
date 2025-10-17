@@ -439,7 +439,6 @@ class ElasticidadCB:
 
     def genera_insight_op(self, model_name="deepseek-ai/DeepSeek-V3.1-Terminus",precio=None,df=None):
         #DeepSeek-V3.1-Terminus
-        #DeepSeek-V3.1-Terminus-GGUF
         #DeepSeek-V3.1-Base
         if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
             raise ValueError("Ejecuta .calcula_elasticidad() antes de generar el insight.")
@@ -452,7 +451,7 @@ class ElasticidadCB:
         template = f"""Eres un analista mexicano experto en econometría. 
         Has corrido un modelo log-log de elasticidad de precios para un SKU.
         Primero:
-        A partir de la tabla de demanda:{df}, donde el precio actual es ${precio}, ayudame a dar una propuesta ideal de precio para mi producto. Si no cuento con esta informacion omite este paso.
+        A partir de la tabla de demanda:{df}, donde el precio actual es ${precio}, ayudame a dar una propuesta ideal de precio para mi producto, además de un rango alternaticvo y ventaja. Si no cuento con esta informacion omite este paso.
         Segundo:
         Resultados del modelo:
         - R²: {self.r2:.4f}
@@ -464,7 +463,7 @@ class ElasticidadCB:
         - Enfócate en conclusiones de elasticidad y cómo afectan el negocio.
         - Explica cómo un incremento en el precio o cambios en el clima impactan las unidades vendidas.
         - Recuerda que los resultados están en **escala logarítmica**; para interpretar en unidades, usa e^(coeficiente) para el intercepto.
-        - Incluye:
+        - Incluye de manera breve:
         1. Variables significativas (p-value < 0.05).
         2. Variable con mayor impacto sobre las ventas.
         3. Calidad del ajuste (R²) explicada en lenguaje simple.
