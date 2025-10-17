@@ -168,12 +168,14 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'intercepto':safe_round(elasticidad.coeficientes.get('Intercept'), 4),
                     #'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
                     'Venta Base': safe_round(
-                                            np.exp(
-                                                (elasticidad.coeficientes.get('Intercept', 0) or 0)
-                                                + np.log(float(precioact)) * (elasticidad.coeficientes.get('Precio', 0) or 0)
-                                                + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
-                                            ), 0
-                                        ),
+                                np.exp(
+                                    (elasticidad.coeficientes.get('Intercept', 0) or 0)
+                                    + np.log(float(precioact or 1)) * (elasticidad.coeficientes.get('Precio', 0) or 0)
+                                    + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
+                                ), 
+                                0
+                            ),
+
                     #coeficientes
                     'Afectación Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
                     'Afectación Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
