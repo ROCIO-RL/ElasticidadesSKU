@@ -233,9 +233,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         #beta_precio = elasticidad.coeficientes.get('Precio')
                         #beta_clima = elasticidad.coeficientes.get('CLIMA')
                         clima_valor = 20  # valor promedio o puedes obtenerlo del layout
-                        st.markdown(intercepto)
-                        st.markdown(af_precio)
-                        st.markdown(af_clima)
+                        #st.markdown(intercepto)
+                        #st.markdown(af_precio)
+                        #st.markdown(af_clima)
 
 
                         
