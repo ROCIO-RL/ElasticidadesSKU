@@ -167,7 +167,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 dispersion = elasticidad.grafica_dispersion()
                 graficos[sku] = fig
                 graficos_dispersion[sku] = dispersion
-                insight = elasticidad.genera_insight_op()
+                #insight = elasticidad.genera_insight_op()
                 def safe_round(value, dec=4):
                     return round(value, dec) if value is not None else None
                 
@@ -195,7 +195,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Pvalue Precio': safe_round(elasticidad.pvalores.get('Precio'), 4),
                     'Pvalue Clima': safe_round(elasticidad.pvalores.get('CLIMA'), 4),
                     'R cuadrada': safe_round(elasticidad.r2, 3),
-                    "Insight": insight
+                    #"Insight": insight
                 })
 
 
@@ -220,7 +220,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             precio = res['Precio Actual']
             intercepto = res['intercepto']
             costoact = res['Costo Actual']
-            insight = res['Insight']
+            #insight = res['Insight']
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
@@ -350,7 +350,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         #st.markdown(f"No se pudo generar la simulación de demanda")
                         st.error(f"No se pudo generar la simulación de demanda ({e})")
                 else:
-                    
+                    insight = elasticidad.genera_insight_op()
                     if sku in graficos_dispersion:
                         st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
