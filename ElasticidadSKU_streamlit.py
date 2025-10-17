@@ -225,7 +225,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                             El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                             """)
-                col1, col2 = st.columns(2)
+                
                 if precio != "":
                     try:
                         precio_actual = float(precio)
@@ -258,7 +258,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             "Δ Demanda %": "{:+.1f}%"
                         }))
 
-
+                        col1, col2 = st.columns(2)
                         with col1:
                             # Gráfico interactivo
                             fig_demanda = px.line(
@@ -284,6 +284,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         st.markdown(f"No se pudo generar la simulación de demanda")
                 else:
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
+                    with col2:
+                        if sku in graficos_dispersion:
+                            st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
                 
                 
                  
