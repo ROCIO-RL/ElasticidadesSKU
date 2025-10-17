@@ -159,6 +159,18 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 insight = elasticidad.genera_insight_op()
                 def safe_round(value, dec=4):
                     return round(value, dec) if value is not None else None
+                precio_actual = float(precioact) if precioact != "" else None
+                beta_0 = elasticidad.coeficientes.get('Intercept')
+                beta_p = elasticidad.coeficientes.get('Precio')
+                beta_c = elasticidad.coeficientes.get('CLIMA')
+                clima_valor = 20  # o el valor promedio que uses
+
+                if precio_actual:
+                    venta_base = np.exp(beta_0 + np.log(precio_actual)*beta_p + clima_valor*beta_c)
+                else:
+                    venta_base = np.exp(beta_0 + clima_valor*beta_c)
+
+                
 
                 resultados.append({
                     'SKU': sku,
@@ -166,8 +178,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Producto': prod,
                     'Precio Actual':precioact,
                     'intercepto':safe_round(elasticidad.coeficientes.get('Intercept'), 4),
-                    'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
+                    #'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
                     #coeficientes
+                    'Venta Base': safe_round(venta_base, 0),
                     'Afectación Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
                     'Afectación Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
                     'Pvalue Intercepto': safe_round(elasticidad.pvalores.get('Intercept'), 4),
