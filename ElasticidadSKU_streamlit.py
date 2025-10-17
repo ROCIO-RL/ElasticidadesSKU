@@ -219,7 +219,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             r2 = res['R cuadrada']
             precio = res['Precio Actual']
             intercepto = res['intercepto']
-            costo = ['Costo Actual']
+            costoact = ['Costo Actual']
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
