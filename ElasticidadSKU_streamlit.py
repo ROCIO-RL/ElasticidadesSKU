@@ -274,10 +274,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         #    "Demanda Estimada": "{:,.0f}",
                         #    "Δ Demanda %": "{:+.1f}%"
                         #}))
+                        idx_precio_actual = (np.abs(precios - precio_actual)).argmin()
                         demanda_df = pd.DataFrame({
                             "Precio": precios,
                             "Demanda Estimada": demanda,
-                            "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
+                            "Δ Demanda %": (demanda / demanda[idx_precio_actual] - 1) * 100
                         })
 
                         # Si se capturó costo, calculamos la utilidad
@@ -337,7 +338,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             )
                             fig_demanda.add_scatter(
                                 x=[precio_actual],
-                                y=[demanda[precios == precio_actual][0]],
+                                y=[demanda[idx_precio_actual]],
                                 mode='markers+text',
                                 text=["Precio Actual"],
                                 textposition="top center",
