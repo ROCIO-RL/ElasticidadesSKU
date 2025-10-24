@@ -38,47 +38,60 @@ elif opcion == "Capturar Manualmente":
         schema=st.secrets["snowflake"]["schema"]
         )
 
-    query = f"""SELECT DISTINCT 
-                    MRCNOMBRE AS MARCA,
-                    AGPPAUTANOMBRE AS AGRUPACION_PAUTA,
-                    PRONOMBRE AS PRODUCTO_BASE,
-                    PROPSTCODBARRAS AS SKU, 
-                    PROPSTNOMBRE AS PRODUCTO
-                FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
-                LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
-                LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
-                LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
-                    WHERE t.anio >= 2023"""
-    df_productos =  pd.read_sql(query,conn)
-    conn.close()
+    #query = f"""SELECT DISTINCT 
+    #                MRCNOMBRE AS MARCA,
+    #                AGPPAUTANOMBRE AS AGRUPACION_PAUTA,
+    #                PRONOMBRE AS PRODUCTO_BASE,
+    #                PROPSTCODBARRAS AS SKU, 
+    #                PROPSTNOMBRE AS PRODUCTO
+    #            FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
+    #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
+    #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
+    #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
+    #                WHERE t.anio >= 2023"""
+
+    query = f"""  SELECT distinct p.propstcodbarras as SKU,
+        p.propstid AS PROPST_ID
+        FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
+        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
+        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
+        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
+        WHERE t.anio >= 2023
+          AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
+          AND c.TIPOCLIENTE='Monitoreado'"""
+    df_propstid =  pd.read_sql(query,conn)
+    #conn.close()
+    df_productos = pd.read_excel(r'Catálogo Corporativo Final.xlsx',sheet_name='Catálogo')
+    df_productos = df_productos[df_productos['IdPais']==1].copy()
+    df_productos = df_propstid.merge(df_productos,left_on='PROPST_ID',right_on='ProPstID',how='left')
     st.markdown("Agrega un SKU, selecciona canal y clima:")
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        marca = st.selectbox("Marca", sorted(df_productos["MARCA"].unique()))
+        marca = st.selectbox("Marca", sorted(df_productos["Marca"].unique()))
 
     with col2:
-        agrupaciones = df_productos[df_productos["MARCA"] == marca]["AGRUPACION_PAUTA"].unique()
+        agrupaciones = df_productos[df_productos["Marca"] == marca]["Agrupación Pauta"].unique()
         agrupacion = st.selectbox("Agrupación", sorted(agrupaciones))
 
     with col3:
         productos_base = df_productos[
-            (df_productos["MARCA"] == marca) &
-            (df_productos["AGRUPACION_PAUTA"] == agrupacion)
-        ]["PRODUCTO_BASE"].unique()
+            (df_productos["Marca"] == marca) &
+            (df_productos["Agrupación Pauta"] == agrupacion)
+        ]["Producto Base"].unique()
         producto_base = st.selectbox("Producto Base", sorted(productos_base))
 
     with col4:
         skus_filtrados = df_productos[
-            (df_productos["MARCA"] == marca) &
-            (df_productos["AGRUPACION_PAUTA"] == agrupacion) &
-            (df_productos["PRODUCTO_BASE"] == producto_base)
-        ][["SKU", "PRODUCTO"]]
+            (df_productos["Marca"] == marca) &
+            (df_productos["Agrupación Pauta"] == agrupacion) &
+            (df_productos["Producto Base"] == producto_base)
+        ][["SKU", "ProPstNombre"]]
 
         sku_row = st.selectbox(
             "SKU",
-            skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['PRODUCTO']}", axis=1)
+            skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['ProPstNombre']}", axis=1)
         )
 
     col1, col2, col3, col4 = st.columns(4)
