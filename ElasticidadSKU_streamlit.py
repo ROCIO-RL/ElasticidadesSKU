@@ -16,6 +16,10 @@ opcion = st.radio("Selecciona cómo quieres cargar los SKUs:",
                   ["Subir Layout", "Capturar Manualmente"])
 
 layout = None
+import os
+st.write("Directorio actual:", os.getcwd())
+st.write("Archivos en este directorio:", os.listdir())
+
 comp = pd.read_excel("Competencia_Elasticidades.xlsx")
 st.write("Vista previa de la competencia:")
 st.dataframe(comp.head())
