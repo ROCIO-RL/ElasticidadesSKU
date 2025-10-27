@@ -208,6 +208,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Pvalue Precio': safe_round(elasticidad.pvalores.get('Precio'), 4),
                     'Pvalue Clima': safe_round(elasticidad.pvalores.get('CLIMA'), 4),
                     'R cuadrada': safe_round(elasticidad.r2, 3),
+                    'Afectación Competencia': safe_round(elasticidad.coeficientes.get('PRECIO_COMPETENCIA'), 4),
+                    'Pvalue Competencia': safe_round(elasticidad.pvalores.get('PRECIO_COMPETENCIA'), 4),
+
                     #"Insight": insight
                 })
 
@@ -235,13 +238,15 @@ if layout is not None and st.button("Ejecutar Análisis"):
             costoact = res['Costo Actual']
             #insight = res['Insight']
             insight = ""
+            af_comp = res.get('Afectación Competencia')
+            af_comp = 0 if pd.isna(af_comp) else af_comp
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
                 st.markdown("## Resumen")
                 df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
                 #st.dataframe(df_sku)
-            
+                
                 st.markdown(f"""
                             📦 **Producto:** {prod}  
                             🆔 **SKU:** {sku}  
@@ -250,11 +255,20 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             - 📊 **Ventas base:** {venta_base:,} unidades.  
                             - 💰 **Elasticidad precio:** {af_precio:.2f}.  
                             Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
-                            - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
-                            Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
-                            - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
-                            El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
+                            
                             """)
+                if af_comp != 0:
+                    st.markdown(f"""
+                    - ⚔️ **Elasticidad cruzada (competencia):** {af_comp:.2f}.  
+                    Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
+                    """)
+
+                st.markdown(f"""
+                    - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
+                    Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
+                    - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
+                    El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
+                """)
                 
                 if precio != "":
                     try:
