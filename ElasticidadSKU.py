@@ -57,7 +57,7 @@ class ElasticidadCB:
     from langchain_community.llms import Ollama
     llm = Ollama(model="llama3")
     pd.options.display.float_format = '{:,.2f}'.format
-    def __init__(self, codbarras, canal, temp):
+    def __init__(self, codbarras, canal, temp,ruta_competencia="Competencia_Elasticidades.xlsx"):
         """
         codbarras: Código de barras del producto
         canal: 'Autoservicios', 'Farmacias' o 'Moderno'
@@ -66,6 +66,7 @@ class ElasticidadCB:
         self.codbarras = codbarras
         self.canal = canal
         self.temp = temp
+        self.ruta_competencia = ruta_competencia
 
     def calcula_precio(self, venta):
         # Filtrado según canal
@@ -133,6 +134,23 @@ class ElasticidadCB:
         self.sellout = self.sellout.merge(self.precio_gli, on=['ANIO','SEMNUMERO'], how='left')
 
         return self.sellout
+    
+    def carga_competencia(self):
+        try:
+            comp = pd.read_excel(self.ruta_competencia)
+            comp.columns = [c.strip() for c in comp.columns]
+            comp = comp.rename(columns={
+                'SKU': 'PROPSTCODBARRAS',
+                'Descripcion Competencia': 'DESC_COMPETENCIA',
+                'Precio Competencia': 'PRECIO_COMPETENCIA'
+            })
+            comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
+            comp = comp[comp['PROPSTCODBARRAS'] == self.codbarras]  # filtrar por el SKU actual
+            return comp
+        except Exception as e:
+            print(f"No se pudo cargar competencia: {e}")
+            return pd.DataFrame()
+
 
     def prepara_datos(self):
         layout = self.sellout[(self.sellout['UNIDADESDESP'] > 0) & (self.sellout['Precio'].notna())].copy()
@@ -150,11 +168,30 @@ class ElasticidadCB:
             temperatura.columns = ['ANIO','SEMNUMERO','CLIMA']
             layout = layout.merge(temperatura, on=['ANIO','SEMNUMERO'], how='left')
 
+        # Competencia
+        competencia = self.carga_competencia()
+        if not competencia.empty:
+            layout = layout.merge(competencia, 
+                                left_on=['ANIO','SEMNUMERO'], 
+                                right_on=['ANIO','SEMNUMERO'], 
+                                how='left')
+
+            if 'PRECIO_COMPETENCIA' in layout.columns and layout['PRECIO_COMPETENCIA'].notna().sum() > 0:
+                layout['PRECIO_COMPETENCIA'] = layout['PRECIO_COMPETENCIA'].astype(float)
+                print("Información de competencia agregada correctamente.")
+            else:
+                print("No hay precios de competencia válidos.")
+        else:
+            print("No se encontró información de competencia para este SKU.")
+
         layout_log = layout.copy()
         self.data_grafico = layout.copy()
 
         # log-log
         layout_log[['UNIDADESDESP','Precio']] = layout_log[['UNIDADESDESP','Precio']].apply(np.log)
+        # competencia
+        if 'PRECIO_COMPETENCIA' in layout_log.columns and layout_log['PRECIO_COMPETENCIA'].notna().sum() > 0:
+            layout_log['PRECIO_COMPETENCIA'] = np.log(layout_log['PRECIO_COMPETENCIA'])
 
         return layout_log
 
@@ -164,10 +201,21 @@ class ElasticidadCB:
         if data.shape[0] < 30:
             raise ValueError("No hay datos suficientes para el modelo")
 
-        if self.temp:
+        """if self.temp:
             modelo = smf.ols('UNIDADESDESP ~ Precio + CLIMA', data=data).fit()
         else:
-            modelo = smf.ols('UNIDADESDESP ~ Precio', data=data).fit()
+            modelo = smf.ols('UNIDADESDESP ~ Precio', data=data).fit()"""
+        
+        formula = 'UNIDADESDESP ~ Precio'
+
+        if self.temp:
+            formula += ' + CLIMA'
+
+        if 'PRECIO_COMPETENCIA' in data.columns and data['PRECIO_COMPETENCIA'].notna().sum() > 0:
+            formula += ' + PRECIO_COMPETENCIA'
+
+        print(f"Fórmula del modelo: {formula}")
+        modelo = smf.ols(formula, data=data).fit()
 
         print(modelo.summary())
         self.r2 = modelo.rsquared
