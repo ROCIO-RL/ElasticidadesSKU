@@ -247,7 +247,7 @@ class ElasticidadCB:
         ))
 
         # Eje de línea (precio)
-        fig.add_trace(go.Scatter(
+        """fig.add_trace(go.Scatter(
             x=df['Fecha'],
             y=df['Precio'],
             name='Precio GLI',
@@ -255,7 +255,28 @@ class ElasticidadCB:
             mode='lines',
             line=dict(color='red',width=2),
             yaxis='y2'
+        ))"""
+        # Eje de línea (precio propio)
+        fig.add_trace(go.Scatter(
+            x=df['Fecha'],
+            y=df['Precio'],
+            name='Precio GLI',
+            mode='lines',
+            line=dict(color='red',width=2),
+            yaxis='y2'
         ))
+
+        # Eje de línea (precio competencia)
+        if 'PRECIO_COMPETENCIA' in df.columns and df['PRECIO_COMPETENCIA'].notna().sum() > 0:
+            fig.add_trace(go.Scatter(
+                x=df['Fecha'],
+                y=df['PRECIO_COMPETENCIA'],
+                name='Precio Competencia',
+                mode='lines',
+                line=dict(color='blue', width=2, dash='dot'),
+                yaxis='y2'
+            ))
+                
 
         # Eje clima (si existe)
         if 'CLIMA' in df.columns:

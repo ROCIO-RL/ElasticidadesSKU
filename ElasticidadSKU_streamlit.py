@@ -16,15 +16,7 @@ opcion = st.radio("Selecciona cómo quieres cargar los SKUs:",
                   ["Subir Layout", "Capturar Manualmente"])
 
 layout = None
-import os
-st.write("Directorio actual:", os.getcwd())
-st.write("Archivos en este directorio:", os.listdir())
 
-comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
-st.write("Vista previa de la competencia:")
-st.dataframe(comp.head())
-
-st.write("Columnas:", comp.columns.tolist())
 if opcion == "Subir Layout":
     archivo = st.file_uploader("Sube un archivo CSV o Excel con columnas: SKU, Canal, Clima", 
                                type=["csv", "xlsx"])
@@ -267,7 +259,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             """)
                 if af_comp != 0:
                     st.markdown(f"""
-                    - ⚔️ **Elasticidad cruzada (competencia):** {af_comp:.2f}.  
+                    - 💰 **Elasticidad cruzada (competencia):** {af_comp:.2f}.  
                     Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
                     """)
 
