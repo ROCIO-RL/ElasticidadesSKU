@@ -173,7 +173,8 @@ class ElasticidadCB:
         # Competencia
         competencia = self.carga_competencia()
         if not competencia.empty:
-            
+            competencia = competencia.sort_values(['ANIO','SEMNUMERO'], ascending=[True, True])
+            self.precio_competencia = float(competencia['PRECIO_COMPETENCIA'].iloc[-1])
             layout = layout.merge(competencia, 
                                 left_on=['ANIO','SEMNUMERO'], 
                                 right_on=['ANIO','SEMNUMERO'], 
@@ -181,7 +182,7 @@ class ElasticidadCB:
 
             if 'PRECIO_COMPETENCIA' in layout.columns and layout['PRECIO_COMPETENCIA'].notna().sum() > 0:
                 layout['PRECIO_COMPETENCIA'] = layout['PRECIO_COMPETENCIA'].astype(float)
-                self.precio_competencia = float(layout['PRECIO_COMPETENCIA'].iloc[-1])
+                #self.precio_competencia = float(layout['PRECIO_COMPETENCIA'].iloc[-1])
                 print("Información de competencia agregada correctamente.")
             else:
                 self.precio_competencia = None
