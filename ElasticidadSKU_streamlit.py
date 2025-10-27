@@ -240,7 +240,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
             #insight = res['Insight']
             insight = ""
             af_comp = res['Afectación Competencia']
-          
+            af_comp = 0 if pd.isna(af_comp) else af_comp
+ 
+            
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
                 st.markdown("## Resumen")
