@@ -137,7 +137,7 @@ class ElasticidadCB:
     
     def carga_competencia(self):
         try:
-            comp = pd.read_excel(self.ruta_competencia)
+            comp = pd.read_excel(r"/workspaces/ElasticidadesSKU/Competencias_Elasticidades.xlsx")
             comp.columns = [c.strip() for c in comp.columns]
             comp = comp.rename(columns={
                 'SKU': 'PROPSTCODBARRAS',
