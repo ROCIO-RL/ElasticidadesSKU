@@ -211,7 +211,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'R cuadrada': safe_round(elasticidad.r2, 3),
                     'Afectación Competencia': safe_round(elasticidad.coeficientes.get('PRECIO_COMPETENCIA'), 4),
                     'Pvalue Competencia': safe_round(elasticidad.pvalores.get('PRECIO_COMPETENCIA'), 4),
-
+                    'Precio Competencia': safe_round(elasticidad.precio_competencia,4)
                     #"Insight": insight
                 })
 
@@ -241,6 +241,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             insight = ""
             af_comp = res['Afectación Competencia']
             af_comp = 0 if pd.isna(af_comp) else af_comp
+            precio_comp = res['Precio Competencia']
  
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
