@@ -146,6 +146,7 @@ class ElasticidadCB:
             })
             comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
             comp = comp[comp['PROPSTCODBARRAS'] == self.codbarras]  # filtrar por el SKU actual
+            print(comp)
             return comp
         except Exception as e:
             print(f"No se pudo cargar competencia: {e}")
