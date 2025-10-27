@@ -16,7 +16,11 @@ opcion = st.radio("Selecciona cómo quieres cargar los SKUs:",
                   ["Subir Layout", "Capturar Manualmente"])
 
 layout = None
+comp = pd.read_excel("Competencia_Elasticidades.xlsx")
+st.write("Vista previa de la competencia:")
+st.dataframe(comp.head())
 
+st.write("Columnas:", comp.columns.tolist())
 if opcion == "Subir Layout":
     archivo = st.file_uploader("Sube un archivo CSV o Excel con columnas: SKU, Canal, Clima", 
                                type=["csv", "xlsx"])
