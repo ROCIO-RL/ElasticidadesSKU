@@ -239,7 +239,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             costoact = res['Costo Actual']
             #insight = res['Insight']
             insight = ""
-            af_comp = res.get('Afectación Competencia')
+            af_comp = res['Afectación Competencia']
             af_comp = 0 if pd.isna(af_comp) else af_comp
             precio_comp = elasticidad.precio_competencia
             
