@@ -240,9 +240,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             #insight = res['Insight']
             insight = ""
             af_comp = res['Afectación Competencia']
-            af_comp = 0 if pd.isna(af_comp) else af_comp
-            precio_comp = elasticidad.precio_competencia
-            
+          
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
                 st.markdown("## Resumen")
@@ -295,7 +293,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                         intercepto
                                         + (np.log(precios) * af_precio)
                                         + (np.log(clima_valor) * af_clima)
-                                        + (np.log(precio_comp) * af_comp if precio_comp else 0)
+                                        + (np.log(elasticidad.precio_competencia) * af_comp if elasticidad.precio_competencia else 0)
                                     )
 
                         #demanda_df = pd.DataFrame({
