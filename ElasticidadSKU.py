@@ -67,6 +67,7 @@ class ElasticidadCB:
         self.canal = canal
         self.temp = temp
         self.ruta_competencia = ruta_competencia
+        self.precio_competencia = None 
 
     def calcula_precio(self, venta):
         # Filtrado según canal
@@ -172,6 +173,7 @@ class ElasticidadCB:
         # Competencia
         competencia = self.carga_competencia()
         if not competencia.empty:
+            
             layout = layout.merge(competencia, 
                                 left_on=['ANIO','SEMNUMERO'], 
                                 right_on=['ANIO','SEMNUMERO'], 
@@ -179,8 +181,10 @@ class ElasticidadCB:
 
             if 'PRECIO_COMPETENCIA' in layout.columns and layout['PRECIO_COMPETENCIA'].notna().sum() > 0:
                 layout['PRECIO_COMPETENCIA'] = layout['PRECIO_COMPETENCIA'].astype(float)
+                self.precio_competencia = float(layout['PRECIO_COMPETENCIA'].iloc[-1])
                 print("Información de competencia agregada correctamente.")
             else:
+                self.precio_competencia = None
                 print("No hay precios de competencia válidos.")
         else:
             print("No se encontró información de competencia para este SKU.")
@@ -555,7 +559,7 @@ class ElasticidadCB:
 
         Si es inelástica (coef. precio entre -1 y 0): - Estrategia de precio: Oportunidad de margen. Puedes aumentar el precio; la caída en ventas será menos que proporcional, aumentando los ingresos totales.
 
-        - Implicación Estratégica - Otras Variables (ej. Clima): Si hay variables significativas además del precio, elige la más importante y da una recomendación.
+        - Implicación Estratégica - Otras Variables (ej. Clima, PRECIO_COMPETENCIA): Si hay variables significativas además del precio, elige la más importante y da una recomendación.
 
         Ejemplo para Temperatura: - Acción Comercial: En días con mayor temperatura, espera un aumento de ~[e^(coeficiente)]% en ventas. Asegura stock y visibilidad en tienda.
 
