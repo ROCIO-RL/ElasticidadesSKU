@@ -211,7 +211,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'R cuadrada': safe_round(elasticidad.r2, 3),
                     'Afectación Competencia': safe_round(elasticidad.coeficientes.get('PRECIO_COMPETENCIA'), 4),
                     'Pvalue Competencia': safe_round(elasticidad.pvalores.get('PRECIO_COMPETENCIA'), 4),
-                    'Precio Competencia': safe_round(elasticidad.precio_competencia,4)
+                    'Precio Competencia': safe_round(elasticidad.precio_competencia,4),
+                    'Nombre Competencia': elasticidad.nombre_competencia
                     #"Insight": insight
                 })
 
@@ -242,6 +243,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             af_comp = res['Afectación Competencia']
             af_comp = 0 if pd.isna(af_comp) else af_comp
             precio_comp = res['Precio Competencia']
+            nombre_comp = res['Nombre Competencia']
  
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
@@ -262,7 +264,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             """)
                 if af_comp != 0:
                     st.markdown(f"""
-                    - 💰 **Elasticidad competencia ({elasticidad.nombre_competencia}):** {af_comp:.2f}.  
+                    - 💰 **Elasticidad competencia ({nombre_comp}):** {af_comp:.2f}.  
                     Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
                     """)
 
