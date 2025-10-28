@@ -237,7 +237,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             precioact = row["Precio Actual"]
             costoact = row['Costo Actual']
             desc_competencia = row['DESC_COMPETENCIA']
-
+            st.markdown(desc_competencia)
             try:
                 elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp,desc_competencia=desc_competencia)
                 elasticidad.consulta_sellout()

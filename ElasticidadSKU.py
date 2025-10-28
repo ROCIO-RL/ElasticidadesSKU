@@ -143,7 +143,7 @@ class ElasticidadCB:
     def carga_competencia(self):
         try:
             comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
-            #comp.columns = [c.strip() for c in comp.columns]
+            comp.columns = [c.strip() for c in comp.columns]
             comp = comp.rename(columns={
                 'SKU': 'PROPSTCODBARRAS',
                 'Descripcion Competencia': 'DESC_COMPETENCIA',
@@ -162,8 +162,8 @@ class ElasticidadCB:
                 #comp['DESC_COMPETENCIA']=comp['DESC_COMPETENCIA'].astype(str).str.strip() 
 
                 # Convertir a string y limpiar espacios
-                comp['DESC_COMPETENCIA'] = comp['DESC_COMPETENCIA'].astype(str).strip()
-                nombre_comp = str(self.nombre_competencia).strip()  # limpia el valor de la clase
+                #comp['DESC_COMPETENCIA'] = comp['DESC_COMPETENCIA'].astype(str).strip()
+                nombre_comp = self.nombre_competencia  # limpia el valor de la clase
 
                 # Filtrar
                 comp_filtrado = comp[comp['DESC_COMPETENCIA'] == nombre_comp]
