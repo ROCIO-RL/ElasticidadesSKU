@@ -93,7 +93,7 @@ elif opcion == "Capturar Manualmente":
             "SKU",
             skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['ProPstNombre']}", axis=1)
         )
-
+        sku_val_prov = sku_row.split(" - ")[0] 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -110,7 +110,7 @@ elif opcion == "Capturar Manualmente":
         costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
 
         # Filtrar por el SKU actual
-        costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_row, 'Costo']
+        costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
 
         # Si el SKU existe en el archivo, precargar su costo
         if not costo_filtrado.empty:
@@ -137,7 +137,7 @@ elif opcion == "Capturar Manualmente":
             'Precio Competencia': 'PRECIO_COMPETENCIA'
         })
         comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
-        comp = comp[comp['PROPSTCODBARRAS'] == sku_row]  # filtrar por SKU
+        comp = comp[comp['PROPSTCODBARRAS'] == sku_val_prov]  # filtrar por SKU
 
         # Si hay competencia, permitir seleccionar
         if not comp.empty:
