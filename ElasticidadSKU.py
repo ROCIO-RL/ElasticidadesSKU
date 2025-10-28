@@ -86,6 +86,9 @@ class ElasticidadCB:
 
         # Precio unitario
         venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP']
+        # Aplicar IVA
+        tasa_iva = 0.16
+        venta['Precio'] = venta['Precio'] * (1 + tasa_iva)
 
         # Promedio semanal
         if self.canal in ['Autoservicios','Moderno']:
