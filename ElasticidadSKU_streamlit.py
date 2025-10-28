@@ -262,7 +262,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             """)
                 if af_comp != 0:
                     st.markdown(f"""
-                    - 💰 **Elasticidad cruzada (competencia):** {af_comp:.2f}.  
+                    - 💰 **Elasticidad competencia ({elasticidad.nombre_competencia}):** {af_comp:.2f}.  
                     Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
                     """)
 

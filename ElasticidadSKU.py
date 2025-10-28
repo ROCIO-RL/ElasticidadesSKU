@@ -68,6 +68,7 @@ class ElasticidadCB:
         self.temp = temp
         self.ruta_competencia = ruta_competencia
         self.precio_competencia = None 
+        self.nombre_competencia = None
 
     def calcula_precio(self, venta):
         # Filtrado según canal
@@ -157,7 +158,7 @@ class ElasticidadCB:
             if not comp.empty:
                 # Tomar la primera descripción disponible
                 primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
-               
+                self.nombre_competencia = primera_desc
                 # Filtrar todas las filas que tengan esa descripción
                 comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
                 comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
