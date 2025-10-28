@@ -142,6 +142,7 @@ elif opcion == "Capturar Manualmente":
             'Precio Competencia': 'PRECIO_COMPETENCIA'
         })
         comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
+        comp['PROPSTCODBARRAS'] = comp['PROPSTCODBARRAS'].astype(str).str.strip()  
         comp = comp[comp['PROPSTCODBARRAS'] == sku_val_prov]  # filtrar por SKU
 
         # Si hay competencia, permitir seleccionar
