@@ -57,7 +57,7 @@ class ElasticidadCB:
     from langchain_community.llms import Ollama
     llm = Ollama(model="llama3")
     pd.options.display.float_format = '{:,.2f}'.format
-    def __init__(self, codbarras, canal, temp,ruta_competencia="Competencia_Elasticidades.xlsx"):
+    def __init__(self, codbarras, canal, temp,desc_competencia,ruta_competencia="Competencia_Elasticidades.xlsx"):
         """
         codbarras: Código de barras del producto
         canal: 'Autoservicios', 'Farmacias' o 'Moderno'
@@ -68,7 +68,7 @@ class ElasticidadCB:
         self.temp = temp
         self.ruta_competencia = ruta_competencia
         self.precio_competencia = None 
-        self.nombre_competencia = None
+        self.nombre_competencia = desc_competencia
 
     def calcula_precio(self, venta):
         # Filtrado según canal
@@ -158,10 +158,10 @@ class ElasticidadCB:
             #comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
             if not comp.empty:
                 # Tomar la primera descripción disponible
-                primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
-                self.nombre_competencia = primera_desc
+                #primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
+                #self.nombre_competencia = primera_desc
                 # Filtrar todas las filas que tengan esa descripción
-                comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
+                comp = comp[comp['DESC_COMPETENCIA'] == self.nombre_competencia]
                 comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
             print(comp)
             return comp

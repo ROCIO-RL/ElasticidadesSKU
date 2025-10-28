@@ -238,7 +238,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             desc_competencia = row['DESC_COMPETENCIA']
           
             try:
-                elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp)
+                elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp,desc_competencia=desc_competencia)
                 elasticidad.consulta_sellout()
                 elasticidad.calcula_elasticidad()
                 fig = elasticidad.grafica()
