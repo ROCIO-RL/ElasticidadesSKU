@@ -159,9 +159,7 @@ elif opcion == "Capturar Manualmente":
 
             st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")
 
-            # Aquí podrías guardarlo o usarlo en tu tabla principal
-            # Ejemplo:
-            # df_resultado.loc[sku_row, 'PRECIO_COMPETENCIA'] = precio_comp
+
         else:
             st.info("No hay información de competencia para este SKU.")
 

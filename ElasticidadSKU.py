@@ -159,6 +159,7 @@ class ElasticidadCB:
                 # Tomar la primera descripción disponible
                 #primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
                 primera_desc = self.nombre_competencia 
+                comp['DESC_COMPETENCIA']=comp['DESC_COMPETENCIA'].astype(str).str.strip() 
                 # Filtrar todas las filas que tengan esa descripción
                 comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
                 comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
