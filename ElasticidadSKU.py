@@ -151,13 +151,12 @@ class ElasticidadCB:
             })
             comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
             comp = comp[comp['PROPSTCODBARRAS'] == self.codbarras]  # filtrar por el SKU actual
-            nombre_comp = self.nombre_competencia
+           
             #primera_desc = comp['DESC_COMPETENCIA'].iloc[1]
             # Filtrar todas las filas que tengan esa misma descripción
             #comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
             if not comp.empty:
                 # Tomar la primera descripción disponible
-
                 primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
                 self.nombre_competencia = primera_desc
                 # Filtrar todas las filas que tengan esa descripción
