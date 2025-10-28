@@ -167,7 +167,7 @@ class ElasticidadCB:
 
                 # Filtrar
                 #comp_filtrado = comp[comp['DESC_COMPETENCIA'] == nombre_comp]
-
+                self.nombre_competencia = primera_desc
                 # Filtrar todas las filas que tengan esa descripción
                 comp_filtrado = comp[comp['DESC_COMPETENCIA'] == primera_desc]
                 comp_filtrado = comp_filtrado[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
