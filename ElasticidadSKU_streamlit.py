@@ -101,7 +101,25 @@ elif opcion == "Capturar Manualmente":
     with col2:
         precio_act = st.text_input("Precio (opcional)")
     with col3:
-        costo_act = st.text_input("Costo (opcional)")
+        # Cargar los costos desde Excel
+        costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
+        costos = costos.rename(columns={
+            'CODIGOBARRAS': 'PROPSTCODBARRAS',
+            'COSTO_GESTION': 'Costo'
+        })  
+        costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
+
+        # Filtrar por el SKU actual
+        costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_row, 'Costo']
+
+        # Si el SKU existe en el archivo, precargar su costo
+        if not costo_filtrado.empty:
+            costo_default = costo_filtrado.iloc[0]
+        else:
+            costo_default = ""
+
+        # Mostrar el campo editable con el valor precargado
+        costo_act = st.text_input("Costo (opcional)", value=costo_default)
     with col4:  
         st.markdown("Clima")  
         clima = st.checkbox("¿Considerar Clima?", value=True)    
