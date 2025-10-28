@@ -93,7 +93,10 @@ elif opcion == "Capturar Manualmente":
             "SKU",
             skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['ProPstNombre']}", axis=1)
         )
-        
+
+
+    # Extraemos el SKU limpio y lo dejamos como texto
+    sku_val_prov = str(sku_row.split(" - ")[0]).strip()   
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -108,7 +111,7 @@ elif opcion == "Capturar Manualmente":
             'COSTO_GESTION': 'Costo'
         })  
         costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
-        sku_val_prov = sku_row.split(" - ")[0] 
+    
         # Filtrar por el SKU actual
         costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
 
@@ -128,7 +131,7 @@ elif opcion == "Capturar Manualmente":
     # AGREGAMOS LA COMPETENCIA SI EXISTE 
     col1,col2 = st.columns(2)
     with col1:
-        sku_val_prov = sku_row.split(" - ")[0] 
+   
         # Cargar datos de competencia
         comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
         comp.columns = [c.strip() for c in comp.columns]
