@@ -571,10 +571,10 @@ class ElasticidadCB:
 
         - Implicación Estratégica - Precio: Da una recomendación concreta y breve basada en la elasticidad-precio.
 
-        Si es elástica (coef. precio < -1): - Estrategia de precio: Cuidado con las alzas. Una subida de precio generará una caída *más que proporcional* en las unidades vendidas, reduciendo ingresos totales.
+        Si es elástica (|coef. precio| > 1): - Estrategia de precio: Cuidado con las alzas. Una subida de precio generará una caída *más que proporcional* en la cantidad demandada, reduciendo los ingresos totales.
 
-        Si es inelástica (coef. precio entre -1 y 0): - Estrategia de precio: Oportunidad de margen. Puedes aumentar el precio; la caída en ventas será menos que proporcional, aumentando los ingresos totales.
-
+        Si es inelástica (|coef. precio| < 1): - Estrategia de precio: Oportunidad de margen. Puedes aumentar el precio; la caída en ventas será *menos que proporcional*, aumentando los ingresos totales.
+        
         - Implicación Estratégica - Otras Variables (ej. Clima, PRECIO_COMPETENCIA): Si hay variables significativas además del precio, elige la más importante y da una recomendación.
 
         Ejemplo para Temperatura: - Acción Comercial: En días con mayor temperatura, espera un aumento de ~[e^(coeficiente)]% en ventas. Asegura stock y visibilidad en tienda.
@@ -584,7 +584,7 @@ class ElasticidadCB:
 
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
-            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_2"],
+            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"],
         )
 
         completion = client.chat.completions.create(
