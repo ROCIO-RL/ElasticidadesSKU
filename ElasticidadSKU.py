@@ -68,7 +68,7 @@ class ElasticidadCB:
         self.temp = temp
         self.ruta_competencia = ruta_competencia
         self.precio_competencia = None 
-        self.nombre_competencia = desc_competencia
+        self.nombre_competencia = None
 
     def calcula_precio(self, venta):
         # Filtrado según canal
@@ -157,22 +157,14 @@ class ElasticidadCB:
             #comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
             if not comp.empty:
                 # Tomar la primera descripción disponible
-                primera_desc = comp['DESC_COMPETENCIA'].iloc[1]
-                #primera_desc = self.nombre_competencia 
-                #comp['DESC_COMPETENCIA']=comp['DESC_COMPETENCIA'].astype(str).str.strip() 
 
-                # Convertir a string y limpiar espacios
-                #comp['DESC_COMPETENCIA'] = comp['DESC_COMPETENCIA'].astype(str).strip()
-                  # limpia el valor de la clase
-
-                # Filtrar
-                #comp_filtrado = comp[comp['DESC_COMPETENCIA'] == nombre_comp]
+                primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
                 self.nombre_competencia = primera_desc
                 # Filtrar todas las filas que tengan esa descripción
-                comp_filtrado = comp[comp['DESC_COMPETENCIA'] == primera_desc]
-                comp_filtrado = comp_filtrado[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
-            print(comp_filtrado)
-            return comp_filtrado
+                comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
+                comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
+            print(comp)
+            return comp
         except Exception as e:
             print(f"No se pudo cargar competencia: {e}")
             return pd.DataFrame()
