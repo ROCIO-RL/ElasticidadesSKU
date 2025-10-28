@@ -580,6 +580,8 @@ class ElasticidadCB:
 
         Ejemplo para Temperatura: - Acción Comercial: En días con mayor temperatura, espera un aumento de ~[e^(coeficiente)]% en ventas. Asegura stock y visibilidad en tienda.
 
+         - Consideración Clave - Coeficientes Cruzados Atípicos: Si el coeficiente del precio de la competencia es negativo y elástico (|coef.| > 1), esto NO indica sustitución. Sugiere que ambas marcas se mueven juntas por factores externos (ej. promociones agregadas como "Julio Regalado"). Para aislar el efecto competitivo real, el modelo debe incluir variables de control como estacionalidad o pulsos de oferta.
+        
         Si faltan datos para la Tarea 1, omítela y comienza directamente con la Tarea 2."""
                 
 
