@@ -7,8 +7,7 @@ import numpy as np
 import plotly.express as px
 
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
-comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
-st.markdown(comp)
+
 st.title("Elasticidades por SKU")
 st.markdown("Sube un layout o captura manualmente los SKUs para calcular elasticidades.")
 
