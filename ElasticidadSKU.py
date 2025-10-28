@@ -151,7 +151,7 @@ class ElasticidadCB:
             })
             comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
             comp = comp[comp['PROPSTCODBARRAS'] == self.codbarras]  # filtrar por el SKU actual
-           
+            nombre_comp = self.nombre_competencia
             #primera_desc = comp['DESC_COMPETENCIA'].iloc[1]
             # Filtrar todas las filas que tengan esa misma descripción
             #comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
@@ -163,7 +163,7 @@ class ElasticidadCB:
 
                 # Convertir a string y limpiar espacios
                 #comp['DESC_COMPETENCIA'] = comp['DESC_COMPETENCIA'].astype(str).strip()
-                nombre_comp = self.nombre_competencia  # limpia el valor de la clase
+                  # limpia el valor de la clase
 
                 # Filtrar
                 comp_filtrado = comp[comp['DESC_COMPETENCIA'] == nombre_comp]
