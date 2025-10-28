@@ -97,7 +97,7 @@ elif opcion == "Capturar Manualmente":
 
     # Extraemos el SKU limpio y lo dejamos como texto
     sku_val_prov = str(sku_row.split(" - ")[0]).strip()   
-    sku_val_prov = sku_val_prov.astype(int)
+    
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -111,8 +111,8 @@ elif opcion == "Capturar Manualmente":
             'CODIGOBARRAS': 'PROPSTCODBARRAS',
             'COSTO_GESTION': 'Costo'
         })  
+        costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()  
         costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
-    
         # Filtrar por el SKU actual
         costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
 
