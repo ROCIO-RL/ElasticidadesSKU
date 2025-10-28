@@ -593,7 +593,7 @@ class ElasticidadCB:
 
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
-            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"],
+            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_2"],
         )
 
         completion = client.chat.completions.create(
