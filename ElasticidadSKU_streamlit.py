@@ -97,6 +97,7 @@ elif opcion == "Capturar Manualmente":
 
     # Extraemos el SKU limpio y lo dejamos como texto
     sku_val_prov = str(sku_row.split(" - ")[0]).strip()   
+    sku_val_prov = sku_val_prov.astype(int)
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
