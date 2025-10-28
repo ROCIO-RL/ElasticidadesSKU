@@ -236,7 +236,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             prod = row["PropstNombre"]
             precioact = row["Precio Actual"]
             costoact = row['Costo Actual']
-            desc_competencia = row['DESC_COMPETENCIA'].astype(str).str.strip()  
+            desc_competencia = row['DESC_COMPETENCIA']
 
             try:
                 elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp,desc_competencia=desc_competencia)

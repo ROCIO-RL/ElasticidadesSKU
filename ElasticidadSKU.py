@@ -158,10 +158,18 @@ class ElasticidadCB:
             if not comp.empty:
                 # Tomar la primera descripción disponible
                 #primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
-                primera_desc = self.nombre_competencia 
-                comp['DESC_COMPETENCIA']=comp['DESC_COMPETENCIA'].astype(str).str.strip() 
+                #primera_desc = self.nombre_competencia 
+                #comp['DESC_COMPETENCIA']=comp['DESC_COMPETENCIA'].astype(str).str.strip() 
+
+                # Convertir a string y limpiar espacios
+                comp['DESC_COMPETENCIA'] = comp['DESC_COMPETENCIA'].astype(str).str.strip()
+                nombre_comp = str(self.nombre_competencia).strip()  # limpia el valor de la clase
+
+                # Filtrar
+                comp = comp[comp['DESC_COMPETENCIA'] == nombre_comp]
+
                 # Filtrar todas las filas que tengan esa descripción
-                comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
+                #comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
                 comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
             print(comp)
             return comp
