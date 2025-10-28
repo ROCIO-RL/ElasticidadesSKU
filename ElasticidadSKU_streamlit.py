@@ -124,6 +124,42 @@ elif opcion == "Capturar Manualmente":
         st.markdown("Clima")  
         clima = st.checkbox("¿Considerar Clima?", value=True)    
 
+
+    # AGREGAMOS LA COMPETENCIA SI EXISTE 
+    col1=st.columns(1)
+    with col1:
+        # Cargar datos de competencia
+        comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
+        comp.columns = [c.strip() for c in comp.columns]
+        comp = comp.rename(columns={
+            'SKU': 'PROPSTCODBARRAS',
+            'Descripcion Competencia': 'DESC_COMPETENCIA',
+            'Precio Competencia': 'PRECIO_COMPETENCIA'
+        })
+        comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
+        comp = comp[comp['PROPSTCODBARRAS'] == sku_row]  # filtrar por SKU
+
+        # Si hay competencia, permitir seleccionar
+        if not comp.empty:
+            # Mostrar un selectbox con las descripciones únicas de competidores
+            descs_comp = comp['DESC_COMPETENCIA'].unique().tolist()
+            seleccion_comp = st.selectbox("Selecciona competencia", options=descs_comp)
+
+            # Filtrar la fila seleccionada
+            comp_sel = comp[comp['DESC_COMPETENCIA'] == seleccion_comp]
+
+            # Tomar el precio de esa competencia (puedes tomar el último o el promedio)
+            precio_comp = comp_sel['PRECIO_COMPETENCIA'].mean()  # o .iloc[-1]
+
+            st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")
+
+            # Aquí podrías guardarlo o usarlo en tu tabla principal
+            # Ejemplo:
+            # df_resultado.loc[sku_row, 'PRECIO_COMPETENCIA'] = precio_comp
+        else:
+            st.info("No hay información de competencia para este SKU.")
+
+
     # Inicializar lista en session_state
     if "manual_layout" not in st.session_state:
         st.session_state.manual_layout = []
