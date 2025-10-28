@@ -126,7 +126,7 @@ elif opcion == "Capturar Manualmente":
 
 
     # AGREGAMOS LA COMPETENCIA SI EXISTE 
-    col1 = st.columns(1)
+    col1,col2 = st.columns(2)
     with col1:
         # Cargar datos de competencia
         comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
