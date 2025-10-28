@@ -158,9 +158,9 @@ class ElasticidadCB:
             if not comp.empty:
                 # Tomar la primera descripción disponible
                 #primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
-                #self.nombre_competencia = primera_desc
+                primera_desc = self.nombre_competencia 
                 # Filtrar todas las filas que tengan esa descripción
-                comp = comp[comp['DESC_COMPETENCIA'] == self.nombre_competencia]
+                comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
                 comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
             print(comp)
             return comp
