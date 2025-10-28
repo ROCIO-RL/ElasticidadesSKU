@@ -296,6 +296,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                         intercepto
                                         + (np.log(precios) * af_precio)
                                         + (np.log(clima_valor) * af_clima)
+                                        + (np.log(precio_comp) * af_comp if precio_comp else 0)
                                     )
                         #+ (np.log(precio_comp) * af_comp if precio_comp else 0)
                         #demanda_df = pd.DataFrame({
