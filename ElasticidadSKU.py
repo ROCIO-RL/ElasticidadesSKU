@@ -162,17 +162,17 @@ class ElasticidadCB:
                 #comp['DESC_COMPETENCIA']=comp['DESC_COMPETENCIA'].astype(str).str.strip() 
 
                 # Convertir a string y limpiar espacios
-                comp['DESC_COMPETENCIA'] = comp['DESC_COMPETENCIA'].astype(str)
-                nombre_comp = str(self.nombre_competencia)  # limpia el valor de la clase
+                comp['DESC_COMPETENCIA'] = comp['DESC_COMPETENCIA'].astype(str).strip()
+                nombre_comp = str(self.nombre_competencia).strip()  # limpia el valor de la clase
 
                 # Filtrar
-                comp = comp[comp['DESC_COMPETENCIA'] == nombre_comp]
+                comp_filtrado = comp[comp['DESC_COMPETENCIA'] == nombre_comp]
 
                 # Filtrar todas las filas que tengan esa descripción
                 #comp = comp[comp['DESC_COMPETENCIA'] == primera_desc]
-                comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
-            print(comp)
-            return comp
+                comp_filtrado = comp_filtrado[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
+            print(comp_filtrado)
+            return comp_filtrado
         except Exception as e:
             print(f"No se pudo cargar competencia: {e}")
             return pd.DataFrame()
