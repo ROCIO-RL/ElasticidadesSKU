@@ -155,7 +155,7 @@ elif opcion == "Capturar Manualmente":
             comp_sel = comp[comp['DESC_COMPETENCIA'] == seleccion_comp]
 
             # Tomar el precio de esa competencia (puedes tomar el último o el promedio)
-            precio_comp = comp_sel['PRECIO_COMPETENCIA'].mean()  # o .iloc[-1]
+            precio_comp = comp_sel['PRECIO_COMPETENCIA'].iloc[-1]  # o .iloc[-1]
 
             st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")
 
@@ -172,6 +172,11 @@ elif opcion == "Capturar Manualmente":
 
     # Botón para agregar
     if st.button("Agregar SKU a la lista"):
+        
+        # Verificar si hay variable de competencia seleccionada
+        desc_competencia = seleccion_comp if "seleccion_comp" in locals() else ""
+
+    
         # Validamos que sea número
         if precio_act.replace(".", "", 1).isdigit():  
             precio = float(precio_act)
@@ -188,7 +193,8 @@ elif opcion == "Capturar Manualmente":
                 "Canal": canal,
                 "Clima": clima,
                 "Precio Actual": precio,
-                "Costo Actual": costo
+                "Costo Actual": costo,
+                "DESC_COMPETENCIA": desc_competencia
             })
             st.success(f"SKU {sku_val} agregado a la lista.")
         elif precio_act == "":
@@ -202,7 +208,8 @@ elif opcion == "Capturar Manualmente":
                 "Canal": canal,
                 "Clima": clima,
                 "Precio Actual": precio,
-                "Costo Actual": costo
+                "Costo Actual": costo,
+                "DESC_COMPETENCIA": desc_competencia
             })
             st.success(f"SKU {sku_val} agregado a la lista.")
         else:
