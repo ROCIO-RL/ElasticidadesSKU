@@ -220,7 +220,8 @@ elif opcion == "Capturar Manualmente":
         layout = pd.DataFrame(st.session_state.manual_layout)
         st.dataframe(layout)
 
-
+desc_competencia = layout['DESC_COMPETENCIA']
+st.markdown(desc_competencia)
 
 # Procesar layout
 if layout is not None and st.button("Ejecutar Análisis"):
