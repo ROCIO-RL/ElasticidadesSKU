@@ -110,7 +110,7 @@ elif opcion == "Capturar Manualmente":
         costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
 
         # Filtrar por el SKU actual
-        costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_row, 'Costo']
+        costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == skus_filtrados, 'Costo']
 
         # Si el SKU existe en el archivo, precargar su costo
         if not costo_filtrado.empty:
