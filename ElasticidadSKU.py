@@ -69,6 +69,7 @@ class ElasticidadCB:
         self.ruta_competencia = ruta_competencia
         self.precio_competencia = None 
         self.nombre_competencia = desc_competencia
+        self.ultima_Semana = None
 
     def calcula_precio(self, venta):
         # Filtrado según canal
@@ -220,6 +221,16 @@ class ElasticidadCB:
         if 'PRECIO_COMPETENCIA' in layout_log.columns and layout_log['PRECIO_COMPETENCIA'].notna().sum() > 0:
             layout_log['PRECIO_COMPETENCIA'] = np.log(layout_log['PRECIO_COMPETENCIA'])
 
+        # Guardar última semana y año
+        if not layout.empty:
+            ultimo_anio = layout['ANIO'].max()
+            ultima_semana = layout[layout['ANIO'] == ultimo_anio]['SEMNUMERO'].max()
+            self.ultima_semana = (int(ultimo_anio), int(ultima_semana))
+            print(f"Última semana registrada: Año {ultimo_anio}, Semana {ultima_semana}")
+        else:
+            self.ultima_semana = None
+
+        
         return layout_log
 
     def calcula_elasticidad(self):
@@ -619,5 +630,6 @@ class ElasticidadCB:
             )
 
     
+
 
 
