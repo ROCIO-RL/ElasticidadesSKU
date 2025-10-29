@@ -248,7 +248,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #insight = elasticidad.genera_insight_op()
                 def safe_round(value, dec=4):
                     return round(value, dec) if value is not None else None
+                # Definir rango de semanas de Julio Regalado
+                semanas_JR = list(range(21, 32))  # 21 a 31 inclusive
                 
+                # Indicador: 1 si está en ese rango, 0 si no
+                indicador_JR = 1 if elasticidad.ultima_semana in semanas_JR else 0
                 resultados.append({
                     'SKU': sku,
                     'Canal': canal,
@@ -281,7 +285,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     #Julio Regalado
                     'Pvalue Julio Regalado':safe_round(elasticidad.pvalores.get('JULIO_REGALADO'), 4),
                     'Afectación Julio Regalado':safe_round(elasticidad.coeficientes.get('JULIO_REGALADO'), 4),
-                    'Ultima Semana': elasticidad.ultima_semana
+                    'Indicador Julio Regalado': indicador_JR
                     #"Insight": insight
                 })
 
@@ -318,12 +322,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
             af_JR = res['Afectación Julio Regalado']
             pv_JR = res['Pvalue Julio Regalado']
             af_JR = 0 if pd.isna(af_JR) else af_JR
-            ultima_semana = res['Ultima Semana']
-            # Definir rango de semanas de Julio Regalado
-            semanas_JR = list(range(21, 32))  # 21 a 31 inclusive
+            indicador_JR = res['Indicador Julio Regalado']
+        
             
-            # Indicador: 1 si está en ese rango, 0 si no
-            indicador_JR = 1 if ultima_semana in semanas_JR else 0
             st.write(f"Indicador Julio Regalado: {indicador_JR}")
  
             
@@ -518,4 +519,5 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             unsafe_allow_html=True
                         )
             
+
 
