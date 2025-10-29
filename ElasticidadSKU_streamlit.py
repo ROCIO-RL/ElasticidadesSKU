@@ -281,6 +281,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     #Julio Regalado
                     'Pvalue Julio Regalado':safe_round(elasticidad.pvalores.get('JULIO_REGALADO'), 4),
                     'Afectación Julio Regalado':safe_round(elasticidad.coeficientes.get('JULIO_REGALADO'), 4),
+                    'Ultima Semana': elasticidad.ultima_semana
                     #"Insight": insight
                 })
 
@@ -317,6 +318,13 @@ if layout is not None and st.button("Ejecutar Análisis"):
             af_JR = res['Afectación Julio Regalado']
             pv_JR = res['Pvalue Julio Regalado']
             af_JR = 0 if pd.isna(af_JR) else af_JR
+            ultima_semana = res['Ultima Semana']
+            # Definir rango de semanas de Julio Regalado
+            semanas_JR = list(range(21, 32))  # 21 a 31 inclusive
+            
+            # Indicador: 1 si está en ese rango, 0 si no
+            indicador_JR = 1 if ultima_semana in semanas_JR else 0
+            st.write(f"Indicador Julio Regalado: {indicador_JR}")
  
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
@@ -510,3 +518,4 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             unsafe_allow_html=True
                         )
             
+
