@@ -182,7 +182,7 @@ class ElasticidadCB:
         layout.dropna(inplace=True)
 
         # Dummy de Julio Regalado
-        layout["JULIO_REGALADO"] = np.where(layout["SEMNUMERO"].between(25, 30), 1, 0)
+        layout["JULIO_REGALADO"] = np.where(layout["SEMNUMERO"].between(21, 31), 1, 0)
         print("Variable dummy 'JULIO_REGALADO' agregada correctamente.")
 
         #clima
@@ -619,4 +619,5 @@ class ElasticidadCB:
             )
 
     
+
 
