@@ -326,7 +326,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             indicador_JR = res['Indicador Julio Regalado']
         
             
-            st.write(f"Indicador Julio Regalado: {indicador_JR}")
+            #st.write(f"Indicador Julio Regalado: {indicador_JR}")
  
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
@@ -521,6 +521,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             unsafe_allow_html=True
                         )
             
+
 
 
 
