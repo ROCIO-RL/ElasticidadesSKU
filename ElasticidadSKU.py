@@ -13,8 +13,8 @@ llm = Ollama(model="llama3")
 pd.options.display.float_format = '{:,.2f}'.format
 import os
 import plotly.graph_objects as go
-from openai import OpenAI
 import streamlit as st
+from openai import OpenAI, APIError, APIStatusError
 
 
 
@@ -590,15 +590,24 @@ class ElasticidadCB:
             api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN"],
         )
 
-        completion = client.chat.completions.create(
-            model=model_name,
-            messages=[{"role": "user", "content": template}],
-            temperature=0.3,
-        )
 
-        resultado = completion.choices[0].message.content.strip()
-        print(resultado)
-        return resultado
+        try:
+            completion = client.chat.completions.create(
+                model=model_name,
+                messages=[{"role": "user", "content": template}],
+                temperature=0.3,
+            )
+            resultado = completion.choices[0].message.content.strip()
+            return resultado
+
+        except (APIStatusError, APIError, Exception) as e:
+            # Aquí atrapamos cualquier error de la API (por falta de créditos, timeouts, etc.)
+            print(f"[ADVERTENCIA] Error generando insight con HuggingFace: {e}")
+            return (
+                "⚠️ **No se pudo generar el insight automático** debido a un error con el modelo "
+                "(posiblemente créditos agotados o problema de conexión). "
+                "Puedes continuar usando las gráficas sin inconveniente."
+            )
 
     
 
