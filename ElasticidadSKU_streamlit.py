@@ -267,6 +267,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                     + np.log(float(precioact or 1)) * (elasticidad.coeficientes.get('Precio', 0) or 0)
                                     + (np.log(elasticidad.precio_competencia) * elasticidad.coeficientes.get('PRECIO_COMPETENCIA') if elasticidad.precio_competencia else 0)
                                     + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
+                                    + (indicador_JR*elasticidad.coeficientes.get('JULIO_REGALADO') if indicador_JR else 0)
                                 ), 
                                 0
                             ),
@@ -520,6 +521,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             unsafe_allow_html=True
                         )
             
+
 
 
 
