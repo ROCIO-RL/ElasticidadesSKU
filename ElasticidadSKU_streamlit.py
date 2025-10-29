@@ -456,10 +456,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         #st.markdown(f"No se pudo generar la simulación de demanda")
                         st.error(f"No se pudo generar la simulación de demanda ({e})")
                 else:
-                    insight = elasticidad.genera_insight_op(precio=None,df=None)
+                    
                     if sku in graficos_dispersion:
                         st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
+                    insight = elasticidad.genera_insight_op(precio=None,df=None)
                 
                 
                  
