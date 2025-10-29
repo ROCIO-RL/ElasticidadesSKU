@@ -181,6 +181,11 @@ class ElasticidadCB:
 
         layout.dropna(inplace=True)
 
+        # Dummy de Julio Regalado
+        layout["JULIO_REGALADO"] = np.where(layout["SEMNUMERO"].between(25, 30), 1, 0)
+        print("Variable dummy 'JULIO_REGALADO' agregada correctamente.")
+
+        #clima
         if self.temp:
             temperatura = clima_bd.copy()
             temperatura.columns = ['ANIO','SEMNUMERO','CLIMA']
@@ -235,6 +240,10 @@ class ElasticidadCB:
 
         if 'PRECIO_COMPETENCIA' in data.columns and data['PRECIO_COMPETENCIA'].notna().sum() > 0:
             formula += ' + PRECIO_COMPETENCIA'
+
+        # Agregamos la dummy de Julio Regalado
+        if 'JULIO_REGALADO' in data.columns:
+            formula += ' + JULIO_REGALADO'
 
         print(f"Fórmula del modelo: {formula}")
         modelo = smf.ols(formula, data=data).fit()
