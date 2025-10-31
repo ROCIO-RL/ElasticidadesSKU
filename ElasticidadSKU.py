@@ -162,6 +162,16 @@ class ElasticidadCB:
                 #primera_desc = comp['DESC_COMPETENCIA'].iloc[0]
                 #self.nombre_competencia = primera_desc
                 # Filtrar todas las filas que tengan esa descripción
+                #comp = comp[comp['DESC_COMPETENCIA'] == self.nombre_competencia]
+                #comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
+
+
+                # Si no hay nombre de competencia o no se encuentra en los datos
+                if not self.nombre_competencia or self.nombre_competencia not in comp['DESC_COMPETENCIA'].values:
+                    # Tomar la primera descripción disponible
+                    self.nombre_competencia = comp['DESC_COMPETENCIA'].iloc[0]
+                
+                # Filtrar todas las filas que tengan esa descripción
                 comp = comp[comp['DESC_COMPETENCIA'] == self.nombre_competencia]
                 comp = comp[['PROPSTCODBARRAS','ANIO','SEMNUMERO','PRECIO_COMPETENCIA']]
             print(comp)
