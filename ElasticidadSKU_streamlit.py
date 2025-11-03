@@ -161,7 +161,9 @@ elif opcion == "Capturar Manualmente":
 
 
             # Filtrar la fila seleccionada
-            comp_sel = comp[comp['DESC_COMPETENCIA'] == seleccion_comp]
+            #comp_sel = comp[comp['DESC_COMPETENCIA'] == seleccion_comp]
+            comp_sel = comp[comp['DESC_COMPETENCIA'].isin(seleccion_comp)]
+
 
             # Tomar el precio de esa competencia (puedes tomar el último o el promedio)
             precio_comp = comp_sel['PRECIO_COMPETENCIA'].iloc[-1]  # o .iloc[-1]
