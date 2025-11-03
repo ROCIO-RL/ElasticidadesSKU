@@ -421,18 +421,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #    Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
                 #    """)
 
-                if res.get('Competencias'):
-                    st.markdown("💰 **Elasticidades de Competencia**")
-                    for comp_info in res['Competencias']:
-                        nombre_comp = comp_info['Nombre Competencia']
-                        af_comp = comp_info['Afectación Competencia']
-                        pv_comp = comp_info['Pvalue Competencia']
-                        precio_comp = comp_info['Precio Competencia']
-
-                        st.markdown(f"""
-                        - **{nombre_comp}**  
-                        Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
-                        """)
+               
                 if af_JR !=0:
                     if pv_JR <= 0.05:
                         st.markdown(f"""
@@ -448,6 +437,18 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                     El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                 """)
+                if res.get('Competencias'):
+                    st.markdown("💰 **Elasticidades de Competencia**")
+                    for comp_info in res['Competencias']:
+                        nombre_comp = comp_info['Nombre Competencia']
+                        af_comp = comp_info['Afectación Competencia']
+                        pv_comp = comp_info['Pvalue Competencia']
+                        precio_comp = comp_info['Precio Competencia']
+
+                        st.markdown(f"""
+                        - **{nombre_comp}**  
+                        Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
+                        """)
                 
                 if precio != "":
                     try:

@@ -13,6 +13,7 @@ llm = Ollama(model="llama3")
 pd.options.display.float_format = '{:,.2f}'.format
 import os
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 from openai import OpenAI, APIError, APIStatusError
 
@@ -359,7 +360,7 @@ class ElasticidadCB:
     
 
 
-    def grafica(self):
+    '''def grafica(self):
         df = self.data_grafico.copy()
 
         # Crear columna de fecha
@@ -441,7 +442,95 @@ class ElasticidadCB:
             height=600
         )
 
+        return fig'''
+    
+    def grafica(self):
+        df = self.data_grafico.copy()
+
+        # Crear columna de fecha
+        df['Fecha'] = pd.to_datetime(
+            df['ANIO'].astype(str) +
+            df['SEMNUMERO'].astype(str).str.zfill(2) + '1', 
+            format='%G%V%u'
+        )
+
+        # Crear figura
+        fig = go.Figure()
+
+        # --- 1️⃣ Ventas (barras) ---
+        fig.add_trace(go.Bar(
+            x=df['Fecha'],
+            y=df['UNIDADESDESP'],
+            name='Unidades Vendidas',
+            marker_color='lightgray',
+            yaxis='y1'
+        ))
+
+        # --- 2️⃣ Precio propio ---
+        fig.add_trace(go.Scatter(
+            x=df['Fecha'],
+            y=df['Precio'],
+            name='Precio Propio',
+            mode='lines',
+            line=dict(color='red', width=2),
+            yaxis='y2'
+        ))
+
+        # --- 3️⃣ Competencias ---
+        # Buscar todas las columnas que empiecen con PRECIO_COMPETENCIA
+        cols_comp = [c for c in df.columns if c.startswith('PRECIO_COMPETENCIA')]
+
+        if cols_comp:
+            colores = px.colors.qualitative.Dark24  # paleta de 24 colores
+            for i, col in enumerate(cols_comp):
+                nombre_comp = col.replace('PRECIO_COMPETENCIA_', '').replace('_', ' ')
+                fig.add_trace(go.Scatter(
+                    x=df['Fecha'],
+                    y=df[col],
+                    name=f'Competencia: {nombre_comp}',
+                    mode='lines',
+                    line=dict(color=colores[i % len(colores)], width=2, dash='dot'),
+                    yaxis='y2'
+                ))
+
+        # --- 4️⃣ Clima ---
+        if 'CLIMA' in df.columns:
+            temp_norm = (df['CLIMA'] - df['CLIMA'].min()) / (df['CLIMA'].max() - df['CLIMA'].min())
+            fig.add_trace(go.Scatter(
+                x=df['Fecha'],
+                y=temp_norm,
+                fill='tozeroy',
+                mode='none',
+                name='Clima (normalizado)',
+                fillcolor='rgba(0, 160, 220, 0.2)',
+                yaxis='y3'
+            ))
+
+        # --- 5️⃣ Layout ---
+        fig.update_layout(
+            title="📊 Unidades vendidas, precios propios y de competencia",
+            xaxis=dict(title="Semana"),
+            yaxis=dict(title="Unidades", side='left', showgrid=False),
+            yaxis2=dict(title="Precio", overlaying='y', side='right'),
+            yaxis3=dict(title="Clima (escala visual)",
+                        overlaying='y', side='right', position=0.95, showgrid=False),
+            bargap=0.2,
+            legend=dict(
+                orientation='h',
+                yanchor="bottom",
+                y=1.05,
+                xanchor="center",
+                x=0.5,
+                title=None,
+                bgcolor='rgba(255,255,255,0.5)'
+            ),
+            hovermode="x unified",
+            template="plotly_white",
+            height=600
+        )
+
         return fig
+
 
     def grafica_dispersion(self):
         df = self.data_grafico.copy()
