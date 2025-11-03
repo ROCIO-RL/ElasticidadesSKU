@@ -176,9 +176,9 @@ elif opcion == "Capturar Manualmente":
 
 
             # Tomar el precio de esa competencia (puedes tomar el último o el promedio)
-            '''precio_comp = comp_sel['PRECIO_COMPETENCIA'].iloc[-1]  # o .iloc[-1]
+            #precio_comp = comp_sel['PRECIO_COMPETENCIA'].iloc[-1]  # o .iloc[-1]
 
-            st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")'''
+            #st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")
 
 
         else:
@@ -259,7 +259,14 @@ if layout is not None and st.button("Ejecutar Análisis"):
             desc_competencia = row['DESC_COMPETENCIA']
           
             try:
-                elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp,desc_competencia=desc_competencia)
+                #elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp,desc_competencia=desc_competencia)
+                elasticidad = ElasticidadCB(
+                    codbarras=sku,
+                    canal=canal,
+                    temp=temp,
+                    desc_competencias=seleccion_comp  # ahora es lista, no string
+                )
+
                 elasticidad.consulta_sellout()
                 elasticidad.calcula_elasticidad()
                 fig = elasticidad.grafica()
@@ -274,6 +281,18 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 
                 # Indicador: 1 si está en ese rango, 0 si no
                 indicador_JR = 1 if elasticidad.ultima_semana in semanas_JR else 0
+
+                competencias_resultados = []
+                for col in elasticidad.coeficientes.index:
+                    if col.startswith("PRECIO_COMPETENCIA"):
+                        competencias_resultados.append({
+                            "Nombre Competencia": col.replace("PRECIO_COMPETENCIA_", "").replace("_", " "),
+                            "Afectación Competencia": safe_round(elasticidad.coeficientes.get(col), 4),
+                            "Pvalue Competencia": safe_round(elasticidad.pvalores.get(col), 4),
+                            "Precio Competencia": safe_round(elasticidad.precio_competencia.get(col), 4) if isinstance(elasticidad.precio_competencia, dict) else None
+                        })
+
+
                 resultados.append({
                     'SKU': sku,
                     'Canal': canal,
@@ -300,10 +319,13 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Pvalue Precio': safe_round(elasticidad.pvalores.get('Precio'), 4),
                     'Pvalue Clima': safe_round(elasticidad.pvalores.get('CLIMA'), 4),
                     'R cuadrada': safe_round(elasticidad.r2, 3),
-                    'Afectación Competencia': safe_round(elasticidad.coeficientes.get('PRECIO_COMPETENCIA'), 4),
-                    'Pvalue Competencia': safe_round(elasticidad.pvalores.get('PRECIO_COMPETENCIA'), 4),
-                    'Precio Competencia': safe_round(elasticidad.precio_competencia,4),
-                    'Nombre Competencia': elasticidad.nombre_competencia,
+                    #'Afectación Competencia': safe_round(elasticidad.coeficientes.get('PRECIO_COMPETENCIA'), 4),
+                    #'Pvalue Competencia': safe_round(elasticidad.pvalores.get('PRECIO_COMPETENCIA'), 4),
+                    #'Precio Competencia': safe_round(elasticidad.precio_competencia,4),
+                    #'Nombre Competencia': elasticidad.nombre_competencia,
+
+                    'Competencias': competencias_resultados,
+
                     #Julio Regalado
                     'Pvalue Julio Regalado':safe_round(elasticidad.pvalores.get('JULIO_REGALADO'), 4),
                     'Afectación Julio Regalado':safe_round(elasticidad.coeficientes.get('JULIO_REGALADO'), 4),
@@ -335,10 +357,13 @@ if layout is not None and st.button("Ejecutar Análisis"):
             costoact = res['Costo Actual']
             #insight = res['Insight']
             insight = ""
-            af_comp = res['Afectación Competencia']
-            af_comp = 0 if pd.isna(af_comp) else af_comp
-            precio_comp = res['Precio Competencia']
-            nombre_comp = res['Nombre Competencia']
+            #af_comp = res['Afectación Competencia']
+            #af_comp = 0 if pd.isna(af_comp) else af_comp
+            #precio_comp = res['Precio Competencia']
+            #nombre_comp = res['Nombre Competencia']
+
+            
+
 
             #Julio Regalado
             af_JR = res['Afectación Julio Regalado']
@@ -366,11 +391,26 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
                             
                             """)
-                if af_comp != 0:
-                    st.markdown(f"""
-                    - 💰 **Elasticidad competencia ({nombre_comp}):** {af_comp:.2f}.  
-                    Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
-                    """)
+                #if af_comp != 0:
+                #    st.markdown(f"""
+                #    - 💰 **Elasticidad competencia ({nombre_comp}):** {af_comp:.2f}.  
+                #    Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
+                #    """)
+
+                if res.get('Competencias'):
+                    st.markdown("### 💰 Elasticidades de Competencia")
+                    for comp_info in res['Competencias']:
+                        nombre_comp = comp_info['Nombre Competencia']
+                        af_comp = comp_info['Afectación Competencia']
+                        pv_comp = comp_info['Pvalue Competencia']
+                        precio_comp = comp_info['Precio Competencia']
+
+                        st.markdown(f"""
+                        - **{nombre_comp}**  
+                        Afectación: {af_comp}  
+                        P-valor: {pv_comp}  
+                        Precio: {precio_comp}
+                        """)
                 if af_JR !=0:
                     if pv_JR <= 0.05:
                         st.markdown(f"""
