@@ -291,6 +291,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             "Pvalue Competencia": safe_round(elasticidad.pvalores.get(col), 4),
                             "Precio Competencia": safe_round(elasticidad.precio_competencia.get(col), 4) if isinstance(elasticidad.precio_competencia, dict) else None
                         })
+                st.markdown("prueba")
                 st.markdown(competencias_resultados)
                 
 
