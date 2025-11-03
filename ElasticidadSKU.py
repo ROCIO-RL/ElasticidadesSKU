@@ -191,15 +191,17 @@ class ElasticidadCB:
                 'Precio Competencia': 'PRECIO_COMPETENCIA'
             })
             comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
-            comp['PROPSTCODBARRAS'] = comp['PROPSTCODBARRAS'].astype(str).str.strip()
+            #comp['PROPSTCODBARRAS'] = comp['PROPSTCODBARRAS'].astype(str).str.strip()
             comp = comp[comp['PROPSTCODBARRAS'] == self.codbarras]
+
+            # Filtramos solo las competencias seleccionadas
+            comp = comp[comp['DESC_COMPETENCIA'].isin(self.nombre_competencias)]
 
             if comp.empty:
                 print("No se encontró información de competencia.")
                 return pd.DataFrame()
 
-            # Filtramos solo las competencias seleccionadas
-            comp = comp[comp['DESC_COMPETENCIA'].isin(self.nombre_competencias)]
+            
 
             # Pivot para tener una columna por competencia
             comp_pivot = comp.pivot_table(

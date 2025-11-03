@@ -292,6 +292,25 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             "Precio Competencia": safe_round(elasticidad.precio_competencia.get(col), 4) if isinstance(elasticidad.precio_competencia, dict) else None
                         })
 
+                
+
+                # Calcular venta base considerando todas las competencias
+                comp_effect = 0
+                if isinstance(elasticidad.precio_competencia, dict):
+                    for col, precio_comp in elasticidad.precio_competencia.items():
+                        beta = elasticidad.coeficientes.get(col, 0)
+                        if precio_comp and not pd.isna(precio_comp):
+                            comp_effect += np.log(precio_comp) * beta
+                venta_base = safe_round(
+                        np.exp(
+                            (elasticidad.coeficientes.get('Intercept', 0) or 0)
+                            + np.log(float(precioact or 1)) * (elasticidad.coeficientes.get('Precio', 0) or 0)
+                            + comp_effect
+                            + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
+                            + (indicador_JR * elasticidad.coeficientes.get('JULIO_REGALADO', 0) if indicador_JR else 0)
+                        ),
+                        0
+                    )
 
                 resultados.append({
                     'SKU': sku,
@@ -300,18 +319,21 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Precio Actual':precioact,
                     'Costo Actual': costoact,
                     'intercepto':safe_round(elasticidad.coeficientes.get('Intercept'), 4),
+                   
                     #'Venta Base': safe_round(np.exp(elasticidad.coeficientes.get('Intercept')), 0),
-                    'Venta Base': safe_round(
-                                np.exp(
-                                    (elasticidad.coeficientes.get('Intercept', 0) or 0)
-                                    + np.log(float(precioact or 1)) * (elasticidad.coeficientes.get('Precio', 0) or 0)
-                                    + (np.log(elasticidad.precio_competencia) * elasticidad.coeficientes.get('PRECIO_COMPETENCIA') if elasticidad.precio_competencia else 0)
-                                    + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
-                                    + (indicador_JR*elasticidad.coeficientes.get('JULIO_REGALADO') if indicador_JR else 0)
-                                ), 
-                                0
-                            ),
+                    #'Venta Base': safe_round(
+                    #            np.exp(
+                    #                (elasticidad.coeficientes.get('Intercept', 0) or 0)
+                    #                + np.log(float(precioact or 1)) * (elasticidad.coeficientes.get('Precio', 0) or 0)
+                    #                + (np.log(elasticidad.precio_competencia) * elasticidad.coeficientes.get('PRECIO_COMPETENCIA') if elasticidad.precio_competencia else 0)
+                    #                + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
+                    #                + (indicador_JR*elasticidad.coeficientes.get('JULIO_REGALADO') if indicador_JR else 0)
+                    #            ), 
+                    #            0
+                    #        ),
 
+                    'Venta Base': venta_base,
+                    
                     #coeficientes
                     'Afectación Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
                     'Afectación Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
