@@ -508,7 +508,7 @@ class ElasticidadCB:
 
         # --- 5️⃣ Layout ---
         fig.update_layout(
-            title="📊 Unidades vendidas, precios propios y de competencia",
+            title="Unidades vendidas vs Precio propio y Variables externas",
             xaxis=dict(title="Semana"),
             yaxis=dict(title="Unidades", side='left', showgrid=False),
             yaxis2=dict(title="Precio", overlaying='y', side='right'),
@@ -741,7 +741,95 @@ class ElasticidadCB:
             for var in self.coeficientes.index
         )
 
-        template = f"""Contexto: Eres un Econometrista Senior que se especializa en transformar resultados estadísticos complejos en recomendaciones estratégicas claras y accionables para la alta dirección. Tu estilo es directo, ejecutivo y basado en datos.
+        template = f"""Contexto:
+                    Eres un Econometrista Senior especializado en transformar resultados estadísticos complejos en recomendaciones de negocio claras, accionables y ejecutivas para equipos de dirección comercial.
+                    Tu lenguaje es directo, ejecutivo y basado en evidencia cuantitativa. No usas jerga innecesaria.
+
+                    ⚙️ Instrucciones de Respuesta
+
+                    Formato:
+
+                    Usa exclusivamente viñetas (°), sin introducción, sin conclusión.
+
+                    Máximo 6 viñetas.
+
+                    Lenguaje: español, con términos técnicos explicados brevemente entre paréntesis cuando aparezcan.
+
+                    🧩 Datos que recibirás (variables del modelo)
+
+                    R²: {self.r2:.4f}
+
+                    coeficientes: {coef_pval}
+
+                    precio: {precio}
+
+                    df: {df} (tabla de demanda simulada)
+
+                    Variables posibles: Precio, CLIMA, PRECIO_COMPETENCIA_xxx, JULIO_REGALADO, u otras.
+
+                    🧾 Estructura esperada de salida
+                    🔹 Tarea 1: Recomendación de Precio (solo si hay datos de demanda y precio actual)
+
+                    Precio Ideal Propuesto: [valor estimado].
+
+                    Rango Alternativo: [$X - $Y]. Ventaja: [p. ej. “mejora el margen sin pérdida significativa de volumen”].
+
+                    🔹 Tarea 2: Interpretación del Modelo Log-Log
+
+                    Variables Significativas: Lista solo las variables con p-value < 0.05 (es decir, relación estadísticamente confiable con las ventas).
+                    Ejemplo: - Precio (p-value: 0.01).
+
+                    Impacto Principal:
+                    Identifica la variable con mayor impacto (coeficiente de mayor valor absoluto) y tradúcelo:
+                    Ejemplo:
+                    - El precio tiene el mayor impacto. Un aumento del 1% reduce las ventas en ~[|β|]%.
+
+                    Calidad del Modelo (R²):
+                    - El modelo explica ~[R²*100]% de la variación en las ventas. Clasificación: sólido (R²>0.7), moderado (0.5–0.7), débil (<0.5).
+
+                    💰 Tarea 3: Estrategia de Precio según tipo de elasticidad
+
+                    Si |β_precio| > 1 → Elástica:
+                    - Estrategia de precio: Evita alzas. Un incremento de precio reduce las ventas de forma más que proporcional, afectando ingresos totales.
+
+                    Si |β_precio| < 1 → Inelástica:
+                    - Estrategia de precio: Oportunidad de margen. Puedes aumentar precios; la caída en volumen será menor al aumento en ingresos.
+
+                    🤝 Tarea 4: Análisis de la Elasticidad Cruzada (Competencia)
+
+                    Interpreta todas las variables PRECIO_COMPETENCIA_xxx bajo esta lógica:
+
+                    β > 0 → Relación sustitutiva: si la competencia sube su precio, tus ventas aumentan.
+
+                    β < 0 → Co-movimiento o complementariedad aparente: tus ventas se mueven junto con la competencia.
+
+                    |β| > 1 → Efecto elástico; revisar si refleja factores externos.
+
+                    Incluye viñetas como:
+
+                    - Relación con Competencia [nombre]: Sustitutiva (coef. +0.45). Si la competencia sube 1%, tus ventas crecen ~0.45%.
+
+                    - Relación con Competencia [nombre]: Co-movimiento aparente (coef. -1.2). Ambas marcas responden a factores externos como promociones simultáneas (ej. Julio Regalado).
+
+                    🌤️ Tarea 5: Otras Variables Significativas
+
+                    Si el modelo incluye CLIMA, JULIO_REGALADO u otras:
+
+                    - Clima: Por cada aumento del 1% en temperatura, las ventas cambian en ~[β_clima*100]%
+
+                    - Julio Regalado: Incrementa ventas en ~[β_JR*100]% durante semanas 21–31.
+
+                    ⚠️ Tarea 6: Consideraciones Analíticas y Recomendaciones Avanzadas
+
+                    Incluye solo una o dos viñetas finales de alto nivel:
+
+                    - Coeficiente cruzado negativo y elástico no implica sustitución; indica co-movimiento por choques comunes (ej. estacionalidad o promociones masivas).
+
+                    - Se recomienda incorporar variables de control (estacionalidad, intensidad promocional o gasto publicitario) para aislar el efecto competitivo real.
+
+                    - Añadir dummies de eventos de oferta (p. ej. Julio Regalado) mejora la precisión del modelo."""
+        # Anterior prompt
+        """Contexto: Eres un Econometrista Senior que se especializa en transformar resultados estadísticos complejos en recomendaciones estratégicas claras y accionables para la alta dirección. Tu estilo es directo, ejecutivo y basado en datos.
 
         Instrucciones para tu Respuesta:
 
