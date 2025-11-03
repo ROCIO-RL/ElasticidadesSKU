@@ -57,7 +57,7 @@ class ElasticidadCB:
     from langchain_community.llms import Ollama
     llm = Ollama(model="llama3")
     pd.options.display.float_format = '{:,.2f}'.format
-    def __init__(self, codbarras, canal, temp,desc_competencia,ruta_competencia="Competencia_Elasticidades.xlsx"):
+    def __init__(self, codbarras, canal, temp,desc_competencias,ruta_competencia="Competencia_Elasticidades.xlsx"):
         """
         codbarras: Código de barras del producto
         canal: 'Autoservicios', 'Farmacias' o 'Moderno'
@@ -67,8 +67,10 @@ class ElasticidadCB:
         self.canal = canal
         self.temp = temp
         self.ruta_competencia = ruta_competencia
-        self.precio_competencia = None 
-        self.nombre_competencia = desc_competencia
+        #self.precio_competencia = None 
+        #self.nombre_competencia = desc_competencia
+        self.precio_competencia = {}
+        self.nombre_competencias = desc_competencias if isinstance(desc_competencias, list) else [desc_competencias]
         self.ultima_Semana = None
 
     def calcula_precio(self, venta):
@@ -141,7 +143,7 @@ class ElasticidadCB:
 
         return self.sellout
     
-    def carga_competencia(self):
+    '''def carga_competencia(self):
         try:
             comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
             comp.columns = [c.strip() for c in comp.columns]
@@ -178,7 +180,48 @@ class ElasticidadCB:
             return comp
         except Exception as e:
             print(f"No se pudo cargar competencia: {e}")
+            return pd.DataFrame()'''
+    def carga_competencia(self):
+        try:
+            comp = pd.read_excel(self.ruta_competencia)
+            comp.columns = [c.strip() for c in comp.columns]
+            comp = comp.rename(columns={
+                'SKU': 'PROPSTCODBARRAS',
+                'Descripcion Competencia': 'DESC_COMPETENCIA',
+                'Precio Competencia': 'PRECIO_COMPETENCIA'
+            })
+            comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
+            comp['PROPSTCODBARRAS'] = comp['PROPSTCODBARRAS'].astype(str).str.strip()
+            comp = comp[comp['PROPSTCODBARRAS'] == self.codbarras]
+
+            if comp.empty:
+                print("No se encontró información de competencia.")
+                return pd.DataFrame()
+
+            # Filtramos solo las competencias seleccionadas
+            comp = comp[comp['DESC_COMPETENCIA'].isin(self.nombre_competencias)]
+
+            # Pivot para tener una columna por competencia
+            comp_pivot = comp.pivot_table(
+                index=['ANIO', 'SEMNUMERO'],
+                columns='DESC_COMPETENCIA',
+                values='PRECIO_COMPETENCIA'
+            ).reset_index()
+
+            # Renombramos columnas para evitar espacios
+            comp_pivot.columns = [f"PRECIO_COMPETENCIA_{str(c).replace(' ', '_')}" if c not in ['ANIO','SEMNUMERO'] else c for c in comp_pivot.columns]
+
+            # Guardamos últimos precios por competencia
+            for col in comp_pivot.columns:
+                if col.startswith('PRECIO_COMPETENCIA'):
+                    self.precio_competencia[col] = comp_pivot[col].dropna().iloc[-1] if comp_pivot[col].notna().any() else None
+
+            return comp_pivot
+
+        except Exception as e:
+            print(f"No se pudo cargar competencia: {e}")
             return pd.DataFrame()
+
 
 
     def prepara_datos(self):
@@ -203,7 +246,7 @@ class ElasticidadCB:
             layout = layout.merge(temperatura, on=['ANIO','SEMNUMERO'], how='left')
 
         # Competencia
-        competencia = self.carga_competencia()
+        '''competencia = self.carga_competencia()
         if not competencia.empty:
             competencia = competencia.sort_values(['ANIO','SEMNUMERO'], ascending=[True, True])
             self.precio_competencia = float(competencia['PRECIO_COMPETENCIA'].iloc[-1])
@@ -220,7 +263,15 @@ class ElasticidadCB:
                 self.precio_competencia = None
                 print("No hay precios de competencia válidos.")
         else:
+            print("No se encontró información de competencia para este SKU.")'''
+        # Competencia
+        competencias = self.carga_competencia()
+        if not competencias.empty:
+            layout = layout.merge(competencias, on=['ANIO','SEMNUMERO'], how='left')
+            print("Información de competencia agregada correctamente.")
+        else:
             print("No se encontró información de competencia para este SKU.")
+
 
         layout_log = layout.copy()
         self.data_grafico = layout.copy()
@@ -228,8 +279,13 @@ class ElasticidadCB:
         # log-log
         layout_log[['UNIDADESDESP','Precio']] = layout_log[['UNIDADESDESP','Precio']].apply(np.log)
         # competencia
-        if 'PRECIO_COMPETENCIA' in layout_log.columns and layout_log['PRECIO_COMPETENCIA'].notna().sum() > 0:
-            layout_log['PRECIO_COMPETENCIA'] = np.log(layout_log['PRECIO_COMPETENCIA'])
+        '''if 'PRECIO_COMPETENCIA' in layout_log.columns and layout_log['PRECIO_COMPETENCIA'].notna().sum() > 0:
+            layout_log['PRECIO_COMPETENCIA'] = np.log(layout_log['PRECIO_COMPETENCIA'])'''
+        # log-log de precios de competencia
+        for col in layout_log.columns:
+            if col.startswith('PRECIO_COMPETENCIA'):
+                layout_log[col] = np.log(layout_log[col])
+
 
         # Guardar última semana y año
         if not layout.empty:
@@ -256,12 +312,21 @@ class ElasticidadCB:
         
         formula = 'UNIDADESDESP ~ Precio'
 
-        if self.temp:
+        '''if self.temp:
             formula += ' + CLIMA'
 
         if 'PRECIO_COMPETENCIA' in data.columns and data['PRECIO_COMPETENCIA'].notna().sum() > 0:
             formula += ' + PRECIO_COMPETENCIA'
+            '''
+        
+        if self.temp:
+            formula += ' + CLIMA'
 
+        # Agregar todas las competencias
+        for col in data.columns:
+            if col.startswith('PRECIO_COMPETENCIA'):
+                formula += f' + {col}'
+        
         # Agregamos la dummy de Julio Regalado
         if 'JULIO_REGALADO' in data.columns:
             formula += ' + JULIO_REGALADO'

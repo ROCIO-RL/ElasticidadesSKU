@@ -149,7 +149,16 @@ elif opcion == "Capturar Manualmente":
         if not comp.empty:
             # Mostrar un selectbox con las descripciones únicas de competidores
             descs_comp = comp['DESC_COMPETENCIA'].unique().tolist()
-            seleccion_comp = st.selectbox("Selecciona competencia", options=descs_comp)
+            #Cambio MLTCOMP
+            #seleccion_comp = st.selectbox("Selecciona competencia", options=descs_comp)
+            seleccion_comp = st.multiselect("Selecciona una o más competencias", options=descs_comp)
+
+            if seleccion_comp:
+                st.write(f"**Competencias seleccionadas:** {', '.join(seleccion_comp)}")
+            else:
+                st.info("Selecciona al menos una competencia para continuar.")
+
+
 
             # Filtrar la fila seleccionada
             comp_sel = comp[comp['DESC_COMPETENCIA'] == seleccion_comp]
