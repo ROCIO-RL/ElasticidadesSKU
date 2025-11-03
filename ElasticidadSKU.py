@@ -457,7 +457,7 @@ class ElasticidadCB:
         # Crear figura
         fig = go.Figure()
 
-        # --- 1️⃣ Ventas (barras) ---
+        # Ventas (barras)
         fig.add_trace(go.Bar(
             x=df['Fecha'],
             y=df['UNIDADESDESP'],
@@ -476,7 +476,7 @@ class ElasticidadCB:
             yaxis='y2'
         ))
 
-        # --- 3️⃣ Competencias ---
+        # Competencias
         # Buscar todas las columnas que empiecen con PRECIO_COMPETENCIA
         cols_comp = [c for c in df.columns if c.startswith('PRECIO_COMPETENCIA')]
 
@@ -493,7 +493,7 @@ class ElasticidadCB:
                     yaxis='y2'
                 ))
 
-        # --- 4️⃣ Clima ---
+        # Clima 
         if 'CLIMA' in df.columns:
             temp_norm = (df['CLIMA'] - df['CLIMA'].min()) / (df['CLIMA'].max() - df['CLIMA'].min())
             fig.add_trace(go.Scatter(
@@ -506,7 +506,7 @@ class ElasticidadCB:
                 yaxis='y3'
             ))
 
-        # --- 5️⃣ Layout ---
+        #Layout
         fig.update_layout(
             title="Unidades vendidas vs Precio propio y Variables externas",
             xaxis=dict(title="Semana"),
