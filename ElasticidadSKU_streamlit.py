@@ -294,7 +294,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 st.markdown("prueba")
                 st.markdown(competencias_resultados)
                 st.markdown(elasticidad.nombre_competencias)
-                
+                st.markdown(elasticidad.status)
 
                 # Calcular venta base considerando todas las competencias
                 comp_effect = 0

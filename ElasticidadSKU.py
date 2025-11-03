@@ -72,6 +72,7 @@ class ElasticidadCB:
         self.precio_competencia = {}
         self.nombre_competencias = desc_competencias if isinstance(desc_competencias, list) else [desc_competencias]
         self.ultima_Semana = None
+        self.status=""
 
     def calcula_precio(self, venta):
         # Filtrado según canal
@@ -199,10 +200,11 @@ class ElasticidadCB:
 
             if comp.empty:
                 print("No se encontró información de competencia.")
+                self.status="No se encontró información de competencia."
                 return pd.DataFrame()
 
             
-
+            self.status="Si filtramos"
             # Pivot para tener una columna por competencia
             comp_pivot = comp.pivot_table(
                 index=['ANIO', 'SEMNUMERO'],
