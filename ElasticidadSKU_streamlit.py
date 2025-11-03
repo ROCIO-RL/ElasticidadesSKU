@@ -155,6 +155,16 @@ elif opcion == "Capturar Manualmente":
 
             if seleccion_comp:
                 st.write(f"**Competencias seleccionadas:** {', '.join(seleccion_comp)}")
+                comp_sel = comp[comp['DESC_COMPETENCIA'].isin(seleccion_comp)]
+                # Mostrar precios de las seleccionadas
+                ultimos_precios = (
+                    comp_sel.groupby('DESC_COMPETENCIA')['PRECIO_COMPETENCIA']
+                    .last()
+                    .to_dict()
+                )
+
+                for nombre, precio in ultimos_precios.items():
+                    st.write(f"**{nombre}:** {precio:.2f}")
             else:
                 st.info("Selecciona al menos una competencia para continuar.")
 
@@ -162,13 +172,13 @@ elif opcion == "Capturar Manualmente":
 
             # Filtrar la fila seleccionada
             #comp_sel = comp[comp['DESC_COMPETENCIA'] == seleccion_comp]
-            comp_sel = comp[comp['DESC_COMPETENCIA'].isin(seleccion_comp)]
+            #comp_sel = comp[comp['DESC_COMPETENCIA'].isin(seleccion_comp)]
 
 
             # Tomar el precio de esa competencia (puedes tomar el último o el promedio)
-            precio_comp = comp_sel['PRECIO_COMPETENCIA'].iloc[-1]  # o .iloc[-1]
+            '''precio_comp = comp_sel['PRECIO_COMPETENCIA'].iloc[-1]  # o .iloc[-1]
 
-            st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")
+            st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")'''
 
 
         else:
