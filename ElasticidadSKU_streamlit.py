@@ -291,10 +291,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             "Pvalue Competencia": safe_round(elasticidad.pvalores.get(col), 4),
                             "Precio Competencia": safe_round(elasticidad.precio_competencia.get(col), 4) if isinstance(elasticidad.precio_competencia, dict) else None
                         })
-                st.markdown("prueba")
-                st.markdown(competencias_resultados)
-                st.markdown(elasticidad.nombre_competencias)
-                st.markdown(elasticidad.status)
+                #st.markdown("prueba")
+                #st.markdown(competencias_resultados)
+                #st.markdown(elasticidad.nombre_competencias)
+                #st.markdown(elasticidad.status)
 
                 # Calcular venta base considerando todas las competencias
                 comp_effect = 0
@@ -422,7 +422,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #    """)
 
                 if res.get('Competencias'):
-                    st.markdown("### 💰 Elasticidades de Competencia")
+                    st.markdown("💰 **Elasticidades de Competencia**")
                     for comp_info in res['Competencias']:
                         nombre_comp = comp_info['Nombre Competencia']
                         af_comp = comp_info['Afectación Competencia']
@@ -431,18 +431,16 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                         st.markdown(f"""
                         - **{nombre_comp}**  
-                        Afectación: {af_comp}  
-                        P-valor: {pv_comp}  
-                        Precio: {precio_comp}
+                        Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
                         """)
                 if af_JR !=0:
                     if pv_JR <= 0.05:
                         st.markdown(f"""
-                        - 📈 **Impacto de promociones Julio Regalado:** {af_JR:.2f}.  
-                        Si el precio de la competencia sube 1%, la venta cambia en **{af_JR:.2f}%**.
+                        - 📈 **Impacto de promociones Julio Regalado (S21-S31):** {af_JR:.2f}.  
+                        Las promociones de Julio Regalado afectan en un **{af_JR:.2f}%** a la venta.
                         """)
                     if pv_JR > 0.05:
-                        st.markdown(f"""Promociones Julio Regalado No tiene importancia estadisticamente""")
+                        st.markdown(f"""Promociones Julio Regalado No tiene importancia estadisticamente (S21-S31)""")
 
                 st.markdown(f"""
                     - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
@@ -470,13 +468,32 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                         # Calcular demanda esperada
                         #demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
+                        #demanda = np.exp(
+                        #                intercepto
+                        #                + (np.log(precios) * af_precio)
+                        #               + (np.log(clima_valor) * af_clima)
+                        #                + (np.log(precio_comp) * af_comp if precio_comp else 0)
+                        #                + (indicador_JR * af_JR if indicador_JR else 0)
+                        #            )
+
+
+                        # Efecto acumulado de todas las competencias
+                        comp_effect = 0
+                        if res.get('Competencias'):
+                            for comp_info in res['Competencias']:
+                                precio_comp = comp_info['Precio Competencia']
+                                af_comp = comp_info['Afectación Competencia']
+                                if precio_comp and not pd.isna(precio_comp):
+                                    comp_effect += np.log(precio_comp) * af_comp
+
                         demanda = np.exp(
-                                        intercepto
-                                        + (np.log(precios) * af_precio)
-                                        + (np.log(clima_valor) * af_clima)
-                                        + (np.log(precio_comp) * af_comp if precio_comp else 0)
-                                        + (indicador_JR * af_JR if indicador_JR else 0)
-                                    )
+                            intercepto
+                            + (np.log(precios) * af_precio)
+                            + (np.log(clima_valor) * af_clima)
+                            + comp_effect
+                            + (indicador_JR * af_JR if indicador_JR else 0)
+                        )
+
                         #+ (np.log(precio_comp) * af_comp if precio_comp else 0)
                         #demanda_df = pd.DataFrame({
                         #    "Precio": precios,
