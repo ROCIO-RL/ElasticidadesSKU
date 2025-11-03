@@ -483,7 +483,7 @@ class ElasticidadCB:
         if cols_comp:
             colores = px.colors.qualitative.Dark24  # paleta de 24 colores
             for i, col in enumerate(cols_comp):
-                nombre_comp = col.replace('PRECIO_COMPETENCIA_', '').replace('_', ' ')
+                nombre_comp = col.replace('PRECIO_COMPETENCIA', '').replace('_', ' ')
                 fig.add_trace(go.Scatter(
                     x=df['Fecha'],
                     y=df[col],
