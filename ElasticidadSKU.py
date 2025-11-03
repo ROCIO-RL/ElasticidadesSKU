@@ -216,6 +216,19 @@ class ElasticidadCB:
             # Renombramos columnas para evitar espacios
             comp_pivot.columns = [f"PRECIO_COMPETENCIA_{str(c).replace(' ', '_')}" if c not in ['ANIO','SEMNUMERO'] else c for c in comp_pivot.columns]
 
+
+            import re
+
+            def limpiar_nombre_comp(nombre):
+                # Reemplazar caracteres inválidos por _
+                return re.sub(r'[^A-Za-z0-9_]', '_', str(nombre))
+
+            comp_pivot.columns = [
+                f"PRECIO_COMPETENCIA_{limpiar_nombre_comp(c)}" if c not in ['ANIO', 'SEMNUMERO'] else c
+                for c in comp_pivot.columns
+            ]
+
+
             # Guardamos últimos precios por competencia
             for col in comp_pivot.columns:
                 if col.startswith('PRECIO_COMPETENCIA'):
@@ -612,7 +625,7 @@ class ElasticidadCB:
 
             client = OpenAI(
                 base_url="https://router.huggingface.co/v1",
-                api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN"], 
+                api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"], 
             )
 
             # Llamada al modelo
@@ -687,7 +700,7 @@ class ElasticidadCB:
 
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
-            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN"],
+            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"],
         )
 
 
