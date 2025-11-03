@@ -191,7 +191,7 @@ class ElasticidadCB:
                 'Precio Competencia': 'PRECIO_COMPETENCIA'
             })
             comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
-            #comp['PROPSTCODBARRAS'] = comp['PROPSTCODBARRAS'].astype(str).str.strip()
+            comp['PROPSTCODBARRAS'] = comp['PROPSTCODBARRAS'].astype(str).str.strip()
             comp = comp[comp['PROPSTCODBARRAS'] == self.codbarras]
 
             # Filtramos solo las competencias seleccionadas
