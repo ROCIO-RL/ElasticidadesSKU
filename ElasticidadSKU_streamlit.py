@@ -457,9 +457,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                 st.markdown(f"""
                     - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
-                    Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
+                    Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2f}**.
                     - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
-                    El modelo explica un **{r2:.2f}**% de la variación de la venta.
+                    El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                 """)
                 if res.get('Competencias'):
                     st.markdown("💰 **Elasticidades de Competencia**")
