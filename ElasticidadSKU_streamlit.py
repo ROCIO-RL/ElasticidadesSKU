@@ -278,9 +278,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     return round(value, dec) if value is not None else None
                 # Definir rango de semanas de Julio Regalado
                 semanas_JR = list(range(21, 32))  # 21 a 31 inclusive
+                semanas_MP = list(range(1, 7))
                 
                 # Indicador: 1 si está en ese rango, 0 si no
                 indicador_JR = 1 if elasticidad.ultima_semana in semanas_JR else 0
+                indicador_MP = 1 if elasticidad.ultima_semana in semanas_MP else 0
 
                 competencias_resultados = []
                 for col in elasticidad.coeficientes.index:
@@ -310,6 +312,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             + comp_effect
                             + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
                             + (indicador_JR * elasticidad.coeficientes.get('JULIO_REGALADO', 0) if indicador_JR else 0)
+                            + (indicador_MP * elasticidad.coeficientes.get('MEGA_PAUTA', 0) if indicador_MP else 0)
                         ),
                         0
                     )
@@ -354,6 +357,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Pvalue Julio Regalado':safe_round(elasticidad.pvalores.get('JULIO_REGALADO'), 4),
                     'Afectación Julio Regalado':safe_round(elasticidad.coeficientes.get('JULIO_REGALADO'), 4),
                     'Indicador Julio Regalado': indicador_JR
+                    #Mega Pauta
+                    'Pvalue Mega Pauta':safe_round(elasticidad.pvalores.get('MEGA_PAUTA'), 4),
+                    'Afectación Mega Pauta':safe_round(elasticidad.coeficientes.get('MEGA_PAUTA'), 4),
+                    'Indicador Mega Pauta': indicador_MP
                     #"Insight": insight
                 })
 
@@ -394,6 +401,13 @@ if layout is not None and st.button("Ejecutar Análisis"):
             pv_JR = res['Pvalue Julio Regalado']
             af_JR = 0 if pd.isna(af_JR) else af_JR
             indicador_JR = res['Indicador Julio Regalado']
+
+
+            #Mega Pauta
+            af_MP = res['Afectación Mega Pauta']
+            pv_MP = res['Pvalue Mega Pauta']
+            af_MP = 0 if pd.isna(af_MP) else af_MP
+            indicador_MP = res['Indicador Mega Pauta']
         
             
             #st.write(f"Indicador Julio Regalado: {indicador_JR}")
@@ -429,13 +443,23 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         Las promociones de Julio Regalado afectan en un **{af_JR:.2f}%** a la venta.
                         """)
                     if pv_JR > 0.05:
-                        st.markdown(f"""Promociones Julio Regalado No tiene importancia estadisticamente (S21-S31)""")
+                        st.markdown(f"""Promociones Julio Regalado NO tiene importancia estadisticamente (S21-S31)""")
+
+
+                if af_MP !=0:
+                    if pv_MP <= 0.05:
+                        st.markdown(f"""
+                        - 📈 **Impacto de Mega Pauta (S01-S06):** {af_MP:.2f}.  
+                        La Mega Pauta afectan en un **{af_MP:.2f}%** a la venta.
+                        """)
+                    if pv_MP > 0.05:
+                        st.markdown(f"""La Mega Pauta NO tiene importancia estadisticamente (S01-S06)""")
 
                 st.markdown(f"""
                     - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
                     Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2%}**.
                     - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
-                    El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
+                    El modelo explica un **{r2:.2f}**% de la variación de la venta.
                 """)
                 if res.get('Competencias'):
                     st.markdown("💰 **Elasticidades de Competencia**")
@@ -493,6 +517,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             + (np.log(clima_valor) * af_clima)
                             + comp_effect
                             + (indicador_JR * af_JR if indicador_JR else 0)
+                            + (indicador_MP * af_MP if indicador_MP else 0)
                         )
 
                         #+ (np.log(precio_comp) * af_comp if precio_comp else 0)

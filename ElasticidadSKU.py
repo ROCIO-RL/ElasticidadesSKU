@@ -258,6 +258,10 @@ class ElasticidadCB:
         layout["JULIO_REGALADO"] = np.where(layout["SEMNUMERO"].between(21, 31), 1, 0)
         print("Variable dummy 'JULIO_REGALADO' agregada correctamente.")
 
+        # Dummy de Mega Pauta
+        layout["MEGA_PAUTA"] = np.where(layout["SEMNUMERO"].between(1, 6), 1, 0)
+        print("Variable dummy 'MEGA_PAUTA' agregada correctamente.")
+
         #clima
         if self.temp:
             temperatura = clima_bd.copy()
@@ -349,6 +353,10 @@ class ElasticidadCB:
         # Agregamos la dummy de Julio Regalado
         if 'JULIO_REGALADO' in data.columns:
             formula += ' + JULIO_REGALADO'
+
+        # Agregamos la dummy de Julio Regalado
+        if 'MEGA_PAUTA' in data.columns:
+            formula += ' + MEGA_PAUTA'
 
         print(f"Fórmula del modelo: {formula}")
         modelo = smf.ols(formula, data=data).fit()
