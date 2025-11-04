@@ -356,7 +356,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     #Julio Regalado
                     'Pvalue Julio Regalado':safe_round(elasticidad.pvalores.get('JULIO_REGALADO'), 4),
                     'Afectación Julio Regalado':safe_round(elasticidad.coeficientes.get('JULIO_REGALADO'), 4),
-                    'Indicador Julio Regalado': indicador_JR
+                    'Indicador Julio Regalado': indicador_JR,
                     #Mega Pauta
                     'Pvalue Mega Pauta':safe_round(elasticidad.pvalores.get('MEGA_PAUTA'), 4),
                     'Afectación Mega Pauta':safe_round(elasticidad.coeficientes.get('MEGA_PAUTA'), 4),
