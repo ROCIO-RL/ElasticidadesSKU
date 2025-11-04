@@ -821,11 +821,13 @@ class ElasticidadCB:
 
                     🌤️ Tarea 5: Otras Variables Significativas
 
-                    Si el modelo incluye CLIMA, JULIO_REGALADO u otras:
+                    Si el modelo incluye CLIMA, JULIO_REGALADO, MEGA_PAUTA u otras:
 
                     - Clima: Por cada aumento del 1% en temperatura, las ventas cambian en ~[β_clima*100]%
 
                     - Julio Regalado: Incrementa ventas en ~[β_JR*100]% durante semanas 21–31.
+                    
+                    - Mega Pauta: Las ventas incrementan en ~[β_MP*100]% durante semanas 01–06.
 
                     ⚠️ Tarea 6: Consideraciones Analíticas y Recomendaciones Avanzadas
 
@@ -835,7 +837,7 @@ class ElasticidadCB:
 
                     - Se recomienda incorporar variables de control (estacionalidad, intensidad promocional o gasto publicitario) para aislar el efecto competitivo real.
 
-                    - Añadir dummies de eventos de oferta (p. ej. Julio Regalado) mejora la precisión del modelo."""
+                    - Añadir dummies de eventos de oferta y mega pauta (p. ej. Julio Regalado y Mega pauta) mejora la precisión del modelo."""
         # Anterior prompt
         """Contexto: Eres un Econometrista Senior que se especializa en transformar resultados estadísticos complejos en recomendaciones estratégicas claras y accionables para la alta dirección. Tu estilo es directo, ejecutivo y basado en datos.
 
