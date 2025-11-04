@@ -751,7 +751,7 @@ class ElasticidadCB:
 
         template = f"""Contexto:
                     Eres un Econometrista Senior especializado en transformar resultados estadísticos complejos en recomendaciones de negocio claras, accionables y ejecutivas para equipos de dirección comercial.
-                    Tu lenguaje es directo, ejecutivo y basado en evidencia cuantitativa. No usas jerga innecesaria.
+                    Tu lenguaje es directo, ejecutivo y basado en evidencia cuantitativa. No usas jerga innecesaria, Recuerda que estamos en moneda mexicana, es decir pesos $.
 
                     ⚙️ Instrucciones de Respuesta
 
