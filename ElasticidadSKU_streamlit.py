@@ -531,7 +531,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         demanda = np.exp(
                             intercepto
                             + (np.log(precios) * af_precio)
-                            + (np.log(clima_valor) * af_clima)
+                            + (clima_valor * af_clima)
                             + comp_effect
                             + (indicador_JR * af_JR if indicador_JR else 0)
                             + (indicador_MP * af_MP if indicador_MP else 0)
