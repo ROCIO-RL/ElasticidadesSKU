@@ -248,7 +248,12 @@ elif opcion == "Capturar Manualmente":
     # Mostrar tabla acumulada
     if st.session_state.manual_layout:
         st.markdown("### SKUs capturados:")
+        
         layout = pd.DataFrame(st.session_state.manual_layout)
+        layout["DESC_COMPETENCIA"] = layout["DESC_COMPETENCIA"].apply(
+            lambda x: x if isinstance(x, list)
+            else ([] if pd.isna(x) or x == "" else [x])
+        )
         st.dataframe(layout)
 
 
