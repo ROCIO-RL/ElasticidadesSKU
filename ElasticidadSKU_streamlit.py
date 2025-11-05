@@ -471,8 +471,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                     El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                 """)
+
                 if res.get('Competencias'):
                     st.markdown("💰 **Elasticidades de Competencia**")
+                    concatenado_competencia = ""
                     for comp_info in res['Competencias']:
                         nombre_comp = comp_info['Nombre Competencia']
                         concatenado_competencia = concatenado_competencia+nombre_comp
