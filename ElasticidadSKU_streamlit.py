@@ -6,6 +6,12 @@ from ElasticidadSKU import ElasticidadCB
 import numpy as np
 import plotly.express as px
 
+# Función para resaltar el precio actual
+def highlight_precio_actual(row):
+    return ["background-color: red; color: white;" if row["Precio"] == precio_actual else "" for _ in row]
+
+
+
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
 
 st.title("Elasticidades por SKU")
@@ -488,8 +494,15 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                         
                         
-                        # Rango de precios (por ejemplo, -20% a +20%)
-                        precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
+                        # Rango de precios 
+                        #precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
+
+                        # Generar rango de precios y asegurar que incluya el precio actual exacto
+                        precios = np.linspace(precio_actual * 0.9, precio_actual * 1.1, num=41)
+                        precios = np.unique(np.append(precios, precio_actual))  # Garantiza que esté el precio exacto
+                        precios = np.round(precios, 2)  # Redondea a 2 decimales
+
+
 
                         # Calcular demanda esperada
                         #demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
@@ -571,16 +584,18 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                     "Δ Demanda %": "{:+.1f}%",
                                     "Utilidad": "{:,.2f}",
                                 })
+                                .apply(highlight_precio_actual, axis=1)
                                 .apply(highlight_max, subset=["Utilidad"])
                             )
                         else:
-                            st.markdown("### 📈 Simulación de Demanda vs. Precio")
+                            st.markdown("### Simulación de Demanda vs. Precio")
                             st.dataframe(
                                 demanda_df.style.format({
                                     "Precio": "{:,.2f}",
                                     "Demanda Estimada": "{:,.0f}",
                                     "Δ Demanda %": "{:+.1f}%",
                                 })
+                                .apply(highlight_precio_actual, axis=1)
                             )
 
 
