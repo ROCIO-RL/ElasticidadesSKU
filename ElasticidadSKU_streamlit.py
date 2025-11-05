@@ -285,8 +285,12 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 elasticidad.calcula_elasticidad()
                 fig = elasticidad.grafica()
                 dispersion = elasticidad.grafica_dispersion()
-                graficos[sku] = fig
-                graficos_dispersion[sku] = dispersion
+                #graficos[sku] = fig
+                #graficos_dispersion[sku] = dispersion
+                clave = f"{sku}_{id_escenario}"
+                graficos[clave] = fig
+                graficos_dispersion[clave] = dispersion
+
                 #insight = elasticidad.genera_insight_op()
                 def safe_round(value, dec=4):
                     return round(value, dec) if value is not None else None
@@ -392,6 +396,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
         st.subheader(" Gráficos e Insights por SKU")
         for res in resultados:
             escenario_id = res['Id_unico']
+            clave = f"{sku}_{escenario_id}"
             sku = res["SKU"]
             prod = res["Producto"]
             venta_base = res['Venta Base']
@@ -631,15 +636,29 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             )
                             st.plotly_chart(fig_demanda, use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
                             with col2:
-                                if sku in graficos_dispersion:
-                                    st.plotly_chart(graficos_dispersion[sku], use_container_width=True, key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
+                                #if sku in graficos_dispersion:
+                                #    st.plotly_chart(graficos_dispersion[sku], use_container_width=True, key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
+                                if clave in graficos_dispersion:
+                                    st.plotly_chart(
+                                        graficos_dispersion[clave],
+                                        use_container_width=True,
+                                        key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}"
+                                    )
+
                     except Exception as e:
                         #st.markdown(f"No se pudo generar la simulación de demanda")
                         st.error(f"No se pudo generar la simulación de demanda ({e})")
                 else:
                     
-                    if sku in graficos_dispersion:
-                        st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
+                    #if sku in graficos_dispersion:
+                    #    st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
+
+                    if clave in graficos_dispersion:
+                        st.plotly_chart(
+                            graficos_dispersion[clave],
+                            use_container_width=True,
+                            key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}"
+                        )
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                     insight = elasticidad.genera_insight_op(precio=None,df=None)
                 
@@ -648,9 +667,16 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                     #st.markdown("")
                 #col1, col2 = st.columns([2, 1]) 
-               
-                if sku in graficos:
-                    st.plotly_chart(graficos[sku], use_container_width=True, key=f"fig_base_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
+
+                #if sku in graficos:
+                #    st.plotly_chart(graficos[sku], use_container_width=True, key=f"fig_base_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
+                
+                if clave in graficos:
+                    st.plotly_chart(
+                        graficos[clave],
+                        use_container_width=True,
+                        key=f"fig_base_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}"
+                    )
                
 
 
