@@ -10,6 +10,10 @@ import plotly.express as px
 def highlight_precio_actual(row):
     return ["background-color: red; color: white;" if row["Precio"] == precio_actual else "" for _ in row]
 
+def highlight_max(s):
+    is_max = s == s.max()
+    return ["background-color: green" if v else "" for v in is_max]
+
 
 
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
@@ -495,12 +499,12 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         
                         
                         # Rango de precios 
-                        #precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
+                        precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
 
                         # Generar rango de precios y asegurar que incluya el precio actual exacto
-                        precios = np.linspace(precio_actual * 0.9, precio_actual * 1.1, num=41)
-                        precios = np.unique(np.append(precios, precio_actual))  # Garantiza que esté el precio exacto
-                        precios = np.round(precios, 2)  # Redondea a 2 decimales
+                        #precios = np.linspace(precio_actual * 0.9, precio_actual * 1.1, num=41)
+                        #precios = np.unique(np.append(precios, precio_actual))  # Garantiza que esté el precio exacto
+                        #precios = np.round(precios, 2)  # Redondea a 2 decimales
 
 
 
@@ -571,9 +575,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                             max_utilidad = demanda_df["Utilidad"].max()
 
-                            def highlight_max(s):
-                                is_max = s == s.max()
-                                return ["background-color: green" if v else "" for v in is_max]
+                            
 
                             st.markdown("### Simulación de Demanda, Precio y Utilidad")
                             st.dataframe(
