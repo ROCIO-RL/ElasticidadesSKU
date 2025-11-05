@@ -379,293 +379,293 @@ if layout is not None and st.button("Ejecutar Análisis"):
             except Exception as e:
                 st.error(f"Error en SKU {sku}: {e}")
 
-            if resultados:
-                df_resultados = pd.DataFrame(resultados)
+    if resultados:
+        df_resultados = pd.DataFrame(resultados)
 
-                
-
-                st.subheader(" Gráficos e Insights por SKU")
-                for res in resultados:
-                    sku = res["SKU"]
-                    prod = res["Producto"]
-                    venta_base = res['Venta Base']
-                    af_precio = res['Afectación Precio']
-                    af_clima = res['Afectación Clima']
-                    af_clima = 0 if pd.isna(af_clima) else af_clima
-                    r2 = res['R cuadrada']
-                    precio = res['Precio Actual']
-                    intercepto = res['intercepto']
-                    costoact = res['Costo Actual']
-                    #insight = res['Insight']
-                    insight = ""
-                    #af_comp = res['Afectación Competencia']
-                    #af_comp = 0 if pd.isna(af_comp) else af_comp
-                    #precio_comp = res['Precio Competencia']
-                    #nombre_comp = res['Nombre Competencia']
-
-                    
-
-
-                    #Julio Regalado
-                    af_JR = res['Afectación Julio Regalado']
-                    pv_JR = res['Pvalue Julio Regalado']
-                    af_JR = 0 if pd.isna(af_JR) else af_JR
-                    indicador_JR = res['Indicador Julio Regalado']
-
-
-                    #Mega Pauta
-                    af_MP = res['Afectación Mega Pauta']
-                    pv_MP = res['Pvalue Mega Pauta']
-                    af_MP = 0 if pd.isna(af_MP) else af_MP
-                    indicador_MP = res['Indicador Mega Pauta']
-                
-                    
-                    #st.write(f"Indicador Julio Regalado: {indicador_JR}")
         
-                    
-                    with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
-                        st.markdown("## Resumen")
-                        df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
-                        #st.dataframe(df_sku)
-                        
-                        st.markdown(f"""
-                                    📦 **Producto:** {prod}  
-                                    🆔 **SKU:** {sku}  
-                                    🏬 **Canal:** {canal}  
+        st.subheader(" Gráficos e Insights por SKU")
+        for res in resultados:
+            sku = res["SKU"]
+            prod = res["Producto"]
+            venta_base = res['Venta Base']
+            af_precio = res['Afectación Precio']
+            af_clima = res['Afectación Clima']
+            af_clima = 0 if pd.isna(af_clima) else af_clima
+            r2 = res['R cuadrada']
+            precio = res['Precio Actual']
+            intercepto = res['intercepto']
+            costoact = res['Costo Actual']
+            #insight = res['Insight']
+            insight = ""
+            #af_comp = res['Afectación Competencia']
+            #af_comp = 0 if pd.isna(af_comp) else af_comp
+            #precio_comp = res['Precio Competencia']
+            #nombre_comp = res['Nombre Competencia']
 
-                                    - 📊 **Ventas base:** {venta_base:,} unidades.  
-                                    - 💰 **Elasticidad precio:** {af_precio:.2f}.  
-                                    Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
-                                    
-                                    """)
-                        #if af_comp != 0:
-                        #    st.markdown(f"""
-                        #    - 💰 **Elasticidad competencia ({nombre_comp}):** {af_comp:.2f}.  
-                        #    Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
-                        #    """)
-
-                    
-                        if af_JR !=0:
-                            if pv_JR <= 0.05:
-                                st.markdown(f"""
-                                - 📈 **Impacto de promociones Julio Regalado (S21-S31):** {af_JR:.2f}.  
-                                Las promociones de Julio Regalado afectan en un **{af_JR:.2f}%** a la venta.
-                                """)
-                            if pv_JR > 0.05:
-                                st.markdown(f"""Promociones Julio Regalado NO tiene importancia estadisticamente (S21-S31)""")
+            
 
 
-                        if af_MP !=0:
-                            if pv_MP <= 0.05:
-                                st.markdown(f"""
-                                - 📈 **Impacto de Mega Pauta (S01-S06):** {af_MP:.2f}.  
-                                La Mega Pauta afectan en un **{af_MP:.2f}%** a la venta.
-                                """)
-                            if pv_MP > 0.05:
-                                st.markdown(f"""La Mega Pauta NO tiene importancia estadisticamente (S01-S06)""")
-
-                        st.markdown(f"""
-                            - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
-                            Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2f}**%.
-                            - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
-                            El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
-                        """)
-                        if res.get('Competencias'):
-                            st.markdown("💰 **Elasticidades de Competencia**")
-                            for comp_info in res['Competencias']:
-                                nombre_comp = comp_info['Nombre Competencia']
-                                af_comp = comp_info['Afectación Competencia']
-                                pv_comp = comp_info['Pvalue Competencia']
-                                precio_comp = comp_info['Precio Competencia']
-
-                                st.markdown(f"""
-                                - **{nombre_comp}**  
-                                Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
-                                """)
-                        
-                        if precio != "":
-                            try:
-                                precio_actual = float(precio)
-                                #intercepto = elasticidad.coeficientes.get('Intercept')
-                                #beta_precio = elasticidad.coeficientes.get('Precio')
-                                #beta_clima = elasticidad.coeficientes.get('CLIMA')
-                                clima_valor = 20  # valor promedio o puedes obtenerlo del layout
-                                #st.markdown(intercepto)
-                                #st.markdown(af_precio)
-                                #st.markdown(af_clima)
+            #Julio Regalado
+            af_JR = res['Afectación Julio Regalado']
+            pv_JR = res['Pvalue Julio Regalado']
+            af_JR = 0 if pd.isna(af_JR) else af_JR
+            indicador_JR = res['Indicador Julio Regalado']
 
 
-                                
-                                
-                                # Rango de precios 
-                                #precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
+            #Mega Pauta
+            af_MP = res['Afectación Mega Pauta']
+            pv_MP = res['Pvalue Mega Pauta']
+            af_MP = 0 if pd.isna(af_MP) else af_MP
+            indicador_MP = res['Indicador Mega Pauta']
+        
+            
+            #st.write(f"Indicador Julio Regalado: {indicador_JR}")
+ 
+            
+            with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
 
-                                # Generar rango de precios y asegurar que incluya el precio actual exacto
-                                precios = np.linspace(precio_actual * 0.9, precio_actual * 1.1, num=41)
-                                precios = np.unique(np.append(precios, precio_actual))  # Garantiza que esté el precio exacto
-                                precios = np.round(precios, 2)  # Redondea a 2 decimales
+                st.markdown("## Resumen")
+                df_sku =df_resultados[['Venta Base','Afectación Precio','Afectación Clima','Pvalue Intercepto','Pvalue Precio','Pvalue Clima','R cuadrada']][df_resultados['SKU']==sku]
+                #st.dataframe(df_sku)
+                
+                st.markdown(f"""
+                            📦 **Producto:** {prod}  
+                            🆔 **SKU:** {sku}  
+                            🏬 **Canal:** {canal}  
 
-
-
-                                # Calcular demanda esperada
-                                #demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
-                                #demanda = np.exp(
-                                #                intercepto
-                                #                + (np.log(precios) * af_precio)
-                                #               + (np.log(clima_valor) * af_clima)
-                                #                + (np.log(precio_comp) * af_comp if precio_comp else 0)
-                                #                + (indicador_JR * af_JR if indicador_JR else 0)
-                                #            )
-
-
-                                # Efecto acumulado de todas las competencias
-                                comp_effect = 0
-                                if res.get('Competencias'):
-                                    for comp_info in res['Competencias']:
-                                        precio_comp = comp_info['Precio Competencia']
-                                        af_comp = comp_info['Afectación Competencia']
-                                        if precio_comp and not pd.isna(precio_comp):
-                                            comp_effect += np.log(precio_comp) * af_comp
-
-                                demanda = np.exp(
-                                    intercepto
-                                    + (np.log(precios) * af_precio)
-                                    + (clima_valor * af_clima)
-                                    + comp_effect
-                                    + (indicador_JR * af_JR if indicador_JR else 0)
-                                    + (indicador_MP * af_MP if indicador_MP else 0)
-                                )
-
-                                #+ (np.log(precio_comp) * af_comp if precio_comp else 0)
-                                #demanda_df = pd.DataFrame({
-                                #    "Precio": precios,
-                                #    "Demanda Estimada": demanda,
-                                #    "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
-                                #})
-
-                                #st.markdown("### 📈 Simulación de Demanda vs. Precio")
-                                #st.dataframe(demanda_df.style.format({
-                                #    "Precio": "{:,.2f}",
-                                #    "Demanda Estimada": "{:,.0f}",
-                                #    "Δ Demanda %": "{:+.1f}%"
-                                #}))
-                                idx_precio_actual = (np.abs(precios - precio_actual)).argmin()
-                                demanda_df = pd.DataFrame({
-                                    "Precio": precios,
-                                    "Demanda Estimada": demanda,
-                                    "Δ Demanda %": (demanda / demanda[idx_precio_actual] - 1) * 100
-                                })
-
-                                # Si se capturó costo, calculamos la utilidad
-
-
-                                # Verificamos si el costo es un número válido
-                                if isinstance(costoact, (int, float)) and not pd.isna(costoact):
-                                    costo_actual = float(costoact)
-                                elif isinstance(costoact, str) and costoact.strip() != "" and costoact.replace(".", "", 1).isdigit():
-                                    costo_actual = float(costoact)
-                                else:
-                                    costo_actual = None
-
-                                if costo_actual is not None:
-                                    demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
-                                        demanda_df["Demanda Estimada"] * costo_actual
-                                    )
-
-                                    max_utilidad = demanda_df["Utilidad"].max()
-
-                                    
-
-                                    st.markdown("### Simulación de Demanda, Precio y Utilidad")
-                                    st.dataframe(
-                                        demanda_df.style
-                                        .format({
-                                            "Precio": "{:,.2f}",
-                                            "Demanda Estimada": "{:,.0f}",
-                                            "Δ Demanda %": "{:+.1f}%",
-                                            "Utilidad": "{:,.2f}",
-                                        })
-                                        .apply(highlight_precio_actual, axis=1)
-                                        .apply(highlight_max, subset=["Utilidad"])
-                                    )
-                                else:
-                                    st.markdown("### Simulación de Demanda vs. Precio")
-                                    st.dataframe(
-                                        demanda_df.style.format({
-                                            "Precio": "{:,.2f}",
-                                            "Demanda Estimada": "{:,.0f}",
-                                            "Δ Demanda %": "{:+.1f}%",
-                                        })
-                                        .apply(highlight_precio_actual, axis=1)
-                                    )
-
-
-                                insight = elasticidad.genera_insight_op(precio=precio,df=demanda_df)
-                                col1, col2 = st.columns(2)
-                                with col1:
-                                    # Gráfico interactivo
-                                    fig_demanda = px.line(
-                                        demanda_df,
-                                        x="Precio",
-                                        y="Demanda Estimada",
-                                        markers=True,
-                                        title=f"Curva de Demanda - {prod}",
-                                    )
-                                    fig_demanda.add_scatter(
-                                        x=[precio_actual],
-                                        y=[demanda[idx_precio_actual]],
-                                        mode='markers+text',
-                                        text=["Precio Actual"],
-                                        textposition="top center",
-                                        marker=dict(color='red', size=10)
-                                    )
-                                    st.plotly_chart(fig_demanda, use_container_width=True)
-                                    with col2:
-                                        if sku in graficos_dispersion:
-                                            st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
-                            except Exception as e:
-                                #st.markdown(f"No se pudo generar la simulación de demanda")
-                                st.error(f"No se pudo generar la simulación de demanda ({e})")
-                        else:
+                            - 📊 **Ventas base:** {venta_base:,} unidades.  
+                            - 💰 **Elasticidad precio:** {af_precio:.2f}.  
+                            Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
                             
-                            if sku in graficos_dispersion:
-                                st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
-                            st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
-                            insight = elasticidad.genera_insight_op(precio=None,df=None)
-                        
-                        
-                        
+                            """)
+                #if af_comp != 0:
+                #    st.markdown(f"""
+                #    - 💰 **Elasticidad competencia ({nombre_comp}):** {af_comp:.2f}.  
+                #    Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
+                #    """)
 
-                            #st.markdown("")
-                        #col1, col2 = st.columns([2, 1]) 
-                    
-                        if sku in graficos:
-                            st.plotly_chart(graficos[sku], use_container_width=True)
-                    
+               
+                if af_JR !=0:
+                    if pv_JR <= 0.05:
+                        st.markdown(f"""
+                        - 📈 **Impacto de promociones Julio Regalado (S21-S31):** {af_JR:.2f}.  
+                        Las promociones de Julio Regalado afectan en un **{af_JR:.2f}%** a la venta.
+                        """)
+                    if pv_JR > 0.05:
+                        st.markdown(f"""Promociones Julio Regalado NO tiene importancia estadisticamente (S21-S31)""")
+
+
+                if af_MP !=0:
+                    if pv_MP <= 0.05:
+                        st.markdown(f"""
+                        - 📈 **Impacto de Mega Pauta (S01-S06):** {af_MP:.2f}.  
+                        La Mega Pauta afectan en un **{af_MP:.2f}%** a la venta.
+                        """)
+                    if pv_MP > 0.05:
+                        st.markdown(f"""La Mega Pauta NO tiene importancia estadisticamente (S01-S06)""")
+
+                st.markdown(f"""
+                    - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
+                    Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2f}**%.
+                    - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
+                    El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
+                """)
+                if res.get('Competencias'):
+                    st.markdown("💰 **Elasticidades de Competencia**")
+                    for comp_info in res['Competencias']:
+                        nombre_comp = comp_info['Nombre Competencia']
+                        af_comp = comp_info['Afectación Competencia']
+                        pv_comp = comp_info['Pvalue Competencia']
+                        precio_comp = comp_info['Precio Competencia']
+
+                        st.markdown(f"""
+                        - **{nombre_comp}**  
+                        Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
+                        """)
+                
+                if precio != "":
+                    try:
+                        precio_actual = float(precio)
+                        #intercepto = elasticidad.coeficientes.get('Intercept')
+                        #beta_precio = elasticidad.coeficientes.get('Precio')
+                        #beta_clima = elasticidad.coeficientes.get('CLIMA')
+                        clima_valor = 20  # valor promedio o puedes obtenerlo del layout
+                        #st.markdown(intercepto)
+                        #st.markdown(af_precio)
+                        #st.markdown(af_clima)
 
 
                         
-                        #st.plotly_chart(fig)
-                        #st.dataframe(df)
                         
-                        
-                        st.markdown("## Insight")
-                        st.markdown(
-                                    f"""
-                                    <div style="
-                                        border: .05px solid gray;   /* Borde gris */
-                                        padding: 10px;             /* Espacio interno */
-                                        border-radius: 8px;        /* Esquinas redondeadas */
-                                        background-color: transparent;  /* Fondo transparente */
-                                        margin: 10px 0px;          /* Margen arriba y abajo */
-                                    ">{insight}
-                                        
-                                    
-                                    """,
-                                    unsafe_allow_html=True
-                                )
+                        # Rango de precios 
+                        #precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
+
+                        # Generar rango de precios y asegurar que incluya el precio actual exacto
+                        precios = np.linspace(precio_actual * 0.9, precio_actual * 1.1, num=41)
+                        precios = np.unique(np.append(precios, precio_actual))  # Garantiza que esté el precio exacto
+                        precios = np.round(precios, 2)  # Redondea a 2 decimales
+
+
+
+                        # Calcular demanda esperada
+                        #demanda = np.exp(intercepto + (np.log(precios) * af_precio) + (np.log(clima_valor) * af_clima))
+                        #demanda = np.exp(
+                        #                intercepto
+                        #                + (np.log(precios) * af_precio)
+                        #               + (np.log(clima_valor) * af_clima)
+                        #                + (np.log(precio_comp) * af_comp if precio_comp else 0)
+                        #                + (indicador_JR * af_JR if indicador_JR else 0)
+                        #            )
+
+
+                        # Efecto acumulado de todas las competencias
+                        comp_effect = 0
+                        if res.get('Competencias'):
+                            for comp_info in res['Competencias']:
+                                precio_comp = comp_info['Precio Competencia']
+                                af_comp = comp_info['Afectación Competencia']
+                                if precio_comp and not pd.isna(precio_comp):
+                                    comp_effect += np.log(precio_comp) * af_comp
+
+                        demanda = np.exp(
+                            intercepto
+                            + (np.log(precios) * af_precio)
+                            + (clima_valor * af_clima)
+                            + comp_effect
+                            + (indicador_JR * af_JR if indicador_JR else 0)
+                            + (indicador_MP * af_MP if indicador_MP else 0)
+                        )
+
+                        #+ (np.log(precio_comp) * af_comp if precio_comp else 0)
+                        #demanda_df = pd.DataFrame({
+                        #    "Precio": precios,
+                        #    "Demanda Estimada": demanda,
+                        #    "Δ Demanda %": (demanda / demanda[precios == precio_actual][0] - 1) * 100
+                        #})
+
+                        #st.markdown("### 📈 Simulación de Demanda vs. Precio")
+                        #st.dataframe(demanda_df.style.format({
+                        #    "Precio": "{:,.2f}",
+                        #    "Demanda Estimada": "{:,.0f}",
+                        #    "Δ Demanda %": "{:+.1f}%"
+                        #}))
+                        idx_precio_actual = (np.abs(precios - precio_actual)).argmin()
+                        demanda_df = pd.DataFrame({
+                            "Precio": precios,
+                            "Demanda Estimada": demanda,
+                            "Δ Demanda %": (demanda / demanda[idx_precio_actual] - 1) * 100
+                        })
+
+                        # Si se capturó costo, calculamos la utilidad
+
+
+                        # Verificamos si el costo es un número válido
+                        if isinstance(costoact, (int, float)) and not pd.isna(costoact):
+                            costo_actual = float(costoact)
+                        elif isinstance(costoact, str) and costoact.strip() != "" and costoact.replace(".", "", 1).isdigit():
+                            costo_actual = float(costoact)
+                        else:
+                            costo_actual = None
+
+                        if costo_actual is not None:
+                            demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
+                                demanda_df["Demanda Estimada"] * costo_actual
+                            )
+
+                            max_utilidad = demanda_df["Utilidad"].max()
+
+                            
+
+                            st.markdown("### Simulación de Demanda, Precio y Utilidad")
+                            st.dataframe(
+                                demanda_df.style
+                                .format({
+                                    "Precio": "{:,.2f}",
+                                    "Demanda Estimada": "{:,.0f}",
+                                    "Δ Demanda %": "{:+.1f}%",
+                                    "Utilidad": "{:,.2f}",
+                                })
+                                .apply(highlight_precio_actual, axis=1)
+                                .apply(highlight_max, subset=["Utilidad"])
+                            )
+                        else:
+                            st.markdown("### Simulación de Demanda vs. Precio")
+                            st.dataframe(
+                                demanda_df.style.format({
+                                    "Precio": "{:,.2f}",
+                                    "Demanda Estimada": "{:,.0f}",
+                                    "Δ Demanda %": "{:+.1f}%",
+                                })
+                                .apply(highlight_precio_actual, axis=1)
+                            )
+
+
+                        insight = elasticidad.genera_insight_op(precio=precio,df=demanda_df)
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            # Gráfico interactivo
+                            fig_demanda = px.line(
+                                demanda_df,
+                                x="Precio",
+                                y="Demanda Estimada",
+                                markers=True,
+                                title=f"Curva de Demanda - {prod}",
+                            )
+                            fig_demanda.add_scatter(
+                                x=[precio_actual],
+                                y=[demanda[idx_precio_actual]],
+                                mode='markers+text',
+                                text=["Precio Actual"],
+                                textposition="top center",
+                                marker=dict(color='red', size=10)
+                            )
+                            st.plotly_chart(fig_demanda, use_container_width=True)
+                            with col2:
+                                if sku in graficos_dispersion:
+                                    st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
+                    except Exception as e:
+                        #st.markdown(f"No se pudo generar la simulación de demanda")
+                        st.error(f"No se pudo generar la simulación de demanda ({e})")
+                else:
                     
+                    if sku in graficos_dispersion:
+                        st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
+                    st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
+                    insight = elasticidad.genera_insight_op(precio=None,df=None)
+                
+                
+                 
+
+                    #st.markdown("")
+                #col1, col2 = st.columns([2, 1]) 
+               
+                if sku in graficos:
+                    st.plotly_chart(graficos[sku], use_container_width=True)
+               
+
+
+                
+                #st.plotly_chart(fig)
+                #st.dataframe(df)
+                
+                
+                st.markdown("## Insight")
+                st.markdown(
+                            f"""
+                            <div style="
+                                border: .05px solid gray;   /* Borde gris */
+                                padding: 10px;             /* Espacio interno */
+                                border-radius: 8px;        /* Esquinas redondeadas */
+                                background-color: transparent;  /* Fondo transparente */
+                                margin: 10px 0px;          /* Margen arriba y abajo */
+                            ">{insight}
+                                
+                            
+                            """,
+                            unsafe_allow_html=True
+                        )
+            
 
 
 
