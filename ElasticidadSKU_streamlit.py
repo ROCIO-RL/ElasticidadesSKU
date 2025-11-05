@@ -403,7 +403,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
         st.subheader(" Gráficos e Insights por SKU")
         for res in resultados:
             escenario_id = res['Id_unico']
-            clave = f"{sku}_{escenario_id}"
+            
             sku = res["SKU"]
             prod = res["Producto"]
             venta_base = res['Venta Base']
@@ -623,6 +623,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
 
                         insight = elasticidad.genera_insight_op(precio=precio,df=demanda_df)
+                        clave = f"{sku}_{escenario_id}"
                         col1, col2 = st.columns(2)
                         with col1:
                             # Gráfico interactivo
@@ -659,7 +660,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     
                     #if sku in graficos_dispersion:
                     #    st.plotly_chart(graficos_dispersion[sku], use_container_width=True)
-
+                    clave = f"{sku}_{escenario_id}"
                     if clave in graficos_dispersion:
                         st.plotly_chart(
                             graficos_dispersion[clave],
