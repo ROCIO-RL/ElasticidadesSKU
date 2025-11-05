@@ -257,6 +257,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
     resultados = []
     graficos = {}
     graficos_dispersion = {}
+    layout = layout.reset_index(drop=True)
+    layout["escenario_id"] = layout.index.astype(str)
 
     with st.spinner("Calculando elasticidades"):
         for _, row in layout.iterrows():
@@ -267,6 +269,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
             precioact = row["Precio Actual"]
             costoact = row['Costo Actual']
             desc_competencia = row['DESC_COMPETENCIA']
+            id_escenario = row['escenario_id']
+            
           
             try:
                 #elasticidad = ElasticidadCB(codbarras=sku, canal=canal, temp=temp,desc_competencia=desc_competencia)
@@ -326,7 +330,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         ),
                         0
                     )
-
+                
                 resultados.append({
                     'SKU': sku,
                     'Canal': canal,
@@ -370,7 +374,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     #Mega Pauta
                     'Pvalue Mega Pauta':safe_round(elasticidad.pvalores.get('MEGA_PAUTA'), 4),
                     'Afectación Mega Pauta':safe_round(elasticidad.coeficientes.get('MEGA_PAUTA'), 4),
-                    'Indicador Mega Pauta': indicador_MP
+                    'Indicador Mega Pauta': indicador_MP,
+                    'Id_unico': id_escenario
                     #"Insight": insight
                 })
 
@@ -386,6 +391,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
         st.subheader(" Gráficos e Insights por SKU")
         for res in resultados:
+            escenario_id = res['Id_unico']
             sku = res["SKU"]
             prod = res["Producto"]
             venta_base = res['Venta Base']
@@ -623,10 +629,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 textposition="top center",
                                 marker=dict(color='red', size=10)
                             )
-                            st.plotly_chart(fig_demanda, use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}")
+                            st.plotly_chart(fig_demanda, use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
                             with col2:
                                 if sku in graficos_dispersion:
-                                    st.plotly_chart(graficos_dispersion[sku], use_container_width=True, key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}")
+                                    st.plotly_chart(graficos_dispersion[sku], use_container_width=True, key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
                     except Exception as e:
                         #st.markdown(f"No se pudo generar la simulación de demanda")
                         st.error(f"No se pudo generar la simulación de demanda ({e})")
@@ -644,7 +650,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #col1, col2 = st.columns([2, 1]) 
                
                 if sku in graficos:
-                    st.plotly_chart(graficos[sku], use_container_width=True, key=f"fig_base_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}")
+                    st.plotly_chart(graficos[sku], use_container_width=True, key=f"fig_base_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
                
 
 
