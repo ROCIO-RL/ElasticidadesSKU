@@ -475,6 +475,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown("💰 **Elasticidades de Competencia**")
                     for comp_info in res['Competencias']:
                         nombre_comp = comp_info['Nombre Competencia']
+                        concatenado_competencia = concatenado_competencia+nombre_comp
                         af_comp = comp_info['Afectación Competencia']
                         pv_comp = comp_info['Pvalue Competencia']
                         precio_comp = comp_info['Precio Competencia']
@@ -620,10 +621,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 textposition="top center",
                                 marker=dict(color='red', size=10)
                             )
-                            st.plotly_chart(fig_demanda, use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}")
+                            st.plotly_chart(fig_demanda, use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}")
                             with col2:
                                 if sku in graficos_dispersion:
-                                    st.plotly_chart(graficos_dispersion[sku], use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}")
+                                    st.plotly_chart(graficos_dispersion[sku], use_container_width=True, key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}")
                     except Exception as e:
                         #st.markdown(f"No se pudo generar la simulación de demanda")
                         st.error(f"No se pudo generar la simulación de demanda ({e})")
@@ -641,7 +642,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #col1, col2 = st.columns([2, 1]) 
                
                 if sku in graficos:
-                    st.plotly_chart(graficos[sku], use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}")
+                    st.plotly_chart(graficos[sku], use_container_width=True, key=f"fig_base_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}")
                
 
 
