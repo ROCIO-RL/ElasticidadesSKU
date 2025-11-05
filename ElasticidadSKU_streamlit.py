@@ -641,7 +641,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #col1, col2 = st.columns([2, 1]) 
                
                 if sku in graficos:
-                    st.plotly_chart(graficos[sku], use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}_{res['Competencias']}"))
+                    st.plotly_chart(graficos[sku], use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}_{res['Competencias']}")
                
 
 
