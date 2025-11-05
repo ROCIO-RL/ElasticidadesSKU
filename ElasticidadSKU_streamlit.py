@@ -270,6 +270,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
             costoact = row['Costo Actual']
             desc_competencia = row['DESC_COMPETENCIA']
             id_escenario = row['escenario_id']
+            desc_competencia = row['DESC_COMPETENCIA']
+
             
           
             try:
@@ -278,7 +280,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     codbarras=sku,
                     canal=canal,
                     temp=temp,
-                    desc_competencias=seleccion_comp  # ahora es lista, no string
+                    desc_competencias=desc_competencia    # ahora es lista, no string
                 )
 
                 elasticidad.consulta_sellout()
