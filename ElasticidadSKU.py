@@ -58,12 +58,13 @@ class ElasticidadCB:
     from langchain_community.llms import Ollama
     llm = Ollama(model="llama3")
     pd.options.display.float_format = '{:,.2f}'.format
-    def __init__(self, codbarras, canal, temp,desc_competencias,ruta_competencia="Competencia_Elasticidades.xlsx"):
+    def __init__(self, codbarras, canal, temp,desc_competencias,ruta_competencia="Competencia_Elasticidades.xlsx", pais="México"):
         """
         codbarras: Código de barras del producto
         canal: 'Autoservicios', 'Farmacias' o 'Moderno'
         temp: True/False si se desea incluir clima
         """
+        self.pais = pais
         self.codbarras = codbarras
         self.canal = canal
         self.temp = temp
@@ -127,8 +128,32 @@ class ElasticidadCB:
           AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
           AND c.TIPOCLIENTE='Monitoreado'
         """
-        self.sellout = pd.read_sql(query, conn)
-        conn.close()
+
+        query_int = f"""SELECT 
+            s.SEMANIO AS ANIO, 
+            s.SEMNUMERO AS SEMNUMERO,
+            es.PROPSTCODBARRAS,
+            so.cadid,
+            so.SOUTCANTDESP AS UnidadesDesp,
+            NVL(so.soutmontodesp,0) AS MontoDespNeto,
+            NVL(so.soutmontodespbrt,0) AS MontoDespBruto,
+        FROM PRD_CNS_MX.DM.FACT_SO_SEM_CAD_SKU_INT so 
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURAPRODUCTOSTOTALPAISES es ON es.PROPSTID=so.PROPSTID 
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURACLIENTESSEGPTVTOTAL cl ON cl.CADID=so.CADID  
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_CATSEMANAS s ON s.SEMID=so.SEMID 
+        LEFT JOIN PRD_STG.GNM_CT.GNMPAIS p ON p.PAISID=so.PAISID  
+        WHERE s.SEMANIO>=2023   
+                AND P.PAIS='{self.pais}'
+                AND p.propstcodbarras = '{self.codbarras}'
+                AND cl.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
+                AND cl.GRPCLASIFICACION='Monitoreado' 
+        """    
+        if self.pais=='México':
+            self.sellout = pd.read_sql(query, conn)
+            conn.close()
+        else:
+            self.sellout = pd.read_sql(query_int, conn)
+            conn.close()
 
         # Filtro de cadenas según canal
         if self.canal == 'Autoservicios':

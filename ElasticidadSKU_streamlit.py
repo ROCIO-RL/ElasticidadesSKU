@@ -22,239 +22,239 @@ st.title("Elasticidades por SKU")
 st.markdown("Sube un layout o captura manualmente los SKUs para calcular elasticidades.")
 
 # Selección de método de carga
-opcion = st.radio("Selecciona cómo quieres cargar los SKUs:", 
-                  ["Subir Layout", "Capturar Manualmente"])
+#opcion = st.radio("Selecciona cómo quieres cargar los SKUs:", 
+#                  ["Subir Layout", "Capturar Manualmente"])
 
 layout = None
 
-if opcion == "Subir Layout":
-    archivo = st.file_uploader("Sube un archivo CSV o Excel con columnas: SKU, Canal, Clima", 
-                               type=["csv", "xlsx"])
-    if archivo:
-        if archivo.name.endswith(".csv"):
-            layout = pd.read_csv(archivo)
+#if opcion == "Subir Layout":
+#    archivo = st.file_uploader("Sube un archivo CSV o Excel con columnas: SKU, Canal, Clima", 
+#                               type=["csv", "xlsx"])
+#    if archivo:
+#        if archivo.name.endswith(".csv"):
+#            layout = pd.read_csv(archivo)
+#        else:
+#            layout = pd.read_excel(archivo)
+#        st.success("Layout cargado correctamente")
+#        st.dataframe(layout)
+
+#elif opcion == "Capturar Manualmente":
+# PRODUCTOS 
+conn = snowflake.connector.connect(
+    user=st.secrets["snowflake"]["user"],
+    password=st.secrets["snowflake"]["password"],
+    account=st.secrets["snowflake"]["account"],
+    database=st.secrets["snowflake"]["database"],
+    schema=st.secrets["snowflake"]["schema"]
+    )
+
+#query = f"""SELECT DISTINCT 
+#                MRCNOMBRE AS MARCA,
+#                AGPPAUTANOMBRE AS AGRUPACION_PAUTA,
+#                PRONOMBRE AS PRODUCTO_BASE,
+#                PROPSTCODBARRAS AS SKU, 
+#                PROPSTNOMBRE AS PRODUCTO
+#            FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
+#            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
+#            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
+#            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
+#                WHERE t.anio >= 2023"""
+
+query = f"""  SELECT distinct p.propstcodbarras as SKU,
+    p.propstid AS PROPST_ID
+    FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
+    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
+    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
+    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
+    WHERE t.anio >= 2023
+        AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
+        AND c.TIPOCLIENTE='Monitoreado'"""
+df_propstid =  pd.read_sql(query,conn)
+#conn.close()
+df_productos = pd.read_excel(r'Catálogo Corporativo Final.xlsx',sheet_name='Catálogo')
+df_productos = df_productos[df_productos['IdPais']==1].copy()
+df_productos = df_propstid.merge(df_productos,left_on='PROPST_ID',right_on='ProPstID',how='left')
+st.markdown("Agrega un SKU, selecciona canal y clima:")
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    marca = st.selectbox("Marca", sorted(df_productos["Marca"].unique()))
+
+with col2:
+    agrupaciones = df_productos[df_productos["Marca"] == marca]["Agrupación Pauta"].unique()
+    agrupacion = st.selectbox("Agrupación", sorted(agrupaciones))
+
+with col3:
+    productos_base = df_productos[
+        (df_productos["Marca"] == marca) &
+        (df_productos["Agrupación Pauta"] == agrupacion)
+    ]["Producto Base"].unique()
+    producto_base = st.selectbox("Producto Base", sorted(productos_base))
+
+with col4:
+    skus_filtrados = df_productos[
+        (df_productos["Marca"] == marca) &
+        (df_productos["Agrupación Pauta"] == agrupacion) &
+        (df_productos["Producto Base"] == producto_base)
+    ][["SKU", "ProPstNombre"]]
+
+    sku_row = st.selectbox(
+        "SKU",
+        skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['ProPstNombre']}", axis=1)
+    )
+
+
+# Extraemos el SKU limpio y lo dejamos como texto
+sku_val_prov = str(sku_row.split(" - ")[0]).strip()   
+
+col1, col2, col3, col4 = st.columns(4)
+
+with col1:
+    canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
+with col2:
+    precio_act = st.text_input("Precio (opcional)")
+with col3:
+    # Cargar los costos desde Excel
+    costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
+    costos = costos.rename(columns={
+        'CODIGOBARRAS': 'PROPSTCODBARRAS',
+        'COSTO_GESTION': 'Costo'
+    })  
+    costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()  
+    costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
+    # Filtrar por el SKU actual
+    costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
+
+    # Si el SKU existe en el archivo, precargar su costo
+    if not costo_filtrado.empty:
+        costo_default = costo_filtrado.iloc[0]
+    else:
+        costo_default = ""
+
+    # Mostrar el campo editable con el valor precargado
+    costo_act = st.text_input("Costo (opcional)", value=costo_default)
+with col4:  
+    st.markdown("Clima")  
+    clima = st.checkbox("¿Considerar Clima?", value=True)    
+
+
+# AGREGAMOS LA COMPETENCIA SI EXISTE 
+col1,col2 = st.columns(2)
+with col1:
+
+    # Cargar datos de competencia
+    comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
+    comp.columns = [c.strip() for c in comp.columns]
+    comp = comp.rename(columns={
+        'SKU': 'PROPSTCODBARRAS',
+        'Descripcion Competencia': 'DESC_COMPETENCIA',
+        'Precio Competencia': 'PRECIO_COMPETENCIA'
+    })
+    comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
+    comp['PROPSTCODBARRAS'] = comp['PROPSTCODBARRAS'].astype(str).str.strip()  
+    comp = comp[comp['PROPSTCODBARRAS'] == sku_val_prov]  # filtrar por SKU
+
+    # Si hay competencia, permitir seleccionar
+    if not comp.empty:
+        # Mostrar un selectbox con las descripciones únicas de competidores
+        descs_comp = comp['DESC_COMPETENCIA'].unique().tolist()
+        #Cambio MLTCOMP
+        #seleccion_comp = st.selectbox("Selecciona competencia", options=descs_comp)
+        seleccion_comp = st.multiselect("Selecciona una o más competencias", options=descs_comp)
+
+        if seleccion_comp:
+            st.write(f"**Competencias seleccionadas:** {', '.join(seleccion_comp)}")
+            comp_sel = comp[comp['DESC_COMPETENCIA'].isin(seleccion_comp)]
+            # Mostrar precios de las seleccionadas
+            ultimos_precios = (
+                comp_sel.groupby('DESC_COMPETENCIA')['PRECIO_COMPETENCIA']
+                .last()
+                .to_dict()
+            )
+
+            for nombre, precio in ultimos_precios.items():
+                st.write(f"**{nombre}:** {precio:.2f}")
         else:
-            layout = pd.read_excel(archivo)
-        st.success("Layout cargado correctamente")
-        st.dataframe(layout)
-
-elif opcion == "Capturar Manualmente":
-    # PRODUCTOS 
-    conn = snowflake.connector.connect(
-        user=st.secrets["snowflake"]["user"],
-        password=st.secrets["snowflake"]["password"],
-        account=st.secrets["snowflake"]["account"],
-        database=st.secrets["snowflake"]["database"],
-        schema=st.secrets["snowflake"]["schema"]
-        )
-
-    #query = f"""SELECT DISTINCT 
-    #                MRCNOMBRE AS MARCA,
-    #                AGPPAUTANOMBRE AS AGRUPACION_PAUTA,
-    #                PRONOMBRE AS PRODUCTO_BASE,
-    #                PROPSTCODBARRAS AS SKU, 
-    #                PROPSTNOMBRE AS PRODUCTO
-    #            FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
-    #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
-    #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
-    #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
-    #                WHERE t.anio >= 2023"""
-
-    query = f"""  SELECT distinct p.propstcodbarras as SKU,
-        p.propstid AS PROPST_ID
-        FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
-        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
-        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
-        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
-        WHERE t.anio >= 2023
-          AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
-          AND c.TIPOCLIENTE='Monitoreado'"""
-    df_propstid =  pd.read_sql(query,conn)
-    #conn.close()
-    df_productos = pd.read_excel(r'Catálogo Corporativo Final.xlsx',sheet_name='Catálogo')
-    df_productos = df_productos[df_productos['IdPais']==1].copy()
-    df_productos = df_propstid.merge(df_productos,left_on='PROPST_ID',right_on='ProPstID',how='left')
-    st.markdown("Agrega un SKU, selecciona canal y clima:")
-
-    col1, col2, col3, col4 = st.columns(4)
-
-    with col1:
-        marca = st.selectbox("Marca", sorted(df_productos["Marca"].unique()))
-
-    with col2:
-        agrupaciones = df_productos[df_productos["Marca"] == marca]["Agrupación Pauta"].unique()
-        agrupacion = st.selectbox("Agrupación", sorted(agrupaciones))
-
-    with col3:
-        productos_base = df_productos[
-            (df_productos["Marca"] == marca) &
-            (df_productos["Agrupación Pauta"] == agrupacion)
-        ]["Producto Base"].unique()
-        producto_base = st.selectbox("Producto Base", sorted(productos_base))
-
-    with col4:
-        skus_filtrados = df_productos[
-            (df_productos["Marca"] == marca) &
-            (df_productos["Agrupación Pauta"] == agrupacion) &
-            (df_productos["Producto Base"] == producto_base)
-        ][["SKU", "ProPstNombre"]]
-
-        sku_row = st.selectbox(
-            "SKU",
-            skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['ProPstNombre']}", axis=1)
-        )
+            st.info("Selecciona al menos una competencia para continuar.")
 
 
-    # Extraemos el SKU limpio y lo dejamos como texto
-    sku_val_prov = str(sku_row.split(" - ")[0]).strip()   
+
+        # Filtrar la fila seleccionada
+        #comp_sel = comp[comp['DESC_COMPETENCIA'] == seleccion_comp]
+        #comp_sel = comp[comp['DESC_COMPETENCIA'].isin(seleccion_comp)]
+
+
+        # Tomar el precio de esa competencia (puedes tomar el último o el promedio)
+        #precio_comp = comp_sel['PRECIO_COMPETENCIA'].iloc[-1]  # o .iloc[-1]
+
+        #st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")
+
+
+    else:
+        st.info("No hay información de competencia para este SKU.")
+
+
+# Inicializar lista en session_state
+if "manual_layout" not in st.session_state:
+    st.session_state.manual_layout = []
+
+# Botón para agregar
+if st.button("Agregar SKU a la lista"):
     
-    col1, col2, col3, col4 = st.columns(4)
+    # Verificar si hay variable de competencia seleccionada
+    desc_competencia = seleccion_comp if "seleccion_comp" in locals() else ""
 
-    with col1:
-        canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
-    with col2:
-        precio_act = st.text_input("Precio (opcional)")
-    with col3:
-        # Cargar los costos desde Excel
-        costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
-        costos = costos.rename(columns={
-            'CODIGOBARRAS': 'PROPSTCODBARRAS',
-            'COSTO_GESTION': 'Costo'
-        })  
-        costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()  
-        costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
-        # Filtrar por el SKU actual
-        costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
 
-        # Si el SKU existe en el archivo, precargar su costo
-        if not costo_filtrado.empty:
-            costo_default = costo_filtrado.iloc[0]
+    # Validamos que sea número
+    if precio_act.replace(".", "", 1).isdigit():  
+        precio = float(precio_act)
+        # Solo convierte costo si tiene un valor numérico
+        if costo_act and costo_act.replace(".", "", 1).isdigit():
+            costo = float(costo_act)
         else:
-            costo_default = ""
-
-        # Mostrar el campo editable con el valor precargado
-        costo_act = st.text_input("Costo (opcional)", value=costo_default)
-    with col4:  
-        st.markdown("Clima")  
-        clima = st.checkbox("¿Considerar Clima?", value=True)    
-
-
-    # AGREGAMOS LA COMPETENCIA SI EXISTE 
-    col1,col2 = st.columns(2)
-    with col1:
-   
-        # Cargar datos de competencia
-        comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
-        comp.columns = [c.strip() for c in comp.columns]
-        comp = comp.rename(columns={
-            'SKU': 'PROPSTCODBARRAS',
-            'Descripcion Competencia': 'DESC_COMPETENCIA',
-            'Precio Competencia': 'PRECIO_COMPETENCIA'
+            costo = ""
+        prod = sku_row.split(" - ")[1] 
+        sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
+        st.session_state.manual_layout.append({
+            "SKU": sku_val,
+            "PropstNombre":prod,
+            "Canal": canal,
+            "Clima": clima,
+            "Precio Actual": precio,
+            "Costo Actual": costo,
+            "DESC_COMPETENCIA": desc_competencia
         })
-        comp = comp[['PROPSTCODBARRAS','ANIO','DESC_COMPETENCIA','SEMNUMERO','PRECIO_COMPETENCIA']]
-        comp['PROPSTCODBARRAS'] = comp['PROPSTCODBARRAS'].astype(str).str.strip()  
-        comp = comp[comp['PROPSTCODBARRAS'] == sku_val_prov]  # filtrar por SKU
-
-        # Si hay competencia, permitir seleccionar
-        if not comp.empty:
-            # Mostrar un selectbox con las descripciones únicas de competidores
-            descs_comp = comp['DESC_COMPETENCIA'].unique().tolist()
-            #Cambio MLTCOMP
-            #seleccion_comp = st.selectbox("Selecciona competencia", options=descs_comp)
-            seleccion_comp = st.multiselect("Selecciona una o más competencias", options=descs_comp)
-
-            if seleccion_comp:
-                st.write(f"**Competencias seleccionadas:** {', '.join(seleccion_comp)}")
-                comp_sel = comp[comp['DESC_COMPETENCIA'].isin(seleccion_comp)]
-                # Mostrar precios de las seleccionadas
-                ultimos_precios = (
-                    comp_sel.groupby('DESC_COMPETENCIA')['PRECIO_COMPETENCIA']
-                    .last()
-                    .to_dict()
-                )
-
-                for nombre, precio in ultimos_precios.items():
-                    st.write(f"**{nombre}:** {precio:.2f}")
-            else:
-                st.info("Selecciona al menos una competencia para continuar.")
-
-
-
-            # Filtrar la fila seleccionada
-            #comp_sel = comp[comp['DESC_COMPETENCIA'] == seleccion_comp]
-            #comp_sel = comp[comp['DESC_COMPETENCIA'].isin(seleccion_comp)]
-
-
-            # Tomar el precio de esa competencia (puedes tomar el último o el promedio)
-            #precio_comp = comp_sel['PRECIO_COMPETENCIA'].iloc[-1]  # o .iloc[-1]
-
-            #st.write(f"**Precio competencia seleccionado:** {precio_comp:.2f}")
-
-
-        else:
-            st.info("No hay información de competencia para este SKU.")
-
-
-    # Inicializar lista en session_state
-    if "manual_layout" not in st.session_state:
-        st.session_state.manual_layout = []
-
-    # Botón para agregar
-    if st.button("Agregar SKU a la lista"):
-        
-        # Verificar si hay variable de competencia seleccionada
-        desc_competencia = seleccion_comp if "seleccion_comp" in locals() else ""
-
+        st.success(f"SKU {sku_val} agregado a la lista.")
+    elif precio_act == "":
+        precio =""
+        costo =""
+        prod = sku_row.split(" - ")[1] 
+        sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
+        st.session_state.manual_layout.append({
+            "SKU": sku_val,
+            "PropstNombre":prod,
+            "Canal": canal,
+            "Clima": clima,
+            "Precio Actual": precio,
+            "Costo Actual": costo,
+            "DESC_COMPETENCIA": desc_competencia
+        })
+        st.success(f"SKU {sku_val} agregado a la lista.")
+    else:
+        st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
     
-        # Validamos que sea número
-        if precio_act.replace(".", "", 1).isdigit():  
-            precio = float(precio_act)
-            # Solo convierte costo si tiene un valor numérico
-            if costo_act and costo_act.replace(".", "", 1).isdigit():
-                costo = float(costo_act)
-            else:
-                costo = ""
-            prod = sku_row.split(" - ")[1] 
-            sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
-            st.session_state.manual_layout.append({
-                "SKU": sku_val,
-                "PropstNombre":prod,
-                "Canal": canal,
-                "Clima": clima,
-                "Precio Actual": precio,
-                "Costo Actual": costo,
-                "DESC_COMPETENCIA": desc_competencia
-            })
-            st.success(f"SKU {sku_val} agregado a la lista.")
-        elif precio_act == "":
-            precio =""
-            costo =""
-            prod = sku_row.split(" - ")[1] 
-            sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
-            st.session_state.manual_layout.append({
-                "SKU": sku_val,
-                "PropstNombre":prod,
-                "Canal": canal,
-                "Clima": clima,
-                "Precio Actual": precio,
-                "Costo Actual": costo,
-                "DESC_COMPETENCIA": desc_competencia
-            })
-            st.success(f"SKU {sku_val} agregado a la lista.")
-        else:
-            st.error("⚠️ Solo se permiten números (ej: 123 o 123.45)")
-        
 
-    # Mostrar tabla acumulada
-    if st.session_state.manual_layout:
-        st.markdown("### SKUs capturados:")
-        
-        layout = pd.DataFrame(st.session_state.manual_layout)
-        layout["DESC_COMPETENCIA"] = layout["DESC_COMPETENCIA"].apply(
-            lambda x: x if isinstance(x, list)
-            else ([] if pd.isna(x) or x == "" else [x])
-        )
-        st.dataframe(layout)
+# Mostrar tabla acumulada
+if st.session_state.manual_layout:
+    st.markdown("### SKUs capturados:")
+    
+    layout = pd.DataFrame(st.session_state.manual_layout)
+    layout["DESC_COMPETENCIA"] = layout["DESC_COMPETENCIA"].apply(
+        lambda x: x if isinstance(x, list)
+        else ([] if pd.isna(x) or x == "" else [x])
+    )
+    st.dataframe(layout)
 
 
 # Procesar layout
