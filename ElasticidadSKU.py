@@ -267,11 +267,8 @@ class ElasticidadCB:
     def carga_competencia(self):
         try:
             self.status=10
-            if self.pais=='México':
-                comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
-            else:
-                comp = pd.read_excel(r"Competencias_Elasticidades_Int.xlsx")
-                comp = comp[comp['Pais']==self.pais]
+            comp = pd.read_excel(r"Competencias_Elasticidades_VF.xlsx")
+            comp = comp[comp['Pais']==self.pais]
             comp.columns = [c.strip() for c in comp.columns]
             comp = comp.rename(columns={
                 'SKU': 'PROPSTCODBARRAS',
