@@ -161,7 +161,8 @@ col1,col2 = st.columns(2)
 with col1:
 
     # Cargar datos de competencia
-    comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
+    comp = pd.read_excel(r"Competencias_Elasticidades_VF.xlsx")
+    comp = comp[comp['Pais']==pais]
     comp.columns = [c.strip() for c in comp.columns]
     comp = comp.rename(columns={
         'SKU': 'PROPSTCODBARRAS',
