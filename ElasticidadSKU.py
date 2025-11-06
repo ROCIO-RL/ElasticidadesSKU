@@ -157,7 +157,7 @@ class ElasticidadCB:
         LEFT JOIN PRD_STG.GNM_CT.GNMPAIS p ON p.PAISID=so.PAISID  
         WHERE s.SEMANIO>=2023   
                 AND P.PAIS='{self.pais}'
-                AND p.propstcodbarras = '{self.codbarras}'
+                AND es.propstcodbarras = '{self.codbarras}'
                 AND cl.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
                 AND cl.GRPCLASIFICACION='Monitoreado' 
         """    
