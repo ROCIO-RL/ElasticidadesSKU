@@ -172,7 +172,7 @@ class ElasticidadCB:
 
         else:
             self.sellout = pd.read_sql(query_int, conn)
-            conn.close()
+            #conn.close()
 
             # Verificar si todo el periodo carece de neto (es nulo o cero)
             '''if self.sellout['MONTODESPNETO'].isnull().all() or (self.sellout['MONTODESPNETO'] == 0).all():
