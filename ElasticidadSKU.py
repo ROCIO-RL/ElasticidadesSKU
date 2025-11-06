@@ -128,7 +128,7 @@ class ElasticidadCB:
                 schema=st.secrets["snowflake"]["schema"]
             )
 
-            # 🔹 Consulta 1: relación semana ↔ TMPID (mes)
+            # relación semana  TMPID (mes)
             query_tiempo = """
             SELECT TMPANIOSEMANAGENOMMA AS ANIO,
                 TMPSEMANAANIOGENOMMA AS SEMNUMERO,
@@ -138,7 +138,7 @@ class ElasticidadCB:
             """
             tiempo = pd.read_sql(query_tiempo, conn)
 
-            # 🔹 Consulta 2: tipo de cambio mensual
+            # tipo de cambio mensual
             query_dolares = """
             SELECT TMPID, ML_USD
             FROM PRD_CNS_MX.DM.TIPO_CAMBIO_X_PAIS
@@ -148,10 +148,10 @@ class ElasticidadCB:
             dolares = pd.read_sql(query_dolares, conn)
             conn.close()
 
-            # 🔹 Merge para expandir ML_USD a todas las semanas
+            # Merge para expandir ML_USD a todas las semanas
             tipo_cambio_semana = tiempo.merge(dolares, on='TMPID', how='left')
 
-            # 🔹 Merge con venta
+            #  Merge con venta
             venta = venta.merge(tipo_cambio_semana[['ANIO', 'SEMNUMERO', 'ML_USD']],
                                 on=['ANIO', 'SEMNUMERO'], how='left')
 
@@ -332,6 +332,50 @@ class ElasticidadCB:
                 return pd.DataFrame()
 
             
+            # --- Conversión a USD si el país es Argentina ---
+            if self.pais == 'Argentina':
+                conn = snowflake.connector.connect(
+                    user=st.secrets["snowflake"]["user"],
+                    password=st.secrets["snowflake"]["password"],
+                    account=st.secrets["snowflake"]["account"],
+                    database=st.secrets["snowflake"]["database"],
+                    schema=st.secrets["snowflake"]["schema"]
+                )
+
+                # 🔹 Traemos relación semana ↔ TMPID (mes)
+                query_tiempo = """
+                SELECT TMPANIOSEMANAGENOMMA AS ANIO,
+                    TMPSEMANAANIOGENOMMA AS SEMNUMERO,
+                    TMPID
+                FROM PRD_CNS_MX.CATALOGOS.VW_CAT_TIEMPO
+                WHERE TMPID >= 20230101
+                """
+                tiempo = pd.read_sql(query_tiempo, conn)
+
+                # 🔹 Traemos tipo de cambio mensual
+                query_dolares = """
+                SELECT TMPID, ML_USD
+                FROM PRD_CNS_MX.DM.TIPO_CAMBIO_X_PAIS
+                WHERE paisid = 9
+                AND tmpid >= 20230101
+                """
+                dolares = pd.read_sql(query_dolares, conn)
+                conn.close()
+
+                # 🔹 Expandimos tipo de cambio a todas las semanas
+                tipo_cambio_semana = tiempo.merge(dolares, on='TMPID', how='left')
+
+                # 🔹 Merge con comp
+                comp = comp.merge(tipo_cambio_semana[['ANIO', 'SEMNUMERO', 'ML_USD']],
+                                on=['ANIO', 'SEMNUMERO'], how='left')
+
+                # 🔹 Convertimos los precios de competencia a USD
+                comp['PRECIO_COMPETENCIA'] = comp['PRECIO_COMPETENCIA'] / comp['ML_USD']
+
+        
+
+
+
             self.status=1
             # Pivot para tener una columna por competencia
             comp_pivot = comp.pivot_table(
