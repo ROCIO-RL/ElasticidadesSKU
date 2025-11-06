@@ -34,6 +34,16 @@ query = f"""SELECT
             TEMPMAX 
         FROM PRD_CNS_MX.SO_HECHOS.VW_DATOS_CLIMA_MX 
         WHERE TMPANIOSEMANAGENOMMA>=2023"""
+query_int =f"""
+            SELECT 
+                Pais,
+                TMPANIOSEMANAGENOMMA, 
+                TMPSEMANAANIOGENOMMA, 
+                TEMPMAX 
+            FROM PRD_CNS_MX.SO_HECHOS.VW_DATOS_CLIMA_INT 
+            WHERE TMPANIOSEMANAGENOMMA>=2023
+            """
+
 query2="""SELECT 
             PROPSTCODBARRAS,
             MIN(PROPSTID) AS PROPSTID 
@@ -41,6 +51,8 @@ query2="""SELECT
         GROUP BY PROPSTCODBARRAS"""
 clima_bd = pd.read_sql(query,conn)
 clima_bd.columns=['Año','Sem','Temperatura']
+clima_bd_int = pd.read_sql(query_int,conn)
+clima_bd_int.columns=['Pais','Año','Sem','Temperatura']
 codbarras=pd.read_sql(query2,conn)
 conn.close()
 
@@ -58,7 +70,7 @@ class ElasticidadCB:
     from langchain_community.llms import Ollama
     llm = Ollama(model="llama3")
     pd.options.display.float_format = '{:,.2f}'.format
-    def __init__(self, codbarras, canal, temp,desc_competencias,ruta_competencia="Competencia_Elasticidades.xlsx", pais="México"):
+    def __init__(self, codbarras, canal, temp,desc_competencias,pais,ruta_competencia="Competencia_Elasticidades.xlsx"):
         """
         codbarras: Código de barras del producto
         canal: 'Autoservicios', 'Farmacias' o 'Moderno'
@@ -77,25 +89,27 @@ class ElasticidadCB:
         self.status= None
 
     def calcula_precio(self, venta):
-        # Filtrado según canal
-        if self.canal == 'Autoservicios':
-            venta = venta[(venta['CADID'].isin([2,1,15,18,3,593])) &
-                          (venta['MONTORETAIL'] > 0) &
-                          (venta['UNIDADESDESP'] > 0)].copy()
-        elif self.canal == 'Farmacias':
-            venta = venta[(venta['CADID'].isin([27,29])) &
-                          (venta['MONTORETAIL'] > 0) &
-                          (venta['UNIDADESDESP'] > 0)].copy()
-        elif self.canal == 'Moderno':
-            venta = venta[(venta['CADID'].isin([1,27,18,15,2,16,3,593])) &
-                          (venta['MONTORETAIL'] > 0) &
-                          (venta['UNIDADESDESP'] > 0)].copy()
+        if self.pais=='México':
+            # Filtrado según canal
+            if self.canal == 'Autoservicios':
+                venta = venta[(venta['CADID'].isin([2,1,15,18,3,593])) &
+                            (venta['MONTORETAIL'] > 0) &
+                            (venta['UNIDADESDESP'] > 0)].copy()
+            elif self.canal == 'Farmacias':
+                venta = venta[(venta['CADID'].isin([27,29])) &
+                            (venta['MONTORETAIL'] > 0) &
+                            (venta['UNIDADESDESP'] > 0)].copy()
+            elif self.canal == 'Moderno':
+                venta = venta[(venta['CADID'].isin([1,27,18,15,2,16,3,593])) &
+                            (venta['MONTORETAIL'] > 0) &
+                            (venta['UNIDADESDESP'] > 0)].copy()
 
         # Precio unitario
         venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP']
-        # Aplicar IVA
-        tasa_iva = 0.16
-        venta['Precio'] = venta['Precio'] * (1 + tasa_iva)
+        if self.pais=='México':
+            # Aplicar IVA
+            tasa_iva = 0.16
+            venta['Precio'] = venta['Precio'] * (1 + tasa_iva)
 
         # Promedio semanal
         if self.canal in ['Autoservicios','Moderno']:
@@ -135,8 +149,7 @@ class ElasticidadCB:
             es.PROPSTCODBARRAS,
             so.cadid,
             so.SOUTCANTDESP AS UnidadesDesp,
-            NVL(so.soutmontodesp,0) AS MontoDespNeto,
-            NVL(so.soutmontodespbrt,0) AS MontoDespBruto,
+            NVL(so.soutmontodesp,0) AS MontoRetail
         FROM PRD_CNS_MX.DM.FACT_SO_SEM_CAD_SKU_INT so 
         LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURAPRODUCTOSTOTALPAISES es ON es.PROPSTID=so.PROPSTID 
         LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURACLIENTESSEGPTVTOTAL cl ON cl.CADID=so.CADID  
@@ -151,16 +164,59 @@ class ElasticidadCB:
         if self.pais=='México':
             self.sellout = pd.read_sql(query, conn)
             conn.close()
+            # Filtro de cadenas según canal
+            if self.canal == 'Autoservicios':
+                self.sellout = self.sellout[self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
+            elif self.canal == 'Farmacias':
+                self.sellout = self.sellout[~self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
+
         else:
             self.sellout = pd.read_sql(query_int, conn)
             conn.close()
 
-        # Filtro de cadenas según canal
-        if self.canal == 'Autoservicios':
-            self.sellout = self.sellout[self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
-        elif self.canal == 'Farmacias':
-            self.sellout = self.sellout[~self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
+            # Verificar si todo el periodo carece de neto (es nulo o cero)
+            '''if self.sellout['MONTODESPNETO'].isnull().all() or (self.sellout['MONTODESPNETO'] == 0).all():
+                # Todo el periodo sin neto → usar bruto
+                self.sellout['MONTORETAIL'] = self.sellout['MONTODESPBRUTO']
+            else:
+                # Si hay al menos un neto válido → aplicar regla fila por fila
+                self.sellout['MONTORETAIL'] = self.sellout['MONTODESPNETO'].where(
+                    self.sellout['MONTODESPNETO'].notnull() & (self.sellout['MONTODESPNETO'] != 0),
+                    self.sellout['MONTODESPBRUTO']
+                )'''
+            
 
+            query_cadid = f"""
+                SELECT DISTINCT
+                    P.PAIS,
+                    so.cadid,
+                    cl.TIPOESTNOMBRE
+                FROM PRD_CNS_MX.DM.FACT_SO_SEM_CAD_SKU_INT so 
+                LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURAPRODUCTOSTOTALPAISES es ON es.PROPSTID=so.PROPSTID 
+                LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURACLIENTESSEGPTVTOTAL cl ON cl.CADID=so.CADID  
+                LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_CATSEMANAS s ON s.SEMID=so.SEMID 
+                LEFT JOIN PRD_STG.GNM_CT.GNMPAIS p ON p.PAISID=so.PAISID  
+                WHERE s.SEMANIO>=2023   
+                AND cl.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
+                AND cl.GRPCLASIFICACION='Monitoreado'
+                AND P.PAIS='{self.pais}'
+                """
+
+            df_cadid = pd.read_sql(query_cadid, conn)
+            conn.close()
+            cadid_autoserv = df_cadid.loc[df_cadid['TIPOESTNOMBRE'] == 'Autoservicios', 'CADID'].unique().tolist()
+            cadid_farm = df_cadid.loc[df_cadid['TIPOESTNOMBRE'] == 'Cadenas de farmacia', 'CADID'].unique().tolist()
+            # Filtro de cadenas según canal
+            if self.canal == 'Autoservicios':
+                self.sellout = self.sellout[self.sellout['CADID'].isin(cadid_autoserv)]
+            elif self.canal == 'Farmacias':
+                self.sellout = self.sellout[~self.sellout['CADID'].isin(cadid_farm)]
+
+
+
+
+
+        
         # Precios semanales
         self.precio_gli = self.calcula_precio(self.sellout)
 
@@ -211,7 +267,11 @@ class ElasticidadCB:
     def carga_competencia(self):
         try:
             self.status=10
-            comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
+            if self.pais=='México':
+                comp = pd.read_excel(r"Competencias_Elasticidades.xlsx")
+            else:
+                comp = pd.read_excel(r"Competencias_Elasticidades_Int.xlsx")
+                comp = comp[comp['Pais']==self.pais]
             comp.columns = [c.strip() for c in comp.columns]
             comp = comp.rename(columns={
                 'SKU': 'PROPSTCODBARRAS',
@@ -279,19 +339,29 @@ class ElasticidadCB:
 
         layout.dropna(inplace=True)
 
-        # Dummy de Julio Regalado
-        layout["JULIO_REGALADO"] = np.where(layout["SEMNUMERO"].between(21, 31), 1, 0)
-        print("Variable dummy 'JULIO_REGALADO' agregada correctamente.")
 
-        # Dummy de Mega Pauta
-        layout["MEGA_PAUTA"] = np.where(layout["SEMNUMERO"].between(1, 6), 1, 0)
-        print("Variable dummy 'MEGA_PAUTA' agregada correctamente.")
+        if self.pais=='México':
+            # Dummy de Julio Regalado
+            layout["JULIO_REGALADO"] = np.where(layout["SEMNUMERO"].between(21, 31), 1, 0)
+            print("Variable dummy 'JULIO_REGALADO' agregada correctamente.")
 
-        #clima
-        if self.temp:
-            temperatura = clima_bd.copy()
-            temperatura.columns = ['ANIO','SEMNUMERO','CLIMA']
-            layout = layout.merge(temperatura, on=['ANIO','SEMNUMERO'], how='left')
+            # Dummy de Mega Pauta
+            layout["MEGA_PAUTA"] = np.where(layout["SEMNUMERO"].between(1, 6), 1, 0)
+            print("Variable dummy 'MEGA_PAUTA' agregada correctamente.")
+
+            #clima
+            if self.temp:
+                temperatura = clima_bd.copy()
+                temperatura.columns = ['ANIO','SEMNUMERO','CLIMA']
+                layout = layout.merge(temperatura, on=['ANIO','SEMNUMERO'], how='left')
+        else:
+            #clima
+            if self.temp:
+                temperatura = clima_bd_int.copy()
+                temperatura = temperatura[temperatura['Pais'] == self.pais]
+                temperatura.columns = ['Pais','ANIO','SEMNUMERO','CLIMA']
+                temperatura = temperatura[['ANIO','SEMNUMERO','CLIMA']]
+                layout = layout.merge(temperatura, on=['ANIO','SEMNUMERO'], how='left')
 
         # Competencia
         '''competencia = self.carga_competencia()
@@ -374,14 +444,16 @@ class ElasticidadCB:
         for col in data.columns:
             if col.startswith('PRECIO_COMPETENCIA'):
                 formula += f' + {col}'
-        
-        # Agregamos la dummy de Julio Regalado
-        if 'JULIO_REGALADO' in data.columns:
-            formula += ' + JULIO_REGALADO'
 
-        # Agregamos la dummy de Julio Regalado
-        if 'MEGA_PAUTA' in data.columns:
-            formula += ' + MEGA_PAUTA'
+
+        if self.pais=='México':
+            # Agregamos la dummy de Julio Regalado
+            if 'JULIO_REGALADO' in data.columns:
+                formula += ' + JULIO_REGALADO'
+
+            # Agregamos la dummy de Julio Regalado
+            if 'MEGA_PAUTA' in data.columns:
+                formula += ' + MEGA_PAUTA'
 
         print(f"Fórmula del modelo: {formula}")
         modelo = smf.ols(formula, data=data).fit()

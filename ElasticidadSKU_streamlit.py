@@ -234,6 +234,7 @@ if st.button("Agregar SKU a la lista"):
         prod = sku_row.split(" - ")[1] 
         sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
         st.session_state.manual_layout.append({
+            "Pais": pais,
             "SKU": sku_val,
             "PropstNombre":prod,
             "Canal": canal,
@@ -249,6 +250,7 @@ if st.button("Agregar SKU a la lista"):
         prod = sku_row.split(" - ")[1] 
         sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
         st.session_state.manual_layout.append({
+            "Pais": pais,
             "SKU": sku_val,
             "PropstNombre":prod,
             "Canal": canal,
@@ -284,6 +286,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
     with st.spinner("Calculando elasticidades"):
         for _, row in layout.iterrows():
+            pais = row['Pais']
             sku = row["SKU"]
             canal = row["Canal"]
             temp = row["Clima"]
@@ -302,7 +305,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     codbarras=sku,
                     canal=canal,
                     temp=temp,
-                    desc_competencias=desc_competencia    # ahora es lista, no string
+                    desc_competencias=desc_competencia,    # ahora es lista, no string
+                    pais = pais
                 )
 
                 elasticidad.consulta_sellout()
