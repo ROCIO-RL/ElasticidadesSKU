@@ -19,7 +19,7 @@ def highlight_max(s):
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
 
 st.title("Elasticidades por SKU")
-st.markdown("Sube un layout o captura manualmente los SKUs para calcular elasticidades.")
+#st.markdown("Sube un layout o captura manualmente los SKUs para calcular elasticidades.")
 
 # Selección de método de carga
 #opcion = st.radio("Selecciona cómo quieres cargar los SKUs:", 
@@ -59,7 +59,8 @@ conn = snowflake.connector.connect(
 #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
 #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
 #                WHERE t.anio >= 2023"""
-
+df_productos = pd.read_excel(r'Catálogo Corporativo Final.xlsx',sheet_name='Catálogo')
+pais = st.selectbox("Pais", sorted(df_productos["Pais"].unique()))
 query = f"""  SELECT distinct p.propstcodbarras as SKU,
     p.propstid AS PROPST_ID
     FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
@@ -69,9 +70,24 @@ query = f"""  SELECT distinct p.propstcodbarras as SKU,
     WHERE t.anio >= 2023
         AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
         AND c.TIPOCLIENTE='Monitoreado'"""
-df_propstid =  pd.read_sql(query,conn)
-#conn.close()
-df_productos = pd.read_excel(r'Catálogo Corporativo Final.xlsx',sheet_name='Catálogo')
+query_int =f"""SELECT distinct
+            es.PROPSTCODBARRAS as SKU,
+            es.propstid AS PROPST_ID
+        FROM PRD_CNS_MX.DM.FACT_SO_SEM_CAD_SKU_INT so 
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURAPRODUCTOSTOTALPAISES es ON es.PROPSTID=so.PROPSTID 
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURACLIENTESSEGPTVTOTAL cl ON cl.CADID=so.CADID  
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_CATSEMANAS s ON s.SEMID=so.SEMID 
+        LEFT JOIN PRD_STG.GNM_CT.GNMPAIS p ON p.PAISID=so.PAISID  
+        WHERE s.SEMANIO>=2023   
+                AND P.PAIS='{pais}'
+                AND cl.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
+                AND cl.GRPCLASIFICACION='Monitoreado'"""
+if pais == 'México':
+    df_propstid =  pd.read_sql(query,conn)
+    conn.close()
+else:
+    df_propstid =  pd.read_sql(query_int,conn)
+    conn.close()
 df_productos = df_productos[df_productos['IdPais']==1].copy()
 df_productos = df_propstid.merge(df_productos,left_on='PROPST_ID',right_on='ProPstID',how='left')
 st.markdown("Agrega un SKU, selecciona canal y clima:")
