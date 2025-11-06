@@ -155,7 +155,7 @@ class ElasticidadCB:
         LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURACLIENTESSEGPTVTOTAL cl ON cl.CADID=so.CADID  
         LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_CATSEMANAS s ON s.SEMID=so.SEMID 
         LEFT JOIN PRD_STG.GNM_CT.GNMPAIS p ON p.PAISID=so.PAISID  
-        WHERE s.SEMANIO>=2023   
+        WHERE s.SEMANIO>=2024  
                 AND P.PAIS='{self.pais}'
                 AND es.propstcodbarras = '{self.codbarras}'
                 AND cl.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
@@ -196,7 +196,7 @@ class ElasticidadCB:
                 LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURACLIENTESSEGPTVTOTAL cl ON cl.CADID=so.CADID  
                 LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_CATSEMANAS s ON s.SEMID=so.SEMID 
                 LEFT JOIN PRD_STG.GNM_CT.GNMPAIS p ON p.PAISID=so.PAISID  
-                WHERE s.SEMANIO>=2023   
+                WHERE s.SEMANIO>=2024   
                 AND cl.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
                 AND cl.GRPCLASIFICACION='Monitoreado'
                 AND P.PAIS='{self.pais}'
@@ -327,7 +327,10 @@ class ElasticidadCB:
 
     def prepara_datos(self):
         layout = self.sellout[(self.sellout['UNIDADESDESP'] > 0) & (self.sellout['Precio'].notna())].copy()
-        layout = layout[layout['ANIO'] >= 2023]
+        if self.pais=='México':
+            layout = layout[layout['ANIO'] >= 2023]
+        else:
+            layout = layout[layout['ANIO'] >= 2024]
 
         print(f"Valores nulos:\n{layout.isna().sum()}\nBorrando nulos...")
 
