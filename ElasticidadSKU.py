@@ -329,7 +329,7 @@ class ElasticidadCB:
         layout = self.sellout[(self.sellout['UNIDADESDESP'] > 0) & (self.sellout['Precio'].notna())].copy()
         layout = layout[layout['ANIO'] >= 2023]
 
-        print(f"Valores nulos:\n{layout.isna().sum()}\nBorrando nulos...")
+        #print(f"Valores nulos:\n{layout.isna().sum()}\nBorrando nulos...")
 
         if layout['Precio'].isna().sum() > 30:
             raise ValueError("El dataframe contiene demasiados nulos")
