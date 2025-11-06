@@ -88,7 +88,8 @@ if pais == 'México':
 else:
     df_propstid =  pd.read_sql(query_int,conn)
     conn.close()
-df_productos = df_productos[df_productos['IdPais']==1].copy()
+#df_productos = df_productos[df_productos['IdPais']==1].copy()
+df_productos = df_productos[df_productos['Pais']==pais].copy()
 df_productos = df_propstid.merge(df_productos,left_on='PROPST_ID',right_on='ProPstID',how='left')
 st.markdown("Agrega un SKU, selecciona canal y clima:")
 
