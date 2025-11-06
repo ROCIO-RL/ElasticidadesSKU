@@ -510,7 +510,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                     El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                 """)
-
+                concatenado_competencia = ""  
                 if res.get('Competencias'):
                     st.markdown("💰 **Elasticidades de Competencia**")
                     concatenado_competencia = ""
@@ -663,7 +663,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 textposition="top center",
                                 marker=dict(color='red', size=10)
                             )
-                            st.plotly_chart(fig_demanda, use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
+                            st.plotly_chart(fig_demanda, use_container_width=True, key=f"fig_demanda_{sku}_{res['Canal']}_{escenario_id}")
                             with col2:
                                 #if sku in graficos_dispersion:
                                 #    st.plotly_chart(graficos_dispersion[sku], use_container_width=True, key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}")
