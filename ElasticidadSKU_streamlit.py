@@ -671,7 +671,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                     st.plotly_chart(
                                         graficos_dispersion[clave],
                                         use_container_width=True,
-                                        key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}"
+                                        key=f"fig_disp_{sku}_{res['Canal']}_{escenario_id}"
                                     )
 
                     except Exception as e:
@@ -686,7 +686,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         st.plotly_chart(
                             graficos_dispersion[clave],
                             use_container_width=True,
-                            key=f"fig_disp_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}"
+                            key=f"fig_disp_{sku}_{res['Canal']}_{escenario_id}"
                         )
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                     insight = elasticidad.genera_insight_op(precio=None,df=None)
@@ -704,7 +704,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.plotly_chart(
                         graficos[clave],
                         use_container_width=True,
-                        key=f"fig_base_{sku}_{res['Canal']}_{precio}_{concatenado_competencia}_{escenario_id}"
+                        key=f"fig_base_{sku}_{res['Canal']}_{escenario_id}"
                     )
                
 
