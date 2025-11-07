@@ -335,6 +335,12 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 clave = f"{sku}_{id_escenario}"
                 graficos[clave] = fig
                 graficos_dispersion[clave] = dispersion
+                if grps:
+                    grps_actuales_df = elasticidad.preparar_grps()
+                    grps_actuales_df = grps_actuales_df.sort_values(by=['ANIO', 'SEMNUMERO'])
+                    grps_actuales = grps_actuales_df['Grps'].iloc[-1]
+                else:
+                    grps_actuales = 0 
 
                 #insight = elasticidad.genera_insight_op()
                 def safe_round(value, dec=4):
@@ -374,6 +380,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             + np.log(float(precioact or 1)) * (elasticidad.coeficientes.get('Precio', 0) or 0)
                             + comp_effect
                             + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
+                            + grps_actuales *(elasticidad.coeficientes.get('Grps', 0) or 0)
                             + (indicador_JR * elasticidad.coeficientes.get('JULIO_REGALADO', 0) if indicador_JR else 0)
                             + (indicador_MP * elasticidad.coeficientes.get('MEGA_PAUTA', 0) if indicador_MP else 0)
                         ),
@@ -385,6 +392,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'SKU': sku,
                     'Canal': canal,
                     'Producto': prod,
+                    'Temperatura': temp,
+                    'Grps':grps,
                     'Precio Actual':precioact,
                     'Costo Actual': costoact,
                     'intercepto':safe_round(elasticidad.coeficientes.get('Intercept'), 4),
@@ -425,6 +434,14 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Pvalue Mega Pauta':safe_round(elasticidad.pvalores.get('MEGA_PAUTA'), 4),
                     'Afectación Mega Pauta':safe_round(elasticidad.coeficientes.get('MEGA_PAUTA'), 4),
                     'Indicador Mega Pauta': indicador_MP,
+
+                    #Grps
+                    'Pvalue Grps':safe_round(elasticidad.pvalores.get('Grps'), 4),
+                    'Afectación Grps':safe_round(elasticidad.coeficientes.get('Grps'), 4),
+                    'Grps Actuales': grps_actuales,
+
+
+
                     'Id_unico': id_escenario
                     #"Insight": insight
                 })
@@ -443,7 +460,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
         for res in resultados:
             pais = res['Pais']
             escenario_id = res['Id_unico']
-            
+            temperatura = res['Temperatura']
+            grps = res['Grps']
             sku = res["SKU"]
             prod = res["Producto"]
             venta_base = res['Venta Base']
@@ -454,6 +472,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
             precio = res['Precio Actual']
             intercepto = res['intercepto']
             costoact = res['Costo Actual']
+            grps_actuales = res['Grps Actuales']
+            af_grps = res['fectación Grps']
+            af_grps = 0 if pd.isna(af_grps) else af_grps
             #insight = res['Insight']
             insight = ""
             #af_comp = res['Afectación Competencia']
@@ -529,13 +550,20 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         """)
                     if pv_MP > 0.05:
                         st.markdown(f"""La Mega Pauta NO tiene importancia estadisticamente (S01-S06)""")
-
+                if temperatura:
+                    st.markdown(f"""
+                        - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
+                        Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2f}**%.
+                    """)
+                if grps:
+                    st.markdown(f"""
+                        - 📈 **Grps:** {r2:.2f}.  
+                        Por cada 1% de incremento en los gprs el sellout cambia en un**{r2:.2f}**% .
+                    """)
                 st.markdown(f"""
-                    - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
-                    Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2f}**%.
-                    - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
-                    El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
-                """)
+                        - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
+                        El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
+                    """)
                 concatenado_competencia = ""  
                 if res.get('Competencias'):
                     st.markdown("💰 **Elasticidades de Competencia**")
@@ -558,6 +586,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         #intercepto = elasticidad.coeficientes.get('Intercept')
                         #beta_precio = elasticidad.coeficientes.get('Precio')
                         #beta_clima = elasticidad.coeficientes.get('CLIMA')
+
                         clima_valor = 20  # valor promedio o puedes obtenerlo del layout
                         #st.markdown(intercepto)
                         #st.markdown(af_precio)
@@ -600,6 +629,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             intercepto
                             + (np.log(precios) * af_precio)
                             + (clima_valor * af_clima)
+                            + (grps_actuales * af_grps)
                             + comp_effect
                             + (indicador_JR * af_JR if indicador_JR else 0)
                             + (indicador_MP * af_MP if indicador_MP else 0)
@@ -637,39 +667,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             costo_actual = None
 
                         if costo_actual is not None:
-                            if pais == 'Argentina':
-                                # --- Obtener tipo de cambio semanal ---
-                                conn = snowflake.connector.connect(
-                                    user=st.secrets["snowflake"]["user"],
-                                    password=st.secrets["snowflake"]["password"],
-                                    account=st.secrets["snowflake"]["account"],
-                                    database=st.secrets["snowflake"]["database"],
-                                    schema=st.secrets["snowflake"]["schema"]
-                                )
-
-                                query = """
-                                SELECT 
-                                    d.TMPID,
-                                    d.USD AS ML_USD
-                                FROM PRD_CNS_MX.CATALOGOS.VW_TIPO_CAMBIO_DIARIO AS d
-                                WHERE d.PAISID = 9
-                                AND d.TMPID >= 20250101
-                                ORDER BY d.TMPID DESC
-                                FETCH FIRST 1 ROWS ONLY;
-                                """
-                                dolares = pd.read_sql(query, conn)
-                                conn.close()
-                                # Extraer el valor (por ejemplo 18.25)
-                                usd_actual = dolares["ML_USD"].iloc[0]
-
-                                # Convertir el costo actual a dólares
-                                costo_actual_usd = costo_actual / usd_actual
-                                                            
-                                demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
-                                    demanda_df["Demanda Estimada"] * costo_actual_usd
-                                )
-                            else:
-                                demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
+                            demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
                                     demanda_df["Demanda Estimada"] * costo_actual
                                 )
 
