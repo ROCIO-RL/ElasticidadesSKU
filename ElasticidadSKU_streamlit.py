@@ -754,7 +754,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #st.dataframe(df)
                 
         
-                st.image("Logo2.png", width=120) 
+                st.image("Logo2.png", width=100) 
                 st.markdown("## Insight")
 
                 
