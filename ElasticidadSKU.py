@@ -655,7 +655,7 @@ class ElasticidadCB:
 
         if self.grps:
             
-            data_grps = preparar_grps()
+            data_grps = self.preparar_grps()
             #data_grps = data_medios.copy()
             layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
 
