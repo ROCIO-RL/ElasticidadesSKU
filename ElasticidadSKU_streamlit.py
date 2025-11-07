@@ -478,7 +478,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             intercepto = res['intercepto']
             costoact = res['Costo Actual']
             grps_actuales = res['Grps Actuales']
-            af_grps = res['fectación Grps']
+            af_grps = res['Afectación Grps']
             af_grps = 0 if pd.isna(af_grps) else af_grps
             #insight = res['Insight']
             insight = ""
