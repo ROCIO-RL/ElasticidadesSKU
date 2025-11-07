@@ -751,7 +751,9 @@ class ElasticidadCB:
         if self.temp:
             formula += ' + CLIMA'
 
-        if self.grps:
+        #if self.grps:
+        #    formula += ' + Grps'
+        if self.grps and 'Grps' in layout.columns and not layout['Grps'].isna().all():
             formula += ' + Grps'
 
         # Agregar todas las competencias
