@@ -750,8 +750,8 @@ class ElasticidadCB:
         if self.temp:
             formula += ' + CLIMA'
 
-        if self.grps:
-            formula += ' + Grps'
+        '''if self.grps:
+            formula += ' + Grps''''
 
         # Agregar todas las competencias
         for col in data.columns:
