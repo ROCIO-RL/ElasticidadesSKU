@@ -370,6 +370,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     )
                 
                 resultados.append({
+                    'Pais':pais,
                     'SKU': sku,
                     'Canal': canal,
                     'Producto': prod,
@@ -429,6 +430,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
         st.subheader(" Gráficos e Insights por SKU")
         for res in resultados:
+            pais = res['Pais']
             escenario_id = res['Id_unico']
             
             sku = res["SKU"]
@@ -617,9 +619,41 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             costo_actual = None
 
                         if costo_actual is not None:
-                            demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
-                                demanda_df["Demanda Estimada"] * costo_actual
-                            )
+                            if pais == 'Argentina':
+                                # --- Obtener tipo de cambio semanal ---
+                                conn = snowflake.connector.connect(
+                                    user=st.secrets["snowflake"]["user"],
+                                    password=st.secrets["snowflake"]["password"],
+                                    account=st.secrets["snowflake"]["account"],
+                                    database=st.secrets["snowflake"]["database"],
+                                    schema=st.secrets["snowflake"]["schema"]
+                                )
+
+                                query = """
+                                SELECT 
+                                    d.TMPID,
+                                    d.USD AS ML_USD
+                                FROM PRD_CNS_MX.CATALOGOS.VW_TIPO_CAMBIO_DIARIO AS d
+                                WHERE d.PAISID = 9
+                                AND d.TMPID >= 20250101
+                                ORDER BY d.TMPID DESC
+                                FETCH FIRST 1 ROWS ONLY;
+                                """
+                                dolares = pd.read_sql(query, conn)
+                                conn.close()
+                                # Extraer el valor (por ejemplo 18.25)
+                                usd_actual = dolares["ML_USD"].iloc[0]
+
+                                # Convertir el costo actual a dólares
+                                costo_actual_usd = costo_actual / usd_actual
+                                                            
+                                demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
+                                    demanda_df["Demanda Estimada"] * costo_actual_usd
+                                )
+                            else:
+                                demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
+                                    demanda_df["Demanda Estimada"] * costo_actual
+                                )
 
                             max_utilidad = demanda_df["Utilidad"].max()
 
