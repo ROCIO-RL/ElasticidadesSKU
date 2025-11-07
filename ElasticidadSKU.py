@@ -262,12 +262,26 @@ class ElasticidadCB:
             # --- Conversión a USD ---
             venta['Precio'] = venta['Precio'] / venta['ML_USD']
 
+            # --- Quitar atípicos usando IQR ---
+            Q1 = venta['Precio'].quantile(0.25)
+            Q3 = venta['Precio'].quantile(0.75)
+            IQR = Q3 - Q1
+            limite_inferior = Q1 - 1.5 * IQR
+            limite_superior = Q3 + 1.5 * IQR
+
+            # Filtrar valores dentro del rango válido
+            venta = venta[
+                (venta['Precio'] >= limite_inferior) &
+                (venta['Precio'] <= limite_superior)
+            ].copy()
+
             # --- Promedio semanal final ---
             precio = (
                 venta.groupby(['ANIO', 'SEMNUMERO'])['Precio']
                 .mean()
                 .reset_index()
             )
+
             return precio
 
 
