@@ -483,13 +483,15 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                             - 📊 **Ventas base semanas:** {venta_base:,} unidades.
                             Corresponde al calculo basado en el precio otorgado y al ajuste del modelo para el canal {canal}  
-                            - 💰 **Elasticidad precio:** {af_precio:.2f}.  
-                            Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.  
+                              
                             """)
                 if abs(af_precio) >= 1:
-                    st.markdown("**- Producto Elástico**")
+                    st.markdown("**Producto Elástico**")
                 else:
-                    st.markdown("**- Producto Inelástico**")
+                    st.markdown("**Producto Inelástico**")
+                
+                st.markdown(f"""- 💰 **Elasticidad precio:** {af_precio:.2f}.  
+                            Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.""")
 
                 #if af_comp != 0:
                 #    st.markdown(f"""
