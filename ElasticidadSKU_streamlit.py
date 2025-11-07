@@ -337,6 +337,14 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 clave = f"{sku}_{id_escenario}"
                 graficos[clave] = fig
                 graficos_dispersion[clave] = dispersion
+                st.write(f"🔎 DEBUG SKU {sku}")
+                st.write(f"  Status: {getattr(elasticidad, 'status', 'sin status')}")
+                st.write(f"  Coeficientes: {getattr(elasticidad, 'coeficientes', 'no definidos')}")
+                st.write(f"  Intercepto: {getattr(elasticidad, 'coeficientes', {}).get('Intercept', None)}")
+                st.write(f"  Afectación Precio: {getattr(elasticidad, 'coeficientes', {}).get('Precio', None)}")
+                st.write(f"  GRPs Actuales: {getattr(elasticidad, 'grps_actuales', None)}")
+                st.write(f"  País: {pais}, Canal: {canal}, Producto: {sku}")
+
                 
                 
 
