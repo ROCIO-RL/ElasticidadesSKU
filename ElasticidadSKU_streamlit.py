@@ -754,7 +754,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #st.dataframe(df)
                 
         
-                col1, col2 = st.columns([6, 1])  # Ajusta proporciones si quieres que el logo sea más pequeño
+                col1, col2 = st.columns([3, 4])  # Ajusta proporciones si quieres que el logo sea más pequeño
 
                 with col1:
                     st.markdown("## Insight")
