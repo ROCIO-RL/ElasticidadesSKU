@@ -760,7 +760,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown("## Insight")
 
                 with col2:
-                    st.image("logo.png", width=60)  # Ajusta el ancho según tu logo
+                    st.image("Logo2.png", width=60)  # Ajusta el ancho según tu logo
                 st.markdown(
                             f"""
                             <div style="
