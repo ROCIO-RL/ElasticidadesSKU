@@ -219,7 +219,10 @@ class ElasticidadCB:
                 preciosarg['PROPSTCODBARRAS'] == self.codbarras
             ][['ANIO', 'SEMNUMERO', 'Precio']]
 
-            # Traemos tipo de cambio semanal
+            # --- Merge con venta ---
+            venta = venta.merge(preciosarg, on=['ANIO', 'SEMNUMERO'], how='left')
+
+            # --- Obtener tipo de cambio semanal ---
             conn = snowflake.connector.connect(
                 user=st.secrets["snowflake"]["user"],
                 password=st.secrets["snowflake"]["password"],
@@ -250,17 +253,23 @@ class ElasticidadCB:
 
             dolares[['ANIO', 'SEMNUMERO']] = dolares[['ANIO', 'SEMNUMERO']].astype(int)
 
-            # Merge tipo de cambio
-            preciosarg = preciosarg.merge(dolares, on=['ANIO', 'SEMNUMERO'], how='left')
+            # --- Merge con tipo de cambio ---
+            venta = venta.merge(dolares, on=['ANIO', 'SEMNUMERO'], how='left')
 
-            # Convertir a USD
-            preciosarg['Precio'] = preciosarg['Precio'] / preciosarg['ML_USD']
-
-            # --- Sustituir columna de precios en venta ---
-            venta = venta.merge(preciosarg[['ANIO', 'SEMNUMERO', 'Precio']],
-                                on=['ANIO', 'SEMNUMERO'], how='left')
-            # Filtramos solo las filas donde sí se encontró precio nuevo
+            # --- Filtro: solo semanas con precio disponible ---
             venta = venta[venta['Precio'].notna()].copy()
+
+            # --- Conversión a USD ---
+            venta['Precio'] = venta['Precio'] / venta['ML_USD']
+
+            # --- Promedio semanal final ---
+            precio = (
+                venta.groupby(['ANIO', 'SEMNUMERO'])['Precio']
+                .mean()
+                .reset_index()
+            )
+            return precio
+
 
         else:
             print(f"País {self.pais} no contemplado.")
