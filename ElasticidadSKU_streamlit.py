@@ -754,16 +754,13 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #st.dataframe(df)
                 
         
-                st.markdown(
-                    """
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <h2 style="margin: 0;">Insight</h2>
-                        <img src="logo.png" width="60">
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+                col1, col2 = st.columns([6, 1])  # Ajusta proporciones si quieres que el logo sea más pequeño
 
+                with col1:
+                    st.markdown("## Insight")
+
+                with col2:
+                    st.image("logo.png", width=60)  # Ajusta el ancho según tu logo
                 st.markdown(
                             f"""
                             <div style="
