@@ -372,6 +372,7 @@ class ElasticidadCB:
 
 
 
+#n
             self.status=1
             # Pivot para tener una columna por competencia
             comp_pivot = comp.pivot_table(
