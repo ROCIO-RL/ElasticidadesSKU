@@ -162,7 +162,7 @@ with col4:
     st.markdown("Variables a considerar")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        clima = st.checkbox("Clima", value=True)
+        clima = st.checkbox("Clima", value=False)
     with col2:
         grps = st.checkbox("Grps", value=True)
 
