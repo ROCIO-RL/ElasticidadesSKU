@@ -117,7 +117,7 @@ class ElasticidadCB:
             semanas_validas = clientes_por_semana[clientes_por_semana['CADID'] >= 3][['ANIO','SEMNUMERO']]
             venta = venta.merge(semanas_validas, on=['ANIO','SEMNUMERO'])
         
-        
+        # --- Conversión a USD si el país es Argentina ---
         if self.pais == 'Argentina':
             conn = snowflake.connector.connect(
                 user=st.secrets["snowflake"]["user"],
@@ -372,7 +372,7 @@ class ElasticidadCB:
 
 
 
-#n
+
             self.status=1
             # Pivot para tener una columna por competencia
             comp_pivot = comp.pivot_table(
