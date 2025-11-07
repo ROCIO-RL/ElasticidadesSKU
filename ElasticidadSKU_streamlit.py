@@ -328,8 +328,22 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     pais = pais
                 )
 
-                elasticidad.consulta_sellout()
-                elasticidad.calcula_elasticidad()
+                #elasticidad.consulta_sellout()
+                #elasticidad.calcula_elasticidad()
+                try:
+                    elasticidad.consulta_sellout()
+                    st.write(f"✅ {sku}: consulta_sellout completada. Filas obtenidas: {len(getattr(elasticidad, 'data', pd.DataFrame()))}")
+                except Exception as e:
+                    st.error(f"❌ Error en consulta_sellout() para {sku}: {e}")
+                    continue
+
+                try:
+                    elasticidad.calcula_elasticidad()
+                    st.write(f"✅ {sku}: calcula_elasticidad completada.")
+                except Exception as e:
+                    st.error(f"❌ Error en calcula_elasticidad() para {sku}: {e}")
+                    continue
+
                 fig = elasticidad.grafica()
                 dispersion = elasticidad.grafica_dispersion()
                 #graficos[sku] = fig
