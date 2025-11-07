@@ -258,7 +258,9 @@ class ElasticidadCB:
 
             # --- Sustituir columna de precios en venta ---
             venta = venta.merge(preciosarg[['ANIO', 'SEMNUMERO', 'Precio']],
-                                on=['ANIO', 'SEMNUMERO'], how='inner' )
+                                on=['ANIO', 'SEMNUMERO'], how='left')
+            # Filtramos solo las filas donde sí se encontró precio nuevo
+            venta = venta[venta['Precio'].notna()].copy()
 
         else:
             print(f"País {self.pais} no contemplado.")
