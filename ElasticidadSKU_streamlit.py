@@ -366,19 +366,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #st.markdown(elasticidad.status)
                 grps = elasticidad.grps
                 if grps:
-                    data_grps = elasticidad.preparar_grps()
-
-                    if data_grps.empty or not {'ANIO', 'SEMNUMERO', 'Grps'}.issubset(data_grps.columns):
-                        grps_actuales = 0
-                        print(f"⚠️ No hay GRPS válidos para SKU {elasticidad.codbarras}")
-                    else:
-                        layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
-                        # Evitar error si Grps tiene NaN o no tiene filas válidas
-                        if data_grps['Grps'].notna().any():
-                            grps_actuales = data_grps['Grps'].iloc[-1]
-                        else:
-                            print(f"⚠️ Columna Grps vacía para SKU {elasticidad.codbarras}")
-                            grps_actuales = 0
+                    grps_actuales = elasticidad.grps_actuales
 
                 else:
                     grps_actuales = 0 

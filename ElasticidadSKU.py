@@ -88,6 +88,7 @@ class ElasticidadCB:
         self.nombre_competencias = desc_competencias if isinstance(desc_competencias, list) else [desc_competencias]
         self.ultima_Semana = None
         self.status= None
+        self.grps_actuales = 0
 
     '''def calcula_precio(self, venta):
         if self.pais=='México':
@@ -665,6 +666,7 @@ class ElasticidadCB:
                 self.grps = False
             else:
                 layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
+                self.grps_actuales = layout['Grps'].iloc[-1]
 
 
         # Competencia
