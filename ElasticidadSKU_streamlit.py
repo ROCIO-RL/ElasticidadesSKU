@@ -562,8 +562,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     """)
                 if grps:
                     st.markdown(f"""
-                        - 📈 **Grps:** {r2:.2f}.  
-                        Por cada 1% de incremento en los gprs el sellout cambia en un**{r2:.2f}**% .
+                        - 📈 **Grps:** {af_grps:.2f}.  
+                        Por cada 1% de incremento en los gprs el sellout cambia en un**{af_grps:.2f}**% .
                     """)
                 st.markdown(f"""
                         - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
