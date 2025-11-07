@@ -753,7 +753,7 @@ class ElasticidadCB:
 
         #if self.grps:
         #    formula += ' + Grps'
-        if self.grps and 'Grps' in layout.columns and not layout['Grps'].isna().all():
+        if self.grps and 'Grps' in data.columns and not data['Grps'].isna().all():
             formula += ' + Grps'
 
         # Agregar todas las competencias
