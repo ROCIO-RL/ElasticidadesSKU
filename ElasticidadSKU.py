@@ -371,8 +371,7 @@ class ElasticidadCB:
                 comp['PRECIO_COMPETENCIA'] = comp['PRECIO_COMPETENCIA'] / comp['ML_USD']
 
 
-
-
+            #cambios
             self.status=1
             # Pivot para tener una columna por competencia
             comp_pivot = comp.pivot_table(
