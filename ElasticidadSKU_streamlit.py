@@ -252,6 +252,7 @@ if st.button("Agregar SKU a la lista"):
             "PropstNombre":prod,
             "Canal": canal,
             "Clima": clima,
+            "Grps": grps,
             "Precio Actual": precio,
             "Costo Actual": costo,
             "DESC_COMPETENCIA": desc_competencia
@@ -268,6 +269,7 @@ if st.button("Agregar SKU a la lista"):
             "PropstNombre":prod,
             "Canal": canal,
             "Clima": clima,
+            "Grps": grps,
             "Precio Actual": precio,
             "Costo Actual": costo,
             "DESC_COMPETENCIA": desc_competencia
@@ -303,6 +305,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             sku = row["SKU"]
             canal = row["Canal"]
             temp = row["Clima"]
+            grps = row['Grps']
             prod = row["PropstNombre"]
             precioact = row["Precio Actual"]
             costoact = row['Costo Actual']
@@ -318,6 +321,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     codbarras=sku,
                     canal=canal,
                     temp=temp,
+                    grps=grps,
                     desc_competencias=desc_competencia,    # ahora es lista, no string
                     pais = pais
                 )
