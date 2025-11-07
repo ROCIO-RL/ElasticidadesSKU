@@ -130,7 +130,10 @@ sku_val_prov = str(sku_row.split(" - ")[0]).strip()
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
+    if pais == 'México':
+        canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
+    if pais == 'Argentina':
+        canal = st.selectbox("Canal", ["Autoservicios"])
 with col2:
     precio_act = st.text_input("Precio (opcional)")
 with col3:
