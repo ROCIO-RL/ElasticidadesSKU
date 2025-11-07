@@ -753,9 +753,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #st.plotly_chart(fig)
                 #st.dataframe(df)
                 
-        
-                st.image("Logo2.png", width=100) 
-                st.markdown("## Insight")
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.image("Logo2.png", width=100) 
+                with col2:    
+                    st.markdown("## Insight")
 
                 
                 st.markdown(
