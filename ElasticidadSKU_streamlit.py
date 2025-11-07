@@ -753,8 +753,17 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #st.plotly_chart(fig)
                 #st.dataframe(df)
                 
-                
-                st.markdown("## Insight")
+        
+                st.markdown(
+                    """
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <h2 style="margin: 0;">Insight</h2>
+                        <img src="logo.png" width="60">
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
                 st.markdown(
                             f"""
                             <div style="
