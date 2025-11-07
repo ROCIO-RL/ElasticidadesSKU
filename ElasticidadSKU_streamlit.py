@@ -639,16 +639,25 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 af_comp = comp_info['Afectación Competencia']
                                 if precio_comp and not pd.isna(precio_comp):
                                     comp_effect += np.log(precio_comp) * af_comp
-
-                        demanda = np.exp(
-                            intercepto
-                            + (np.log(precios) * af_precio)
-                            + (clima_valor * af_clima)
-                            + (grps_actuales * af_grps)
-                            + comp_effect
-                            + (indicador_JR * af_JR if indicador_JR else 0)
-                            + (indicador_MP * af_MP if indicador_MP else 0)
-                        )
+                        if grps:
+                            demanda = np.exp(
+                                intercepto
+                                + (np.log(precios) * af_precio)
+                                + (clima_valor * af_clima)
+                                + (grps_actuales * af_grps)
+                                + comp_effect
+                                + (indicador_JR * af_JR if indicador_JR else 0)
+                                + (indicador_MP * af_MP if indicador_MP else 0)
+                            )
+                        else:
+                            demanda = np.exp(
+                                intercepto
+                                + (np.log(precios) * af_precio)
+                                + (clima_valor * af_clima)
+                                + comp_effect
+                                + (indicador_JR * af_JR if indicador_JR else 0)
+                                + (indicador_MP * af_MP if indicador_MP else 0)
+                            )
 
                         #+ (np.log(precio_comp) * af_comp if precio_comp else 0)
                         #demanda_df = pd.DataFrame({
