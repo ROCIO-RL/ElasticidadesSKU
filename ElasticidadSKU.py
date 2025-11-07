@@ -689,7 +689,7 @@ class ElasticidadCB:
             df_productos = df_propstid.merge(df_productos,left_on='PROPST_ID',right_on='ProPstID',how='left')
             df_productos = df_productos[['SKU','Producto Base']]
             
-            df_productos = df_productos[df_productos['SKU']==self.codbarra]
+            df_productos = df_productos[df_productos['SKU']==self.codbarras]
             df_productos = df_productos.drop_duplicates()
             productobase = df_productos['Producto Base'].iloc[0]
 
