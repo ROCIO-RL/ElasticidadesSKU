@@ -314,7 +314,7 @@ class ElasticidadCB:
         WHERE s.SEMANIO>=2023   
                 AND P.PAIS='{self.pais}'
                 AND es.propstcodbarras = '{self.codbarras}'
-                AND cl.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
+                AND cl.TIPOESTNOMBRE IN ('Autoservicios')
                 AND cl.GRPCLASIFICACION='Monitoreado' 
         """    
         if self.pais=='México':
