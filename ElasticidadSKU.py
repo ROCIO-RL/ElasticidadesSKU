@@ -471,7 +471,7 @@ class ElasticidadCB:
 
             
             # --- Conversión a USD si el país es Argentina ---
-            if self.pais == 'Argentina':
+            '''if self.pais == 'Argentina':
                 conn = snowflake.connector.connect(
                     user=st.secrets["snowflake"]["user"],
                     password=st.secrets["snowflake"]["password"],
@@ -507,7 +507,7 @@ class ElasticidadCB:
                 comp = comp.merge(dolares, on=['ANIO', 'SEMNUMERO'], how='left')
 
                 # Convertir precios a USD
-                comp['PRECIO_COMPETENCIA'] = comp['PRECIO_COMPETENCIA'] / comp['ML_USD']
+                comp['PRECIO_COMPETENCIA'] = comp['PRECIO_COMPETENCIA'] / comp['ML_USD']'''
 
 
             #cambios
