@@ -755,7 +755,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 
                 col1, col2 = st.columns(2)
                 with col2:
-                    st.image("Logo2.png", width=120) 
+                    st.image("Logo2.png", width=100) 
                 with col1:    
                     st.markdown("## Insight")
 
