@@ -659,9 +659,9 @@ class ElasticidadCB:
         if self.grps:
             
             data_grps = self.preparar_grps()
-            #data_grps = data_medios.copy()
-            if data_grps.empty:
-                print("nop")
+
+            if data_grps.empty or not {'ANIO', 'SEMNUMERO'}.issubset(data_grps.columns):
+                print(f"⚠️ No se pudo agregar GRPS para SKU {self.codbarras}: DataFrame vacío o sin columnas necesarias.")
             else:
                 layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
 
