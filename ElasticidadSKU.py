@@ -666,7 +666,8 @@ class ElasticidadCB:
                 self.grps = False
             else:
                 layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
-                self.grps_actuales = layout['Grps'].iloc[-1]
+                self.grps_actuales = data_grps['Grps'].dropna().iloc[-1] if not data_grps['Grps'].dropna().empty else 0
+
 
 
         # Competencia
@@ -750,8 +751,8 @@ class ElasticidadCB:
         if self.temp:
             formula += ' + CLIMA'
 
-        #if self.grps:
-        #    formula += ' + Grps'
+        if self.grps:
+            formula += ' + Grps'
 
         # Agregar todas las competencias
         for col in data.columns:
