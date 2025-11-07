@@ -756,11 +756,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
         
                 col1, col2 = st.columns([6, 1])  # Ajusta proporciones si quieres que el logo sea más pequeño
 
-                with col1:
+                with col2:
                     st.markdown("## Insight")
 
-                with col2:
-                    st.image("Logo2.png", width=60)  # Ajusta el ancho según tu logo
+                with col1:
+                    st.image("Logo2.png", width=100)  # Ajusta el ancho según tu logo
                 st.markdown(
                             f"""
                             <div style="
