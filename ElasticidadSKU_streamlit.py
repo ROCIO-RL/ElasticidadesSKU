@@ -691,17 +691,18 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             costo_actual = None
 
                         if costo_actual is not None:
-                            demanda_df["Utilidad"] = (demanda_df["Demanda Estimada"] * demanda_df["Precio"]) - (
-                                    demanda_df["Demanda Estimada"] * costo_actual
-                                )
+                            demanda_df["Utilidad"] = (
+                                (demanda_df["Demanda Estimada"] * demanda_df["Precio"])
+                                - (demanda_df["Demanda Estimada"] * costo_actual)
+                            )
 
-                            #max_utilidad = demanda_df["Utilidad"].max()
-                            if not demanda_df.empty and demanda_df["Utilidad"].notna().any():
+                            if demanda_df["Utilidad"].notna().any():
                                 max_utilidad = demanda_df["Utilidad"].max()
                             else:
-                                print(f"⚠️ No hay datos válidos de utilidad para SKU {sku}.")
+                                st.warning(f"⚠️ No hay utilidades válidas para SKU {sku}. Revisa los datos.")
                                 max_utilidad = 0
 
+                            
                             
 
                             st.markdown("### Simulación de Demanda, Precio y Utilidad")
