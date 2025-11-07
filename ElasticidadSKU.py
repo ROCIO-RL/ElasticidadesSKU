@@ -162,7 +162,7 @@ class ElasticidadCB:
 
         return precio
 '''
-
+    #funcion sustituida
     def calcula_precio(self, venta):
 
         # --- CASO MEXICO ---
@@ -270,6 +270,7 @@ class ElasticidadCB:
             .mean()
             .reset_index()
         )
+        #return
         return precio
 
 
