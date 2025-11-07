@@ -160,7 +160,7 @@ with col4:
     #st.markdown("Clima")  
     #clima = st.checkbox("¿Considerar Clima?", value=True)  
     st.markdown("Variables a considerar")
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     with col1:
         clima = st.checkbox("Clima", value=True)
     with col2:
