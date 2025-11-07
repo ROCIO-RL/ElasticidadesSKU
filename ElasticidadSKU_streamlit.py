@@ -755,14 +755,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 
                 col1, col2 = st.columns(2)
                 with col1:
-                     st.markdown(
-                        """
-                        <div style="display: flex; align-items: center; height: 100%;">
-                            <img src="logo.png" width="100">
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+                    st.image("logo.png", width=100) 
                 with col2:    
                     st.markdown("## Insight")
 
