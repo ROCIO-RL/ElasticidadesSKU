@@ -366,16 +366,20 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #st.markdown(elasticidad.status)
                 grps = elasticidad.grps
                 if grps:
-                    #grps_actuales = 0 
-    
                     data_grps = elasticidad.preparar_grps()
-                    if data_grps.empty or not {'ANIO', 'SEMNUMERO'}.issubset(data_grps.columns):
-                        grps_actuales = 0 
-                  
+
+                    if data_grps.empty or not {'ANIO', 'SEMNUMERO', 'Grps'}.issubset(data_grps.columns):
+                        grps_actuales = 0
+                        print(f"⚠️ No hay GRPS válidos para SKU {elasticidad.codbarras}")
                     else:
                         layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
-                        #grps_actuales_df = grps_actuales_df.sort_values(by=['ANIO', 'SEMNUMERO'])
-                        grps_actuales = data_grps['Grps'].iloc[-1]
+                        # Evitar error si Grps tiene NaN o no tiene filas válidas
+                        if data_grps['Grps'].notna().any():
+                            grps_actuales = data_grps['Grps'].iloc[-1]
+                        else:
+                            print(f"⚠️ Columna Grps vacía para SKU {elasticidad.codbarras}")
+                            grps_actuales = 0
+
                 else:
                     grps_actuales = 0 
                 # Calcular venta base considerando todas las competencias
