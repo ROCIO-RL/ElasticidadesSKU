@@ -88,7 +88,7 @@ class ElasticidadCB:
         self.ultima_Semana = None
         self.status= None
 
-    def calcula_precio(self, venta):
+    '''def calcula_precio(self, venta):
         if self.pais=='México':
             # Filtrado según canal
             if self.canal == 'Autoservicios':
@@ -119,6 +119,8 @@ class ElasticidadCB:
         
         # --- Conversión a USD si el país es Argentina ---
         if self.pais == 'Argentina':
+            preciosarg = pd.read_excel(r"PrecioArg.xlsx",sheet_name='PreciosArg')
+            preciosarg = preciosarg[preciosarg['PROPSTCODBARRAS']==self.codbarras]
             conn = snowflake.connector.connect(
                 user=st.secrets["snowflake"]["user"],
                 password=st.secrets["snowflake"]["password"],
@@ -158,6 +160,116 @@ class ElasticidadCB:
 
         precio = venta.groupby(['ANIO','SEMNUMERO'])['Precio'].mean().reset_index()
 
+        return precio
+'''
+
+    def calcula_precio(self, venta):
+
+        # --- CASO MEXICO ---
+        if self.pais == 'México':
+            # Filtrado según canal
+            if self.canal == 'Autoservicios':
+                venta = venta[
+                    (venta['CADID'].isin([2, 1, 15, 18, 3, 593])) &
+                    (venta['MONTORETAIL'] > 0) &
+                    (venta['UNIDADESDESP'] > 0)
+                ].copy()
+            elif self.canal == 'Farmacias':
+                venta = venta[
+                    (venta['CADID'].isin([27, 29])) &
+                    (venta['MONTORETAIL'] > 0) &
+                    (venta['UNIDADESDESP'] > 0)
+                ].copy()
+            elif self.canal == 'Moderno':
+                venta = venta[
+                    (venta['CADID'].isin([1, 27, 18, 15, 2, 16, 3, 593])) &
+                    (venta['MONTORETAIL'] > 0) &
+                    (venta['UNIDADESDESP'] > 0)
+                ].copy()
+
+            # Precio unitario
+            venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP']
+
+            # Aplicar IVA
+            tasa_iva = 0.16
+            venta['Precio'] = venta['Precio'] * (1 + tasa_iva)
+
+            # Filtrar semanas válidas
+            if self.canal in ['Autoservicios', 'Moderno']:
+                clientes_por_semana = (
+                    venta.groupby(['ANIO', 'SEMNUMERO'])['CADID']
+                    .nunique()
+                    .reset_index()
+                )
+                semanas_validas = clientes_por_semana[
+                    clientes_por_semana['CADID'] >= 3
+                ][['ANIO', 'SEMNUMERO']]
+                venta = venta.merge(semanas_validas, on=['ANIO', 'SEMNUMERO'])
+
+        # --- CASO ARGENTINA ---
+        elif self.pais == 'Argentina':
+            # Leemos precios externos
+            preciosarg = pd.read_excel(r"PrecioArg.xlsx", sheet_name='PreciosArg')
+            preciosarg.columns = [c.strip() for c in preciosarg.columns]
+            preciosarg = preciosarg.rename(columns={
+                'Promedio de Precio': 'Precio',
+                'SEMANA': 'SEMNUMERO' if 'SEMANA' in preciosarg.columns else 'SEMNUMERO'
+            })
+            preciosarg = preciosarg[
+                preciosarg['PROPSTCODBARRAS'] == self.codbarras
+            ][['ANIO', 'SEMNUMERO', 'Precio']]
+
+            # Traemos tipo de cambio semanal
+            conn = snowflake.connector.connect(
+                user=st.secrets["snowflake"]["user"],
+                password=st.secrets["snowflake"]["password"],
+                account=st.secrets["snowflake"]["account"],
+                database=st.secrets["snowflake"]["database"],
+                schema=st.secrets["snowflake"]["schema"]
+            )
+
+            query = """
+            SELECT 
+                t.TMPANIOSEMANAGENOMMA AS ANIO,
+                t.TMPSEMANAANIOGENOMMA AS SEMNUMERO,
+                AVG(USD_MXN) AS ML_USD
+            FROM PRD_CNS_MX.CATALOGOS.VW_TIPO_CAMBIO_DIARIO AS d
+            LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_CAT_TIEMPO AS t 
+                ON t.TMPID = d.TMPID
+            WHERE d.PAISID = 9
+            AND t.TMPID >= 20230101
+            GROUP BY 
+                t.TMPANIOSEMANAGENOMMA, 
+                t.TMPSEMANAANIOGENOMMA
+            ORDER BY 
+                t.TMPANIOSEMANAGENOMMA, 
+                t.TMPSEMANAANIOGENOMMA
+            """
+            dolares = pd.read_sql(query, conn)
+            conn.close()
+
+            dolares[['ANIO', 'SEMNUMERO']] = dolares[['ANIO', 'SEMNUMERO']].astype(int)
+
+            # Merge tipo de cambio
+            preciosarg = preciosarg.merge(dolares, on=['ANIO', 'SEMNUMERO'], how='left')
+
+            # Convertir a USD
+            preciosarg['Precio'] = preciosarg['Precio'] / preciosarg['ML_USD']
+
+            # --- Sustituir columna de precios en venta ---
+            venta = venta.merge(preciosarg[['ANIO', 'SEMNUMERO', 'Precio']],
+                                on=['ANIO', 'SEMNUMERO'], how='left')
+
+        else:
+            print(f"País {self.pais} no contemplado.")
+            return pd.DataFrame()
+
+        # --- Promedio semanal final ---
+        precio = (
+            venta.groupby(['ANIO', 'SEMNUMERO'])['Precio']
+            .mean()
+            .reset_index()
+        )
         return precio
 
 
