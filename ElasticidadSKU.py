@@ -902,6 +902,7 @@ class ElasticidadCB:
             ))
 
         #Layout
+        #control
         fig.update_layout(
             title="Unidades vendidas vs Precio propio y Variables externas",
             xaxis=dict(title="Semana"),
