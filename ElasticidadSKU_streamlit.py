@@ -338,14 +338,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 graficos[clave] = fig
                 graficos_dispersion[clave] = dispersion
                 
-                if grps:
-                    grps_actuales = 0 
-    
-                    #grps_actuales_df = data_medios.copy()
-                    #grps_actuales_df = grps_actuales_df.sort_values(by=['ANIO', 'SEMNUMERO'])
-                    #grps_actuales = grps_actuales_df['Grps'].iloc[-1]
-                else:
-                    grps_actuales = 0 
+                
 
                 #insight = elasticidad.genera_insight_op()
                 def safe_round(value, dec=4):
@@ -371,7 +364,20 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 #st.markdown(competencias_resultados)
                 #st.markdown(elasticidad.nombre_competencias)
                 #st.markdown(elasticidad.status)
-
+                grps = elasticidad.grps
+                if grps:
+                    #grps_actuales = 0 
+    
+                    data_grps = elasticidad.preparar_grps()
+                    if data_grps.empty or not {'ANIO', 'SEMNUMERO'}.issubset(data_grps.columns):
+                        grps_actuales = 0 
+                  
+                    else:
+                        layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
+                        #grps_actuales_df = grps_actuales_df.sort_values(by=['ANIO', 'SEMNUMERO'])
+                        grps_actuales = data_grps['Grps'].iloc[-1]
+                else:
+                    grps_actuales = 0 
                 # Calcular venta base considerando todas las competencias
                 comp_effect = 0
                 if isinstance(elasticidad.precio_competencia, dict):
