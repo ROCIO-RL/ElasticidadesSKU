@@ -690,7 +690,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             if not demanda_df.empty and demanda_df["Utilidad"].notna().any():
                                 max_utilidad = demanda_df["Utilidad"].max()
                             else:
-                                print(f"⚠️ No hay datos válidos de utilidad para SKU {self.codbarras}.")
+                                print(f"⚠️ No hay datos válidos de utilidad para SKU {sku}.")
                                 max_utilidad = 0
 
                             
