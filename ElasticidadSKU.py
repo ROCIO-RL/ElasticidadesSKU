@@ -232,7 +232,7 @@ class ElasticidadCB:
             SELECT 
                 t.TMPANIOSEMANAGENOMMA AS ANIO,
                 t.TMPSEMANAANIOGENOMMA AS SEMNUMERO,
-                AVG(USD_MXN) AS ML_USD
+                AVG(USD) AS ML_USD
             FROM PRD_CNS_MX.CATALOGOS.VW_TIPO_CAMBIO_DIARIO AS d
             LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_CAT_TIEMPO AS t 
                 ON t.TMPID = d.TMPID
