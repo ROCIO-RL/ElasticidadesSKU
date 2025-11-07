@@ -225,6 +225,9 @@ class ElasticidadCB:
 
         data_medios = data_medios.rename(columns={'Año':'ANIO','Sem': 'SEMNUMERO'})
         data_medios = data_medios[data_medios['Producto base']==productobase]
+        if data_medios.empty:
+            print(f"⚠️ No se encontró el SKU {productobase} en el catálogo.")
+            return pd.DataFrame()  # o maneja el error como prefieras
         data_medios = data_medios[['ANIO','SEMNUMERO','Grps']]
         data_medios=data_medios.groupby(['ANIO','SEMNUMERO']).agg({'Grps':'sum'}).reset_index()
 
