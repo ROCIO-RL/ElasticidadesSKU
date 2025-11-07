@@ -175,7 +175,7 @@ class ElasticidadCB:
             schema=st.secrets["snowflake"]["schema"]
         )
         df_productos=pd.read_excel(r'Catálogo Corporativo Final.xlsx',sheet_name='Catálogo')
-        df_productos=df_productos[df_productos['IdPais']==self.pais].copy()
+        df_productos=df_productos[df_productos['Pais']==self.pais].copy()
         query = f"""  SELECT distinct p.propstcodbarras as SKU,
             p.propstid AS PROPST_ID
             FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
