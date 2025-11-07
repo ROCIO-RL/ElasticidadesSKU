@@ -70,7 +70,7 @@ class ElasticidadCB:
     from langchain_community.llms import Ollama
     llm = Ollama(model="llama3")
     pd.options.display.float_format = '{:,.2f}'.format
-    def __init__(self, codbarras, canal, temp,desc_competencias,pais,ruta_competencia="Competencia_Elasticidades.xlsx"):
+    def __init__(self, codbarras, canal, temp,grps,desc_competencias,pais,ruta_competencia="Competencia_Elasticidades.xlsx"):
         """
         codbarras: Código de barras del producto
         canal: 'Autoservicios', 'Farmacias' o 'Moderno'
@@ -80,6 +80,7 @@ class ElasticidadCB:
         self.codbarras = codbarras
         self.canal = canal
         self.temp = temp
+        self.grps = grps
         self.ruta_competencia = ruta_competencia
         #self.precio_competencia = None 
         #self.nombre_competencia = desc_competencia

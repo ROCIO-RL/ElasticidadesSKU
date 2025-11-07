@@ -157,8 +157,12 @@ with col3:
     # Mostrar el campo editable con el valor precargado
     costo_act = st.text_input("Costo (opcional)", value=costo_default)
 with col4:  
-    st.markdown("Clima")  
-    clima = st.checkbox("¿Considerar Clima?", value=True)    
+    #st.markdown("Clima")  
+    #clima = st.checkbox("¿Considerar Clima?", value=True)  
+    st.markdown("Variables a considerar")
+    clima = st.checkbox("Clima", value=True)
+    grps = st.checkbox("Grps", value=True)
+
 
 
 # AGREGAMOS LA COMPETENCIA SI EXISTE 
@@ -486,9 +490,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                               
                             """)
                 if abs(af_precio) >= 1:
-                    st.markdown("**Producto Elástico**")
+                    st.markdown("**PRODUCTO ELÁSTICO**")
                 else:
-                    st.markdown("**Producto Inelástico**")
+                    st.markdown("**PRODUCTO INELÁSTICO**")
                 
                 st.markdown(f"""- 💰 **Elasticidad precio:** {af_precio:.2f}.  
                             Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.""")
