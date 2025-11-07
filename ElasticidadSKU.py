@@ -660,7 +660,10 @@ class ElasticidadCB:
             
             data_grps = self.preparar_grps()
             #data_grps = data_medios.copy()
-            layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
+            if data_grps.empty:
+                print("nop")
+            else:
+                layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
 
 
         # Competencia
