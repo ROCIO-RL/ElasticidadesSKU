@@ -482,6 +482,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             grps_actuales = res['Grps Actuales']
             af_grps = res['Afectación Grps']
             af_grps = 0 if pd.isna(af_grps) else af_grps
+            pv_grps = res['Pvalue Grps']
             #insight = res['Insight']
             insight = ""
             #af_comp = res['Afectación Competencia']
@@ -566,6 +567,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown(f"""
                         - 📈 **Grps:** {af_grps:.2f}.  
                         Por cada 1% de incremento en los gprs el sellout cambia en un**{af_grps:.2f}**% .
+                        {pv_grps}
                     """)
                 st.markdown(f"""
                         - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
