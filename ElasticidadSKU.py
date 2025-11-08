@@ -627,6 +627,8 @@ class ElasticidadCB:
                 layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
 
                 self.grps_actuales = layout['Grps'].mean()
+                layout["Grps"] = layout["Grps"].fillna(0)
+
         except Exception as e:
             print(f"No se pudo cargar competencia: {e}")
 
