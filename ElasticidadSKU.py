@@ -620,13 +620,14 @@ class ElasticidadCB:
                 temperatura.columns = ['Pais','ANIO','SEMNUMERO','CLIMA']
                 temperatura = temperatura[['ANIO','SEMNUMERO','CLIMA']]
                 layout = layout.merge(temperatura, on=['ANIO','SEMNUMERO'], how='left')
-
+        data_grps = self.preparar_grps()
         if self.grps:
-            data_grps = self.preparar_grps()
-            if self.grps:
-                layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
+            #data_grps = self.preparar_grps()
+            layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
 
-                self.grps_actuales = layout['Grps'].mean()
+            self.grps_actuales = layout['Grps'].mean()
+           
+                
         
         self.columnas = layout.columns
 
