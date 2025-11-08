@@ -250,6 +250,7 @@ class ElasticidadCB:
 
         if data_medios.empty:
             print(f"⚠️ No se encontraron GRPs para '{self.producto_base }' ({self.pais}).")
+            self.grps = False
             return pd.DataFrame()
 
         # --- 5. Agrupar

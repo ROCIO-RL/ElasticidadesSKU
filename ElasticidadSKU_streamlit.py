@@ -334,7 +334,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                 elasticidad.consulta_sellout()
                 elasticidad.calcula_elasticidad()
-                st.markdown(elasticidad.columnas)
+             
 
                 fig = elasticidad.grafica()
                 dispersion = elasticidad.grafica_dispersion()
@@ -343,7 +343,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 clave = f"{sku}_{id_escenario}"
                 graficos[clave] = fig
                 graficos_dispersion[clave] = dispersion
-                st.markdown(elasticidad.columnas)
+               
                 
 
                 
