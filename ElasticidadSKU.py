@@ -193,7 +193,7 @@ class ElasticidadCB:
             .rename(columns={'Año': 'ANIO', 'Sem': 'SEMNUMERO'})
         )
         self.status = 3
-        
+
         print(f"✅ {len(data_medios)} filas de GRPs encontradas para {self.producto_base }.")
         return data_medios
 
@@ -717,10 +717,10 @@ class ElasticidadCB:
         if self.temp:
             formula += ' + CLIMA'
 
-        if self.grps:
-            formula += ' + Grps'
-        #if self.grps and 'Grps' in data.columns and not data['Grps'].isna().all():
+        #if self.grps:
         #    formula += ' + Grps'
+        if self.grps and 'Grps' in data.columns and not data['Grps'].isna().all():
+            formula += ' + Grps'
         '''if 'Grps' in data.columns:
             print("Resumen de Grps:", data['Grps'].describe())
             if data['Grps'].dropna().empty:
