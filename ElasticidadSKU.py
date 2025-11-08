@@ -70,7 +70,7 @@ class ElasticidadCB:
     from langchain_community.llms import Ollama
     llm = Ollama(model="llama3")
     pd.options.display.float_format = '{:,.2f}'.format
-    def __init__(self, codbarras, canal, temp,grps,desc_competencias,pais,ruta_competencia="Competencia_Elasticidades.xlsx"):
+    def __init__(self, codbarras, canal, temp,grps,productobase,desc_competencias,pais,ruta_competencia="Competencia_Elasticidades.xlsx"):
         """
         codbarras: Código de barras del producto
         canal: 'Autoservicios', 'Farmacias' o 'Moderno'
@@ -81,6 +81,7 @@ class ElasticidadCB:
         self.canal = canal
         self.temp = temp
         self.grps = grps
+        self.producto_base =productobase
         self.ruta_competencia = ruta_competencia
         #self.precio_competencia = None 
         #self.nombre_competencia = desc_competencia
@@ -236,60 +237,18 @@ class ElasticidadCB:
     
     def preparar_grps(self):
        
-        conn = snowflake.connector.connect(
-            user=st.secrets["snowflake"]["user"],
-            password=st.secrets["snowflake"]["password"],
-            account=st.secrets["snowflake"]["account"],
-            database=st.secrets["snowflake"]["database"],
-            schema=st.secrets["snowflake"]["schema"]
-        )
-
-        # Normalizar SKU
-        self.codbarras = str(self.codbarras).strip()
-
-        # --- 1. Catálogo corporativo
-        df_productos = pd.read_excel(r'Catálogo Corporativo Final.xlsx', sheet_name='Catálogo')
-        df_productos = df_productos[df_productos['Pais'] == self.pais].copy()
-
-        # --- 2. Obtener PROPST_ID desde Snowflake
-        query = f"""SELECT DISTINCT p.propstcodbarras AS SKU, p.propstid AS PROPST_ID
-                    FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
-                    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
-                    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
-                    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
-                    WHERE t.anio >= 2023
-                    AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
-                    AND c.TIPOCLIENTE = 'Monitoreado'"""
-
-        df_propstid = pd.read_sql(query, conn)
-        conn.close()
-
-        # --- 3. Merge con catálogo
-        df_productos = df_propstid.merge(df_productos, left_on='PROPST_ID', right_on='ProPstID', how='left')
-        df_productos = df_productos[['SKU', 'Producto Base']].drop_duplicates()
-        df_productos['SKU'] = df_productos['SKU'].astype(str).str.strip()
-        df_productos = df_productos[df_productos['SKU'] == self.codbarras]
-
-        if df_productos.empty or df_productos['Producto Base'].isna().any():
-            print(f"⚠️ No se encontró el SKU {self.codbarras} o su Producto Base en el catálogo.")
-            return pd.DataFrame()
-
-        productobase = str(df_productos['Producto Base'].iloc[0]).strip().lower()
+        
 
         # --- 4. Cargar CSV de medios
         data_medios = pd.read_csv(r"DashboardInternacional_ProductoBase.csv")
 
-        # Normalizar campos
-        data_medios['Pais'] = data_medios['Pais'].astype(str).str.strip().str.lower()
-        data_medios['Producto base'] = data_medios['Producto base'].astype(str).str.strip().str.lower()
-        pais_norm = str(self.pais).strip().lower()
-
+    
         # Filtrar
-        data_medios = data_medios[data_medios['Pais'] == pais_norm]
-        data_medios = data_medios[data_medios['Producto base'] == productobase]
+        data_medios = data_medios[data_medios['Pais'] == self.pais]
+        data_medios = data_medios[data_medios['Producto base'] == self.producto_base ]
 
         if data_medios.empty:
-            print(f"⚠️ No se encontraron GRPs para '{productobase}' ({self.pais}).")
+            print(f"⚠️ No se encontraron GRPs para '{self.producto_base }' ({self.pais}).")
             return pd.DataFrame()
 
         # --- 5. Agrupar
@@ -298,7 +257,7 @@ class ElasticidadCB:
             .rename(columns={'Año': 'ANIO', 'Sem': 'SEMNUMERO'})
         )
 
-        print(f"✅ {len(data_medios)} filas de GRPs encontradas para {productobase}.")
+        print(f"✅ {len(data_medios)} filas de GRPs encontradas para {self.producto_base }.")
         return data_medios
 
 

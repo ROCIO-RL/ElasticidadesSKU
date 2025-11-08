@@ -252,6 +252,7 @@ if st.button("Agregar SKU a la lista"):
             "Pais": pais,
             "SKU": sku_val,
             "PropstNombre":prod,
+            "Producto base": productos_base,
             "Canal": canal,
             "Clima": clima,
             "Grps": grps,
@@ -269,6 +270,7 @@ if st.button("Agregar SKU a la lista"):
             "Pais": pais,
             "SKU": sku_val,
             "PropstNombre":prod,
+            "Producto base": productos_base,
             "Canal": canal,
             "Clima": clima,
             "Grps": grps,
@@ -314,6 +316,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             desc_competencia = row['DESC_COMPETENCIA']
             id_escenario = row['escenario_id']
             desc_competencia = row['DESC_COMPETENCIA']
+            productobase = row['Producto base']
 
             
           
@@ -325,7 +328,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     temp=temp,
                     grps=grps,
                     desc_competencias=desc_competencia,    # ahora es lista, no string
-                    pais = pais
+                    pais = pais,
+                    productobase = productobase
                 )
 
                 elasticidad.consulta_sellout()
