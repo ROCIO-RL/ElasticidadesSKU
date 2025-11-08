@@ -90,6 +90,7 @@ class ElasticidadCB:
         self.ultima_Semana = None
         self.status= None
         self.grps_actuales = 0
+        self.columnas = None
 
     '''def calcula_precio(self, venta):
         if self.pais=='México':
@@ -689,6 +690,7 @@ class ElasticidadCB:
             layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
 
             self.grps_actuales = layout['Grps'].mean()
+            self.columnas = layout.columns
 
                
                 
