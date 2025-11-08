@@ -626,7 +626,7 @@ class ElasticidadCB:
                 #data_grps = self.preparar_grps()
                 layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
 
-                self.grps_actuales = layout['Grps'].mean()
+                self.grps_actuales = layout['Grps'].iloc[-1]
                 layout["Grps"] = layout["Grps"].fillna(0)
 
         except Exception as e:

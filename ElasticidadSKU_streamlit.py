@@ -573,7 +573,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     st.markdown(f"""
                         - 📈 **Grps:** {af_grps:.2f}.  
                         Por cada 1% de incremento en los gprs el sellout cambia en un**{af_grps:.2f}**% .
-                        {pv_grps}
+                        {pv_grps}_{grps_actuales}
                     """)
                 st.markdown(f"""
                         - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
