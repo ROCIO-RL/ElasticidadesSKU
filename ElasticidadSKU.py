@@ -686,26 +686,12 @@ class ElasticidadCB:
 
         if self.grps:
             data_grps = self.preparar_grps()
+            layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
 
-            # Validaciones robustas
-            if (
-                data_grps.empty 
-                or 'Grps' not in data_grps.columns 
-                or data_grps['Grps'].dropna().empty
-            ):
-                print(f"⚠️ No se pudo agregar GRPS para SKU {self.codbarras}: DataFrame vacío o sin valores válidos.")
-                self.grps_actuales = 0
-                self.grps = False
-            else:
-                try:
-                    # Último valor no nulo
-                    self.grps_actuales = float(data_grps['Grps'].dropna().iloc[-1])
-                except Exception as e:
-                    print(f"⚠️ Error al calcular GRPS actuales: {e}")
-                    self.grps_actuales = 0
+            self.grps_actuales = layout['Grps'].mean()
 
-                # Merge con layout solo si tiene datos
-                layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
+               
+                
 
 
 
@@ -791,16 +777,16 @@ class ElasticidadCB:
         if self.temp:
             formula += ' + CLIMA'
 
-        #if self.grps:
-        #    formula += ' + Grps'
+        if self.grps:
+            formula += ' + Grps'
         #if self.grps and 'Grps' in data.columns and not data['Grps'].isna().all():
         #    formula += ' + Grps'
-        if 'Grps' in data.columns:
+        '''if 'Grps' in data.columns:
             print("Resumen de Grps:", data['Grps'].describe())
             if data['Grps'].dropna().empty:
                 print("⚠️ Grps está vacío. Se removerá de la fórmula.")
                 data = data.drop(columns=['Grps'], errors='ignore')
-                self.grps = False
+                self.grps = False'''
 
         # Agregar todas las competencias
         for col in data.columns:
