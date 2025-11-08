@@ -688,10 +688,12 @@ class ElasticidadCB:
 
         if self.grps:
             data_grps = self.preparar_grps()
-            layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
+            if self.grps:
+                layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
 
-            self.grps_actuales = layout['Grps'].mean()
-            self.columnas = layout.columns
+                self.grps_actuales = layout['Grps'].mean()
+        
+        self.columnas = layout.columns
 
                
                 
