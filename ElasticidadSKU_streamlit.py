@@ -333,6 +333,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 )
 
                 elasticidad.consulta_sellout()
+                print(elasticidad.status)
                 elasticidad.calcula_elasticidad()
                 print(elasticidad.status)
 
