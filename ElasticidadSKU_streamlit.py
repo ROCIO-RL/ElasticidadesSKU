@@ -111,14 +111,7 @@ with col3:
         (df_productos["Marca"] == marca) &
         (df_productos["Agrupación Pauta"] == agrupacion)
     ]["Producto Base"].unique()
-    #producto_base = st.selectbox("Producto Base", sorted(productos_base))
-
-    
-    st.session_state["producto_base"] = st.selectbox(
-        "Producto Base", sorted(productos_base),
-        key="producto_base_select"
-    )
-
+    producto_base = st.selectbox("Producto Base", sorted(productos_base))
 
 with col4:
     skus_filtrados = df_productos[
@@ -131,7 +124,6 @@ with col4:
         "SKU",
         skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['ProPstNombre']}", axis=1)
     )
- 
 
 
 # Extraemos el SKU limpio y lo dejamos como texto
@@ -254,8 +246,6 @@ if st.button("Agregar SKU a la lista"):
             costo = float(costo_act)
         else:
             costo = ""
-        producto_base = st.session_state.get("producto_base", None)
-
         prod = sku_row.split(" - ")[1] 
         sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
         st.session_state.manual_layout.append({
