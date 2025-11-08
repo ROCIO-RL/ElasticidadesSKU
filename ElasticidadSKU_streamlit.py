@@ -334,7 +334,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                 elasticidad.consulta_sellout()
                 elasticidad.calcula_elasticidad()
-             
+                print(elasticidad.status)
 
                 fig = elasticidad.grafica()
                 dispersion = elasticidad.grafica_dispersion()
