@@ -661,10 +661,13 @@ class ElasticidadCB:
             
             data_grps = self.preparar_grps()
 
-            if data_grps.empty or not {'ANIO', 'SEMNUMERO'}.issubset(data_grps.columns):
-                print(f"⚠️ No se pudo agregar GRPS para SKU {self.codbarras}: DataFrame vacío o sin columnas necesarias.")
+            if data_grps.empty or 'Grps' not in data_grps.columns or data_grps['Grps'].dropna().empty:
+                print(f"⚠️ No se pudo agregar GRPS para SKU {self.codbarras}.")
+                self.grps_actuales = 0
                 self.grps = False
             else:
+                self.grps_actuales = data_grps['Grps'].dropna().iloc[-1]
+
                 layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
                 self.grps_actuales = data_grps['Grps'].dropna().iloc[-1] if not data_grps['Grps'].dropna().empty else 0
 
