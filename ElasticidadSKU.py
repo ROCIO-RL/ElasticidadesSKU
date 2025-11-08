@@ -658,18 +658,28 @@ class ElasticidadCB:
                 layout = layout.merge(temperatura, on=['ANIO','SEMNUMERO'], how='left')
 
         if self.grps:
-            
             data_grps = self.preparar_grps()
 
-            if data_grps.empty or 'Grps' not in data_grps.columns or data_grps['Grps'].dropna().empty:
-                print(f"⚠️ No se pudo agregar GRPS para SKU {self.codbarras}.")
+            # Validaciones robustas
+            if (
+                data_grps.empty 
+                or 'Grps' not in data_grps.columns 
+                or data_grps['Grps'].dropna().empty
+            ):
+                print(f"⚠️ No se pudo agregar GRPS para SKU {self.codbarras}: DataFrame vacío o sin valores válidos.")
                 self.grps_actuales = 0
                 self.grps = False
             else:
-                self.grps_actuales = data_grps['Grps'].dropna().iloc[-1]
+                try:
+                    # Último valor no nulo
+                    self.grps_actuales = float(data_grps['Grps'].dropna().iloc[-1])
+                except Exception as e:
+                    print(f"⚠️ Error al calcular GRPS actuales: {e}")
+                    self.grps_actuales = 0
 
-                layout = layout.merge(data_grps, on=['ANIO','SEMNUMERO'], how='left')
-                self.grps_actuales = data_grps['Grps'].dropna().iloc[-1] if not data_grps['Grps'].dropna().empty else 0
+                # Merge con layout solo si tiene datos
+                layout = layout.merge(data_grps, on=['ANIO', 'SEMNUMERO'], how='left')
+
 
 
 
