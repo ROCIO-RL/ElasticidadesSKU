@@ -570,11 +570,14 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2f}**%.
                     """)
                 if grps:
-                    st.markdown(f"""
-                        - 📈 **Grps:** {af_grps:.2f}.  
-                        Por cada 1% de incremento en los gprs el sellout cambia en un**{af_grps:.2f}**% .
-                        {pv_grps}_{grps_actuales}
-                    """)
+                    if pv_grps<= 0.05:
+                        st.markdown(f"""
+                            - 📈 **Grps:** {af_grps:.2f}.  
+                            Por cada 1% de incremento en los gprs el sellout cambia en un**{af_grps:.2f}**% .
+                            
+                        """)
+                    else:
+                        st.markdown(f"""Los grps NO tienen importancia estadisticamente""")
                 st.markdown(f"""
                         - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                         El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
