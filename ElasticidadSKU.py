@@ -167,7 +167,7 @@ class ElasticidadCB:
 
 
 
-    def preparar_grps(self):
+    '''def preparar_grps(self):
         conn = snowflake.connector.connect(
             user=st.secrets["snowflake"]["user"],
             password=st.secrets["snowflake"]["password"],
@@ -232,7 +232,75 @@ class ElasticidadCB:
         data_medios = data_medios[['ANIO','SEMNUMERO','Grps']]
         data_medios=data_medios.groupby(['ANIO','SEMNUMERO']).agg({'Grps':'sum'}).reset_index()
 
+        return data_medios'''
+    
+    def preparar_grps(self):
+       
+        conn = snowflake.connector.connect(
+            user=st.secrets["snowflake"]["user"],
+            password=st.secrets["snowflake"]["password"],
+            account=st.secrets["snowflake"]["account"],
+            database=st.secrets["snowflake"]["database"],
+            schema=st.secrets["snowflake"]["schema"]
+        )
+
+        # Normalizar SKU
+        self.codbarras = str(self.codbarras).strip()
+
+        # --- 1. Catálogo corporativo
+        df_productos = pd.read_excel(r'Catálogo Corporativo Final.xlsx', sheet_name='Catálogo')
+        df_productos = df_productos[df_productos['Pais'] == self.pais].copy()
+
+        # --- 2. Obtener PROPST_ID desde Snowflake
+        query = f"""SELECT DISTINCT p.propstcodbarras AS SKU, p.propstid AS PROPST_ID
+                    FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
+                    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
+                    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
+                    LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
+                    WHERE t.anio >= 2023
+                    AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
+                    AND c.TIPOCLIENTE = 'Monitoreado'"""
+
+        df_propstid = pd.read_sql(query, conn)
+        conn.close()
+
+        # --- 3. Merge con catálogo
+        df_productos = df_propstid.merge(df_productos, left_on='PROPST_ID', right_on='ProPstID', how='left')
+        df_productos = df_productos[['SKU', 'Producto Base']].drop_duplicates()
+        df_productos['SKU'] = df_productos['SKU'].astype(str).str.strip()
+        df_productos = df_productos[df_productos['SKU'] == self.codbarras]
+
+        if df_productos.empty or df_productos['Producto Base'].isna().any():
+            print(f"⚠️ No se encontró el SKU {self.codbarras} o su Producto Base en el catálogo.")
+            return pd.DataFrame()
+
+        productobase = str(df_productos['Producto Base'].iloc[0]).strip().lower()
+
+        # --- 4. Cargar CSV de medios
+        data_medios = pd.read_csv(r"DashboardInternacional_ProductoBase.csv")
+
+        # Normalizar campos
+        data_medios['Pais'] = data_medios['Pais'].astype(str).str.strip().str.lower()
+        data_medios['Producto base'] = data_medios['Producto base'].astype(str).str.strip().str.lower()
+        pais_norm = str(self.pais).strip().lower()
+
+        # Filtrar
+        data_medios = data_medios[data_medios['Pais'] == pais_norm]
+        data_medios = data_medios[data_medios['Producto base'] == productobase]
+
+        if data_medios.empty:
+            print(f"⚠️ No se encontraron GRPs para '{productobase}' ({self.pais}).")
+            return pd.DataFrame()
+
+        # --- 5. Agrupar
+        data_medios = (
+            data_medios.groupby(['Año', 'Sem'], as_index=False)['Grps'].sum()
+            .rename(columns={'Año': 'ANIO', 'Sem': 'SEMNUMERO'})
+        )
+
+        print(f"✅ {len(data_medios)} filas de GRPs encontradas para {productobase}.")
         return data_medios
+
 
 
 
