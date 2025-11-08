@@ -111,7 +111,7 @@ with col3:
         (df_productos["Marca"] == marca) &
         (df_productos["Agrupación Pauta"] == agrupacion)
     ]["Producto Base"].unique()
-    producto_base = st.selectbox("Producto Base", sorted(productos_base))
+    #producto_base = st.selectbox("Producto Base", sorted(productos_base))
 
     if len(productos_base) > 0:
         st.session_state["producto_base"] = st.selectbox(
