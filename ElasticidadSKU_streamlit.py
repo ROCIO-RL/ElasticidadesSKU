@@ -113,13 +113,12 @@ with col3:
     ]["Producto Base"].unique()
     #producto_base = st.selectbox("Producto Base", sorted(productos_base))
 
-    if len(productos_base) > 0:
-        st.session_state["producto_base"] = st.selectbox(
-            "Producto Base", sorted(productos_base),
-            key="producto_base_select"
-        )
-    else:
-        st.warning("No hay productos base disponibles para esta marca y agrupación.")
+    
+    st.session_state["producto_base"] = st.selectbox(
+        "Producto Base", sorted(productos_base),
+        key="producto_base_select"
+    )
+
 
 with col4:
     skus_filtrados = df_productos[
