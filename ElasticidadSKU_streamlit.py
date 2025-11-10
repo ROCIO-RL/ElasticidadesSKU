@@ -652,6 +652,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 + (indicador_JR * af_JR if indicador_JR else 0)
                                 + (indicador_MP * af_MP if indicador_MP else 0)
                             )
+                           
                         else:
                             demanda = np.exp(
                                 intercepto
@@ -661,6 +662,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 + (indicador_JR * af_JR if indicador_JR else 0)
                                 + (indicador_MP * af_MP if indicador_MP else 0)
                             )
+                            
 
                         #+ (np.log(precio_comp) * af_comp if precio_comp else 0)
                         #demanda_df = pd.DataFrame({
@@ -681,7 +683,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             "Demanda Estimada": demanda,
                             "Δ Demanda %": (demanda / demanda[idx_precio_actual] - 1) * 100
                         })
-
+                        demanda_df = demanda_df.drop_duplicates()
                         # Si se capturó costo, calculamos la utilidad
 
 
