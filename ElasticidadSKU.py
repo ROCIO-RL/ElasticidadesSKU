@@ -595,7 +595,7 @@ class ElasticidadCB:
         if layout['Precio'].isna().sum() > 30:
             raise ValueError("El dataframe contiene demasiados nulos")
 
-        layout.dropna(inplace=True)
+        #layout.dropna(inplace=True)
 
 
         if self.pais=='México':
