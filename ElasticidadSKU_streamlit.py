@@ -162,7 +162,7 @@ with col3:
         conn.close()
         costos = costos.rename(columns={
             'CODIGOBARRAS': 'PROPSTCODBARRAS',
-            'COSTO': 'Costo'
+            'COSTO_GESTION': 'Costo'
         })  
         costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()  
         costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
