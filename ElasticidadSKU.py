@@ -424,13 +424,13 @@ class ElasticidadCB:
 
             df_cadid = pd.read_sql(query_cadid, conn)
             conn.close()
-            '''cadid_autoserv = df_cadid.loc[df_cadid['TIPOESTNOMBRE'] == 'Autoservicios', 'CADID'].unique().tolist()
+            cadid_autoserv = df_cadid.loc[df_cadid['TIPOESTNOMBRE'] == 'Autoservicios', 'CADID'].unique().tolist()
             cadid_farm = df_cadid.loc[df_cadid['TIPOESTNOMBRE'] == 'Cadenas de farmacia', 'CADID'].unique().tolist()
             # Filtro de cadenas según canal
             if self.canal == 'Autoservicios':
                 self.sellout = self.sellout[self.sellout['CADID'].isin(cadid_autoserv)]
             elif self.canal == 'Farmacias':
-                self.sellout = self.sellout[~self.sellout['CADID'].isin(cadid_farm)]'''
+                self.sellout = self.sellout[~self.sellout['CADID'].isin(cadid_farm)]
 
 
 

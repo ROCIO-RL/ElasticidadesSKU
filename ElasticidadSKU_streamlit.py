@@ -137,7 +137,7 @@ with col1:
     if pais == 'Argentina':
         canal = st.selectbox("Canal", ["Autoservicios"])
 with col2:
-    precio_act = st.text_input("Precio (opcional)")
+    precio_act = st.text_input("Precio")
 with col3:
     # Cargar los costos desde Excel
     if pais == 'México':
@@ -178,7 +178,7 @@ with col3:
         costo_default = ""
 
     # Mostrar el campo editable con el valor precargado
-    costo_act = st.text_input("Costo (opcional)", value=costo_default)
+    costo_act = st.text_input("Costo", value=costo_default)
 with col4:  
     #st.markdown("Clima")  
     #clima = st.checkbox("¿Considerar Clima?", value=True)  
@@ -548,8 +548,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             🆔 **SKU:** {sku}  
                             🏬 **Canal:** {canal}  
 
-                            - 📊 **Ventas base semanas:** {venta_base:,} unidades.
-                            Corresponde al calculo basado en el precio otorgado y al ajuste del modelo para el canal {canal}  
+                            - 📊 **Ventas base:** {venta_base:,} unidades.
+                            Venta esperada semanal en el canal {canal} dado el precio actual y el promedio del clima y GRPs.
                               
                             """)
                 if abs(af_precio) >= 1:
