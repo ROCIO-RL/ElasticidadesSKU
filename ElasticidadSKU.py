@@ -301,7 +301,7 @@ class ElasticidadCB:
             venta['Precio'] = venta['Precio'] / venta['ML_USD']
 
             # --- Quitar atípicos usando IQR ---
-            '''Q1 = venta['Precio'].quantile(0.25)
+            Q1 = venta['Precio'].quantile(0.25)
             Q3 = venta['Precio'].quantile(0.75)
             IQR = Q3 - Q1
             limite_inferior = Q1 - 1.5 * IQR
@@ -311,7 +311,7 @@ class ElasticidadCB:
             venta = venta[
                 (venta['Precio'] >= limite_inferior) &
                 (venta['Precio'] <= limite_superior)
-            ].copy()'''
+            ].copy()
 
             # --- Promedio semanal final ---
             precio = (
@@ -405,7 +405,7 @@ class ElasticidadCB:
                 )'''
             
 
-            query_cadid = f"""
+           ''' query_cadid = f"""
                 SELECT DISTINCT
                     P.PAIS,
                     so.cadid,
@@ -429,7 +429,7 @@ class ElasticidadCB:
             if self.canal == 'Autoservicios':
                 self.sellout = self.sellout[self.sellout['CADID'].isin(cadid_autoserv)]
             elif self.canal == 'Farmacias':
-                self.sellout = self.sellout[~self.sellout['CADID'].isin(cadid_farm)]
+                self.sellout = self.sellout[~self.sellout['CADID'].isin(cadid_farm)]'''
 
 
 
