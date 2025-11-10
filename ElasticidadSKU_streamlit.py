@@ -168,6 +168,14 @@ with col3:
         costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
         # Filtrar por el SKU actual
         costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
+        # Si el SKU existe en el archivo, precargar su costo
+        if not costo_filtrado.empty:
+            costo_default = costo_filtrado.iloc[0]
+        else:
+            costo_default = ""
+
+        # Mostrar el campo editable con el valor precargado
+        costo_act = st.text_input("Costo", value=costo_default)
     else:
         costos = pd.read_excel(r"CostoInternacional_VF.xlsx")
 
@@ -197,17 +205,25 @@ with col3:
         # Devuelve un DataFrame con una fila (último costo)
         costo_filtrado = costos_mensuales.head(1)
 
+        # Si el SKU existe en el archivo, precargar su costo 
+        if not costo_filtrado.empty:
+            # Si es un DataFrame con una columna 'Costo'
+            if 'Costo' in costo_filtrado.columns:
+                costo_default = costo_filtrado['Costo'].iloc[0]
+            else:
+                # Si viene de otra forma, tomamos el primer valor
+                costo_default = costo_filtrado.iloc[0]
+        else:
+            costo_default = ""
+
+        # Asegurar que el valor sea string (Streamlit lo requiere)
+        costo_act = st.text_input("Costo", value=str(costo_default))
+
+
 
     
 
-    # Si el SKU existe en el archivo, precargar su costo
-    if not costo_filtrado.empty:
-        costo_default = costo_filtrado.iloc[0]
-    else:
-        costo_default = ""
-
-    # Mostrar el campo editable con el valor precargado
-    costo_act = st.text_input("Costo", value=costo_default)
+    
 with col4:  
     #st.markdown("Clima")  
     #clima = st.checkbox("¿Considerar Clima?", value=True)  
