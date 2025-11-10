@@ -160,16 +160,48 @@ with col3:
                     matriz_precio_costo where paisid=1;"""
         dfcostosmx =  pd.read_sql(query_int,conn)
         conn.close()
+        costos = costos.rename(columns={
+            'CODIGOBARRAS': 'PROPSTCODBARRAS',
+            'COSTO': 'Costo'
+        })  
+        costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()  
+        costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
+        # Filtrar por el SKU actual
+        costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
     else:
+        # Leer archivo de costos internacionales
         costos = pd.read_excel(r"CostoInternacional_VF.xlsx")
-    costos = costos.rename(columns={
-        'CODIGOBARRAS': 'PROPSTCODBARRAS',
-        'COSTO': 'Costo'
-    })  
-    costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()  
-    costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
-    # Filtrar por el SKU actual
-    costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
+
+        # Normalizar columnas
+        costos = costos.rename(columns={
+            'CODIGOBARRAS': 'PROPSTCODBARRAS',
+            'COSTO': 'Costo'
+        })
+        costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()
+        costos['Pais'] = costos['Pais'].str.strip()
+
+        # --- Filtrar por país y SKU ---
+        costos_filtrados = costos[
+            (costos['Pais'] == pais) &
+            (costos['PROPSTCODBARRAS'] == sku_val_prov)
+        ].copy()
+
+        # --- Calcular promedio mensual ---
+        costos_mensuales = (
+            costos_filtrados
+            .groupby(['ANIO', 'MES'], as_index=False)['Costo']
+            .mean()
+        )
+
+        # --- Obtener costo más reciente ---
+        # Ordenamos por año y mes descendente
+        costos_mensuales = costos_mensuales.sort_values(['ANIO', 'MES'], ascending=[False, False])
+        costo_actual = costos_mensuales.iloc[0]['Costo'] if not costos_mensuales.empty else None
+
+        # --- Resultado final ---
+        costo_filtrado = costo_actual
+
+    
 
     # Si el SKU existe en el archivo, precargar su costo
     if not costo_filtrado.empty:
