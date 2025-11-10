@@ -161,6 +161,7 @@ with col3:
         dfcostosmx =  pd.read_sql(query_int,conn)
         conn.close()
         costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
+        
         costos = costos.rename(columns={
             'CODIGOBARRAS': 'PROPSTCODBARRAS',
             'COSTO_GESTION': 'Costo'
