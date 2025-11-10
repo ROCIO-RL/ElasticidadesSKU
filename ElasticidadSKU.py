@@ -294,8 +294,9 @@ class ElasticidadCB:
             # --- Merge con tipo de cambio ---
             venta = venta.merge(dolares, on=['ANIO', 'SEMNUMERO'], how='left')
 
-            # --- Filtro: solo semanas con precio disponible ---
-            #venta = venta[venta['Precio'].notna()].copy()
+            # --- Interpolar precios faltantes ---
+            venta = venta.sort_values(['ANIO', 'SEMNUMERO'])
+            venta['Precio'] = venta['Precio'].interpolate(method='linear', limit_direction='both')
 
             # --- Conversión a USD ---
             venta['Precio'] = venta['Precio'] / venta['ML_USD']
