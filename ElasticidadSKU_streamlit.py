@@ -141,7 +141,7 @@ with col2:
 with col3:
     # Cargar los costos desde Excel
     if pais == 'México':
-        #query para< el futuro
+        #query para el futuro
         conn = snowflake.connector.connect(
                 user=st.secrets["snowflake"]["user"],
                 password=st.secrets["snowflake"]["password"],
