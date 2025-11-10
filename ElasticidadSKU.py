@@ -405,8 +405,8 @@ class ElasticidadCB:
                 )'''
             
 
-           #query_cadid = f"""
-                '''SELECT DISTINCT
+           query_cadid = f"""
+                SELECT DISTINCT
                     P.PAIS,
                     so.cadid,
                     cl.TIPOESTNOMBRE
@@ -421,7 +421,7 @@ class ElasticidadCB:
                 AND P.PAIS='{self.pais}'
                 """
 
-            df_cadid = pd.read_sql(query_cadid, conn)
+            '''df_cadid = pd.read_sql(query_cadid, conn)
             conn.close()
             cadid_autoserv = df_cadid.loc[df_cadid['TIPOESTNOMBRE'] == 'Autoservicios', 'CADID'].unique().tolist()
             cadid_farm = df_cadid.loc[df_cadid['TIPOESTNOMBRE'] == 'Cadenas de farmacia', 'CADID'].unique().tolist()
