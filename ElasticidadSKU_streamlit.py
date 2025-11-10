@@ -617,7 +617,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         #precios = np.arange(precio_actual * 0.9, precio_actual * 1.1 + 0.5, 0.5)
 
                         # Generar rango de precios y asegurar que incluya el precio actual exacto
-                        precios = np.linspace(precio_actual * 0.85, precio_actual * 1.15, num=31)
+                        precios = np.linspace(precio_actual * 0.85, precio_actual * 1.15, num=21)
                         precios = np.unique(np.append(precios, precio_actual))  # Garantiza que esté el precio exacto
                         precios = np.round(precios, 2)  # Redondea a 2 decimales
 
