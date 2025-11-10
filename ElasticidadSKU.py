@@ -292,7 +292,7 @@ class ElasticidadCB:
             dolares[['ANIO', 'SEMNUMERO']] = dolares[['ANIO', 'SEMNUMERO']].astype(int)
 
             # --- Merge con tipo de cambio ---
-            venta = venta.merge(dolares, on=['ANIO', 'SEMNUMERO'], how='inner')
+            venta = venta.merge(dolares, on=['ANIO', 'SEMNUMERO'], how='left')
 
             # --- Filtro: solo semanas con precio disponible ---
             #venta = venta[venta['Precio'].notna()].copy()
