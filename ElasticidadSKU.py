@@ -405,8 +405,8 @@ class ElasticidadCB:
                 )'''
             
 
-           ''' query_cadid = f"""
-                SELECT DISTINCT
+           #query_cadid = f"""
+                '''SELECT DISTINCT
                     P.PAIS,
                     so.cadid,
                     cl.TIPOESTNOMBRE
