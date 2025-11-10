@@ -295,7 +295,7 @@ class ElasticidadCB:
             venta = venta.merge(dolares, on=['ANIO', 'SEMNUMERO'], how='inner')
 
             # --- Filtro: solo semanas con precio disponible ---
-            venta = venta[venta['Precio'].notna()].copy()
+            #venta = venta[venta['Precio'].notna()].copy()
 
             # --- Conversión a USD ---
             venta['Precio'] = venta['Precio'] / venta['ML_USD']

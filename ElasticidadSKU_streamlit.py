@@ -140,10 +140,31 @@ with col2:
     precio_act = st.text_input("Precio (opcional)")
 with col3:
     # Cargar los costos desde Excel
-    costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
+    if pais == 'México':
+        costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
+        conn = snowflake.connector.connect(
+                user=st.secrets["snowflake"]["user"],
+                password=st.secrets["snowflake"]["password"],
+                account=st.secrets["snowflake"]["account"],
+                database=st.secrets["snowflake"]["database"],
+                schema=st.secrets["snowflake"]["schema"]
+                )
+        query = f"""  SELECT
+                    semanio,
+                    semmes,
+                    fecha,
+                    codigobarras,
+                    costo_estandar,
+                    paisid
+                    FROM
+                    matriz_precio_costo where paisid=1;"""
+        dfcostosmx =  pd.read_sql(query_int,conn)
+        conn.close()
+    else:
+        costos = pd.read_excel(r"CostoInternacional_VF.xlsx")
     costos = costos.rename(columns={
         'CODIGOBARRAS': 'PROPSTCODBARRAS',
-        'COSTO_GESTION': 'Costo'
+        'COSTO': 'Costo'
     })  
     costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()  
     costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
