@@ -141,7 +141,7 @@ with col2:
 with col3:
     # Cargar los costos desde Excel
     if pais == 'México':
-        
+        #query para< el futuro
         conn = snowflake.connector.connect(
                 user=st.secrets["snowflake"]["user"],
                 password=st.secrets["snowflake"]["password"],
@@ -161,7 +161,7 @@ with col3:
         dfcostosmx =  pd.read_sql(query_int,conn)
         conn.close()
         costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
-        
+
         costos = costos.rename(columns={
             'CODIGOBARRAS': 'PROPSTCODBARRAS',
             'COSTO_GESTION': 'Costo'
