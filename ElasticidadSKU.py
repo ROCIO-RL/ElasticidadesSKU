@@ -252,6 +252,7 @@ class ElasticidadCB:
             preciosarg = preciosarg.rename(columns={
                 'SEMANA': 'SEMNUMERO' if 'SEMANA' in preciosarg.columns else 'SEMNUMERO'
             })
+            preciosarg['PROPSTCODBARRAS'] = preciosarg['PROPSTCODBARRAS'].astype(str).str.strip()
             preciosarg = preciosarg[preciosarg['Pais']==self.pais]
             preciosarg = preciosarg[
                 preciosarg['PROPSTCODBARRAS'] == self.codbarras
@@ -330,6 +331,7 @@ class ElasticidadCB:
 
             
             preciosint = preciosint.rename(columns={'SEMANA': 'SEMNUMERO'})
+            preciosint['PROPSTCODBARRAS'] = preciosint['PROPSTCODBARRAS'].astype(str).str.strip()
 
             # Filtramos por país y código de barras
             preciosint = preciosint[
