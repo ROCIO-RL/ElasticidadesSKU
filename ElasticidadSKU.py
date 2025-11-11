@@ -328,24 +328,20 @@ class ElasticidadCB:
             preciosint = pd.read_excel(r"PreciosInternacional.xlsx")
             preciosint.columns = [c.strip() for c in preciosint.columns]
 
-            # Renombrar columna SEMANA si existe
-            if 'SEMANA' in preciosint.columns:
-                preciosint = preciosint.rename(columns={'SEMANA': 'SEMNUMERO'})
+            
+            preciosint = preciosint.rename(columns={'SEMANA': 'SEMNUMERO'})
 
-            # Verificar si existen el país y el SKU en el archivo
-            existe_pais = self.pais in preciosint['Pais'].unique()
-            existe_sku = self.codbarras in preciosint['PROPSTCODBARRAS'].unique()
+            # Filtramos por país y código de barras
+            preciosint = preciosint[
+                (preciosint['Pais'] == self.pais) &
+                (preciosint['PROPSTCODBARRAS'] == self.codbarras)
+            ][['ANIO', 'SEMNUMERO', 'Precio']]
 
-            if not existe_pais or not existe_sku:
-                # Si no existe el país o el SKU, calcular precio directo
+            # --- Si después del filtro no hay datos ---
+            if preciosint.empty:
+                # Calcular el precio directamente
                 venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP'].replace(0, np.nan)
             else:
-                # Filtrar precios según país y código de barras
-                preciosint = preciosint[
-                    (preciosint['Pais'] == self.pais) &
-                    (preciosint['PROPSTCODBARRAS'] == self.codbarras)
-                ][['ANIO', 'SEMNUMERO', 'Precio']]
-
                 # --- Merge con venta ---
                 venta = venta.merge(preciosint, on=['ANIO', 'SEMNUMERO'], how='left')
 
@@ -357,9 +353,6 @@ class ElasticidadCB:
                 venta.loc[venta['Precio'].isna(), 'Precio'] = (
                     venta['MONTORETAIL'] / venta['UNIDADESDESP'].replace(0, np.nan)
                 )
-            
-
-            
 
         # --- Promedio semanal final ---
         precio = (
