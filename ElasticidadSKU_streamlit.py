@@ -428,9 +428,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 )
 
                 elasticidad.consulta_sellout()
-                print(elasticidad.status)
+                #print(elasticidad.status)
+                st.markdown("Consulta sellout")
                 elasticidad.calcula_elasticidad()
-                print(elasticidad.status)
+                #print(elasticidad.status)
+                st.markdown("Calcula elasticidad")
 
                 fig = elasticidad.grafica()
                 dispersion = elasticidad.grafica_dispersion()
@@ -439,11 +441,6 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 clave = f"{sku}_{id_escenario}"
                 graficos[clave] = fig
                 graficos_dispersion[clave] = dispersion
-               
-                
-
-                
-                
 
                 #insight = elasticidad.genera_insight_op()
                 def safe_round(value, dec=4):
