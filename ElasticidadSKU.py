@@ -1185,16 +1185,59 @@ class ElasticidadCB:
             return resultado
     
 
-    def genera_insight_op(self, model_name="deepseek-ai/DeepSeek-V3.1-Terminus",precio=None,df=None):
+    #def genera_insight_op(self, model_name="deepseek-ai/DeepSeek-V3.1-Terminus",precio=None,df=None):
+    def genera_insight_op(res,df=None,model_name="deepseek-ai/DeepSeek-V3.1-Terminus"):
         #DeepSeek-V3.1-Terminus
         #DeepSeek-V3.1-Base
-        if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
+        '''if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
             raise ValueError("Ejecuta .calcula_elasticidad() antes de generar el insight.")
 
         coef_pval = "\n".join(
             f"- {var}: coef = {self.coeficientes[var]:.4f}, p = {self.pvalores[var]:.4g}"
             for var in self.coeficientes.index
         )
+'''
+
+        # Valores base
+        r2 = res.get("R cuadrada", 0)
+        precio = res.get("Precio Actual")
+
+        # Armar diccionarios solo con las variables que existan
+        posibles_vars = {
+            "Intercept": ("intercepto", "Pvalue Intercepto"),
+            "Precio": ("Afectación Precio", "Pvalue Precio"),
+            "CLIMA": ("Afectación Clima", "Pvalue Clima"),
+            "Grps": ("Afectación Grps", "Pvalue Grps"),
+            "JULIO_REGALADO": ("Afectación Julio Regalado", "Pvalue Julio Regalado"),
+            "MEGA_PAUTA": ("Afectación Mega Pauta", "Pvalue Mega Pauta"),
+        }
+
+        coeficientes, pvalores = {}, {}
+
+        for nombre, (coef_key, pval_key) in posibles_vars.items():
+            if res.get(coef_key) is not None:
+                coeficientes[nombre] = res.get(coef_key)
+                pvalores[nombre] = res.get(pval_key, None)
+
+        # Competencias dinámicas
+        if res.get("Competencias"):
+            for comp in res["Competencias"]:
+                nombre = comp.get("Nombre Competencia", "Competencia_SinNombre")
+                coef = comp.get("Afectación Competencia")
+                pval = comp.get("Pvalue Competencia")
+                if coef is not None:
+                    coeficientes[f"PRECIO_COMPETENCIA_{nombre}"] = coef
+                    pvalores[f"PRECIO_COMPETENCIA_{nombre}"] = pval
+
+        # Generar texto limpio de coeficientes
+        if coeficientes:
+            coef_pval = "\n".join(
+                f"- {var}: coef = {coeficientes[var]:.4f}, p = {pvalores.get(var, float('nan')):.4g}"
+                for var in coeficientes
+            )
+        else:
+            coef_pval = "No se encontraron variables con coeficientes válidos."
+
 
         template = f"""Contexto:
                     Eres un Econometrista Senior especializado en transformar resultados estadísticos complejos en recomendaciones de negocio claras, accionables y ejecutivas para equipos de dirección comercial.
@@ -1212,13 +1255,12 @@ class ElasticidadCB:
 
                     🧩 Datos que recibirás (variables del modelo)
 
-                    R²: {self.r2:.4f}
+                    R²: {r2:.4f}
 
                     coeficientes: {coef_pval}
 
-                    precio: {precio}
-
-                    df: {df} (tabla de demanda simulada)
+                    Precio actual: {precio if precio is not None else "No disponible"}
+                    df (demanda simulada): {df if df is not None else "No disponible"}
 
                     Variables posibles: Precio, CLIMA, PRECIO_COMPETENCIA_xxx, JULIO_REGALADO, u otras.
 
@@ -1285,57 +1327,13 @@ class ElasticidadCB:
                     - Se recomienda incorporar variables de control (estacionalidad, intensidad promocional o gasto publicitario) para aislar el efecto competitivo real.
 
                     - Añadir dummies de eventos de oferta y mega pauta (p. ej. Julio Regalado y Mega pauta) mejora la precisión del modelo."""
-        # Anterior prompt
-        """Contexto: Eres un Econometrista Senior que se especializa en transformar resultados estadísticos complejos en recomendaciones estratégicas claras y accionables para la alta dirección. Tu estilo es directo, ejecutivo y basado en datos.
-
-        Instrucciones para tu Respuesta:
-
-        Formato: Usa solo viñetas (-). No incluyas introducciones, conclusiones o texto de relleno.
-
-        Lenguaje: Exclusivamente en español. Evita toda jerga técnica innecesaria. Si usas un término técnico (como "p-value"), explícalo brevemente entre paréntesis de inmediato.
-
-        Extensión: Máximo 6 viñetas en total. Sé brutalmente conciso.
-
-        Tarea 1: Recomendación de Precio (Si los datos están disponibles)
-
-        Si se proporciona la tabla de demanda{df} y el precio actual{precio}, procede:
-
-        - Precio Ideal Propuesto: [Precio específico].
-
-        - Rango Alternativo: [Rango de precios, ej. $X - $Y]. Ventaja: [Beneficio clave, ej. 'mejora el margen sin perder volumen significativo'].
-
-        Tarea 2: Análisis del Modelo Log-Log (Siempre requerido)
-        Analiza los resultados proporcionados 
-        - R²: {self.r2:.4f}
-        - ¿Coeficientes y p-values: {coef_pval} y responde estrictamente en este orden y formato:
-
-        - Variables Significativas: Lista solo las variables con p-value < 0.05 (es decir, cuya relación con las ventas es estadísticamente confiable). Ej: - Precio (p-value: 0.01).
-
-        - Impacto Principal: Identifica la una variable del modelo con el coeficiente más alto (en valor absoluto). Traduce su impacto a un lenguaje claro:
-
-        Ejemplo para Precio: - La variable con mayor impacto es el Precio. Por cada 1% que aumentes el precio, las ventas caerán aproximadamente un [Valor Absoluto del Coeficiente]%.
-
-        - Calidad del Modelo (R²): - El modelo explica aproximadamente un [R²*100]% de las variaciones en la demanda. [Interpretación breve: ej. "Ajuste sólido" si R² > 0.7, "Ajuste moderado" si R² > 0.5, etc.].
-
-        - Implicación Estratégica - Precio: Da una recomendación concreta y breve basada en la elasticidad-precio.
-
-        Si es elástica (|coef. precio| > 1): - Estrategia de precio: Cuidado con las alzas. Una subida de precio generará una caída *más que proporcional* en la cantidad demandada, reduciendo los ingresos totales.
-
-        Si es inelástica (|coef. precio| < 1): - Estrategia de precio: Oportunidad de margen. Puedes aumentar el precio; la caída en ventas será *menos que proporcional*, aumentando los ingresos totales.
         
-        - Implicación Estratégica - Otras Variables (ej. Clima, PRECIO_COMPETENCIA): Si hay variables significativas además del precio, elige la más importante y da una recomendación.
-
-        Ejemplo para Temperatura: - Acción Comercial: En días con mayor temperatura, espera un aumento de ~[e^(coeficiente)]% en ventas. Asegura stock y visibilidad en tienda.
-
-         - Consideración Clave - Coeficientes Cruzados Atípicos: Si el coeficiente del precio de la competencia es negativo y elástico (|coef.| > 1), esto NO indica sustitución. Sugiere que ambas marcas se mueven juntas por factores externos (ej. promociones agregadas como "Julio Regalado"). Para aislar el efecto competitivo real, el modelo debe incluir variables de control como estacionalidad o pulsos de oferta.
-        
-        Si faltan datos para la Tarea 1, omítela y comienza directamente con la Tarea 2."""
                 
         #HF_TOKEN_Apagado
         #status
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
-            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_Apagado"],
+            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"],
         )
 
 
