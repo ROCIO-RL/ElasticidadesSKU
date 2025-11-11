@@ -247,12 +247,12 @@ class ElasticidadCB:
         # --- CASO ARGENTINA ---
         elif self.pais == 'Argentina':
             # Leemos precios externos
-            preciosarg = pd.read_excel(r"PrecioArg.xlsx", sheet_name='PreciosArg')
+            preciosarg = pd.read_excel(r"PreciosInternacional.xlsx")
             preciosarg.columns = [c.strip() for c in preciosarg.columns]
             preciosarg = preciosarg.rename(columns={
-                'Promedio de Precio': 'Precio',
                 'SEMANA': 'SEMNUMERO' if 'SEMANA' in preciosarg.columns else 'SEMNUMERO'
             })
+            preciosarg = preciosarg[preciosarg['Pais']==self.pais]
             preciosarg = preciosarg[
                 preciosarg['PROPSTCODBARRAS'] == self.codbarras
             ][['ANIO', 'SEMNUMERO', 'Precio']]
@@ -323,13 +323,40 @@ class ElasticidadCB:
 
             return precio
 
-
         else:
-            #print(f"País {self.pais} no contemplado.")
-            #return pd.DataFrame()
-             # Precio unitario
-            #venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP']
-            venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP'].replace(0, np.nan)
+            # Leemos precios externos
+            preciosint = pd.read_excel(r"PreciosInternacional.xlsx")
+            preciosint.columns = [c.strip() for c in preciosint.columns]
+
+            # Renombrar columna SEMANA si existe
+            if 'SEMANA' in preciosint.columns:
+                preciosint = preciosint.rename(columns={'SEMANA': 'SEMNUMERO'})
+
+            # Verificar si existen el país y el SKU en el archivo
+            existe_pais = self.pais in preciosint['Pais'].unique()
+            existe_sku = self.codbarras in preciosint['PROPSTCODBARRAS'].unique()
+
+            if not existe_pais or not existe_sku:
+                # Si no existe el país o el SKU, calcular precio directo
+                venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP'].replace(0, np.nan)
+            else:
+                # Filtrar precios según país y código de barras
+                preciosint = preciosint[
+                    (preciosint['Pais'] == self.pais) &
+                    (preciosint['PROPSTCODBARRAS'] == self.codbarras)
+                ][['ANIO', 'SEMNUMERO', 'Precio']]
+
+                # --- Merge con venta ---
+                venta = venta.merge(preciosint, on=['ANIO', 'SEMNUMERO'], how='left')
+
+                # --- Interpolar precios faltantes ---
+                venta = venta.sort_values(['ANIO', 'SEMNUMERO'])
+                venta['Precio'] = venta['Precio'].interpolate(method='linear', limit_direction='both')
+
+                # Si quedan precios nulos, calcular con MONTORETAIL/UNIDADESDESP
+                venta.loc[venta['Precio'].isna(), 'Precio'] = (
+                    venta['MONTORETAIL'] / venta['UNIDADESDESP'].replace(0, np.nan)
+                )
             
 
             
@@ -1334,7 +1361,7 @@ class ElasticidadCB:
         #status
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
-            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"],
+            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_Apagado"],
         )
 
 
