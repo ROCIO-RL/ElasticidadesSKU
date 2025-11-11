@@ -1278,6 +1278,7 @@ class ElasticidadCB:
         Si faltan datos para la Tarea 1, omítela y comienza directamente con la Tarea 2."""
                 
         #HF_TOKEN_Apagado
+        #status
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
             api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"],
