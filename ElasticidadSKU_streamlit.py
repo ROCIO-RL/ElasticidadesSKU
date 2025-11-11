@@ -139,7 +139,7 @@ with col1:
 with col2:
     precio_act = st.text_input("Precio")
 with col3:
-    st.markdown("ststus")
+    st.markdown("status")
     # Cargar los costos desde Excel
     if pais == 'México':
         #query para el futuro
