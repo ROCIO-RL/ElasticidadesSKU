@@ -62,7 +62,7 @@ conn = snowflake.connector.connect(
 #            LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
 #                WHERE t.anio >= 2023"""
 df_productos = pd.read_excel(r'Catálogo Corporativo Final.xlsx',sheet_name='Catálogo')
-paisesdisponibles = ['Argentina','México','Colombia']
+paisesdisponibles = ['Argentina','México','Colombia','Brasil']
 df_productos = df_productos[df_productos['Pais'].isin(paisesdisponibles)]
 pais = st.selectbox("Pais", sorted(df_productos["Pais"].unique()))
 query = f"""  SELECT distinct p.propstcodbarras as SKU,
