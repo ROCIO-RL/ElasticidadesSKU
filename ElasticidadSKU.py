@@ -328,8 +328,8 @@ class ElasticidadCB:
             #print(f"País {self.pais} no contemplado.")
             #return pd.DataFrame()
              # Precio unitario
-            venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP']
-
+            #venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP']
+            venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP'].replace(0, np.nan)
             
 
             
