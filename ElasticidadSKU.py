@@ -894,7 +894,7 @@ class ElasticidadCB:
                 ))
 
         # Clima 
-        if 'CLIMA' in df.columns:
+        '''if 'CLIMA' in df.columns:
             temp_norm = (df['CLIMA'] - df['CLIMA'].min()) / (df['CLIMA'].max() - df['CLIMA'].min())
             fig.add_trace(go.Scatter(
                 x=df['Fecha'],
@@ -904,7 +904,32 @@ class ElasticidadCB:
                 name='Clima (normalizado)',
                 fillcolor='rgba(0, 160, 220, 0.2)',
                 yaxis='y3'
+            ))'''
+        
+        if 'Grps' in df.columns:
+            grps_norm = (df['Grps'] - df['Grps'].min()) / (df['Grps'].max() - df['Grps'].min())
+            fig.add_trace(go.Scatter(
+                x=df['Fecha'],
+                y=grps_norm,
+                fill='tozeroy',
+                mode='none',
+                name='Grps (normalizado)',
+                fillcolor='rgba(0, 160, 220, 0.2)',
+                yaxis='y3'
             ))
+        else:
+            # Clima 
+            if 'CLIMA' in df.columns:
+                temp_norm = (df['CLIMA'] - df['CLIMA'].min()) / (df['CLIMA'].max() - df['CLIMA'].min())
+                fig.add_trace(go.Scatter(
+                    x=df['Fecha'],
+                    y=temp_norm,
+                    fill='tozeroy',
+                    mode='none',
+                    name='Clima (normalizado)',
+                    fillcolor='rgba(0, 160, 220, 0.2)',
+                    yaxis='y3'
+                ))
 
         #Layout
         #control
@@ -913,7 +938,7 @@ class ElasticidadCB:
             xaxis=dict(title="Semana"),
             yaxis=dict(title="Unidades", side='left', showgrid=False),
             yaxis2=dict(title="Precio", overlaying='y', side='right'),
-            yaxis3=dict(title="Clima (escala visual)",
+            yaxis3=dict(title="Variables Externas (escala visual)",
                         overlaying='y', side='right', position=0.95, showgrid=False),
             bargap=0.2,
             legend=dict(
