@@ -1186,7 +1186,7 @@ class ElasticidadCB:
     
 
     #def genera_insight_op(self, model_name="deepseek-ai/DeepSeek-V3.1-Terminus",precio=None,df=None):
-    def genera_insight_op(res,df=None,model_name="deepseek-ai/DeepSeek-V3.1-Terminus"):
+    def genera_insight_op(self,res,df=None,model_name="deepseek-ai/DeepSeek-V3.1-Terminus"):
         #DeepSeek-V3.1-Terminus
         #DeepSeek-V3.1-Base
         '''if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
