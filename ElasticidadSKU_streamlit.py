@@ -138,8 +138,9 @@ with col1:
         canal = st.selectbox("Canal", ["Autoservicios"])
 with col2:
     precio_act = st.text_input("Precio")
+    st.markdown("status1")
 with col3:
-    st.markdown("status")
+    
     # Cargar los costos desde Excel
     if pais == 'México':
         #query para el futuro
