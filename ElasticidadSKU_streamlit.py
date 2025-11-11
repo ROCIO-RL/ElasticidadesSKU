@@ -429,10 +429,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                 elasticidad.consulta_sellout()
                 #print(elasticidad.status)
-                st.markdown("Consulta sellout")
+                #st.markdown("Consulta sellout")
                 elasticidad.calcula_elasticidad()
                 #print(elasticidad.status)
-                st.markdown("Calcula elasticidad")
+                #st.markdown("Calcula elasticidad")
 
                 fig = elasticidad.grafica()
                 dispersion = elasticidad.grafica_dispersion()
