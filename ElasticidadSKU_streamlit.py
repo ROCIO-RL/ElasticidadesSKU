@@ -150,7 +150,7 @@ with col3:
                 database=st.secrets["snowflake"]["database"],
                 schema=st.secrets["snowflake"]["schema"]
                 )
-        query = f"""  SELECT
+        query_costos = f"""  SELECT
             semanio AS ANIO,
             semmes AS MES,
             codigobarras,
@@ -159,7 +159,7 @@ with col3:
             PRD_CNS_MX.DM.matriz_precio_costo 
             where paisid=1
             Order By semanio,semmes;"""
-        costos =  pd.read_sql(query_int,conn)
+        costos =  pd.read_sql(query_costos,conn)
         conn.close()
         #costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
 
