@@ -193,7 +193,7 @@ with col3:
         # Devuelve un DataFrame con una fila (último costo)
         costo_filtrado = costos_mensuales.head(1)
 
-        # Si el SKU existe en el archivo, precargar su costo 
+
         if not costo_filtrado.empty:
             # Si es un DataFrame con una columna 'Costo'
             if 'Costo' in costo_filtrado.columns:
@@ -202,8 +202,9 @@ with col3:
                 # Si viene de otra forma, tomamos el primer valor
                 costo_default = costo_filtrado.iloc[0]
         else:
+            costo_default = ""
 
-            costo_act = st.text_input("Costo", value=costo_default)
+        costo_act = st.text_input("Costo", value=costo_default)
     else:
         costos = pd.read_excel(r"CostoInternacional_VF.xlsx")
 
