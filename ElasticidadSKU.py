@@ -704,14 +704,14 @@ class ElasticidadCB:
         self.data_grafico = layout.copy()
 
         # log-log
-        layout_log[['UNIDADESDESP','Precio']] = layout_log[['UNIDADESDESP','Precio']].apply(np.log1p)
+        layout_log[['UNIDADESDESP','Precio']] = layout_log[['UNIDADESDESP','Precio']].apply(np.log)
         # competencia
         '''if 'PRECIO_COMPETENCIA' in layout_log.columns and layout_log['PRECIO_COMPETENCIA'].notna().sum() > 0:
             layout_log['PRECIO_COMPETENCIA'] = np.log(layout_log['PRECIO_COMPETENCIA'])'''
         # log-log de precios de competencia
         for col in layout_log.columns:
             if col.startswith('PRECIO_COMPETENCIA'):
-                layout_log[col] = np.log1p(layout_log[col])
+                layout_log[col] = np.log(layout_log[col])
 
 
         # Guardar última semana y año
