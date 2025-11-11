@@ -151,34 +151,59 @@ with col3:
                 schema=st.secrets["snowflake"]["schema"]
                 )
         query = f"""  SELECT
-                    semanio,
-                    semmes,
-                    fecha,
-                    codigobarras,
-                    costo_estandar,
-                    paisid
-                    FROM
-                    matriz_precio_costo where paisid=1;"""
-        dfcostosmx =  pd.read_sql(query_int,conn)
+            semanio AS ANIO,
+            semmes AS MES,
+            codigobarras,
+            costo_estandar AS COSTO_GESTION
+            FROM
+            PRD_CNS_MX.DM.matriz_precio_costo 
+            where paisid=1
+            Order By semanio,semmes;"""
+        costos =  pd.read_sql(query_int,conn)
         conn.close()
-        costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
+        #costos = pd.read_excel(r"CostoGestionMensual_2025-10-28-0942 (1).xlsx")
 
         costos = costos.rename(columns={
             'CODIGOBARRAS': 'PROPSTCODBARRAS',
             'COSTO_GESTION': 'Costo'
         })  
         costos['PROPSTCODBARRAS'] = costos['PROPSTCODBARRAS'].astype(str).str.strip()  
-        costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
+        #costos = costos[['PROPSTCODBARRAS', 'Costo']].drop_duplicates()
         # Filtrar por el SKU actual
-        costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
+        #costo_filtrado = costos.loc[costos['PROPSTCODBARRAS'] == sku_val_prov, 'Costo']
+        # Filtrar por país y SKU
+        costos_filtrados = costos[costos['PROPSTCODBARRAS'] == sku_val_prov].copy()
         # Si el SKU existe en el archivo, precargar su costo
-        if not costo_filtrado.empty:
-            costo_default = costo_filtrado.iloc[0]
-        else:
-            costo_default = ""
+        #if not costo_filtrado.empty:
+            #costo_default = costo_filtrado.iloc[0]
+        #else:
+            #costo_default = ""
 
         # Mostrar el campo editable con el valor precargado
-        costo_act = st.text_input("Costo", value=costo_default)
+        # Calcular promedio mensual
+        costos_mensuales = (
+            costos_filtrados
+            .groupby(['ANIO', 'MES'], as_index=False)['Costo']
+            .mean()
+        )
+
+        # Obtener costo más reciente (manteniendo forma de DataFrame)
+        costos_mensuales = costos_mensuales.sort_values(['ANIO', 'MES'], ascending=[False, False])
+
+        # Devuelve un DataFrame con una fila (último costo)
+        costo_filtrado = costos_mensuales.head(1)
+
+        # Si el SKU existe en el archivo, precargar su costo 
+        if not costo_filtrado.empty:
+            # Si es un DataFrame con una columna 'Costo'
+            if 'Costo' in costo_filtrado.columns:
+                costo_default = costo_filtrado['Costo'].iloc[0]
+            else:
+                # Si viene de otra forma, tomamos el primer valor
+                costo_default = costo_filtrado.iloc[0]
+        else:
+
+            costo_act = st.text_input("Costo", value=costo_default)
     else:
         costos = pd.read_excel(r"CostoInternacional_VF.xlsx")
 
