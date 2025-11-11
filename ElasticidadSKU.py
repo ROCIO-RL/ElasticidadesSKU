@@ -386,7 +386,27 @@ class ElasticidadCB:
                 AND es.propstcodbarras = '{self.codbarras}'
                 AND cl.TIPOESTNOMBRE IN ('Autoservicios')
                 AND cl.GRPCLASIFICACION='Monitoreado' 
-        """    
+        """   
+
+        query_int_2 = f"""SELECT 
+            s.SEMANIO AS ANIO, 
+            s.SEMNUMERO AS SEMNUMERO,
+            es.PROPSTCODBARRAS,
+            so.cadid,
+            so.SOUTCANTDESP AS UnidadesDesp,
+            NVL(so.soutmontodespbrt,0) AS MontoRetail
+        FROM PRD_CNS_MX.DM.FACT_SO_SEM_CAD_SKU_INT so 
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURAPRODUCTOSTOTALPAISES es ON es.PROPSTID=so.PROPSTID 
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_ESTRUCTURACLIENTESSEGPTVTOTAL cl ON cl.CADID=so.CADID  
+        LEFT JOIN PRD_CNS_MX.CATALOGOS.VW_CATSEMANAS s ON s.SEMID=so.SEMID 
+        LEFT JOIN PRD_STG.GNM_CT.GNMPAIS p ON p.PAISID=so.PAISID  
+        WHERE s.SEMANIO>=2023   
+                AND P.PAIS='{self.pais}'
+                AND es.propstcodbarras = '{self.codbarras}'
+                AND cl.TIPOESTNOMBRE IN ('Autoservicios')
+                AND cl.GRPCLASIFICACION='Monitoreado' 
+        """  
+
         if self.pais=='México':
             self.sellout = pd.read_sql(query, conn)
             conn.close()
@@ -397,7 +417,10 @@ class ElasticidadCB:
                 self.sellout = self.sellout[~self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
 
         else:
-            self.sellout = pd.read_sql(query_int, conn)
+            if self.pais =='Colombia':
+                self.sellout = pd.read_sql(query_int_2, conn)
+            else:
+                self.sellout = pd.read_sql(query_int, conn)
             #conn.close()
 
             # Verificar si todo el periodo carece de neto (es nulo o cero)
