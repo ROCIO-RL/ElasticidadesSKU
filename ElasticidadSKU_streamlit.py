@@ -827,7 +827,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
 
                         #insight = elasticidad.genera_insight_op(precio=precio,df=demanda_df)
-                        insight = genera_insight_op(res, df=demanda_df)
+                        insight = elasticidad.genera_insight_op(res, df=demanda_df)
 
                         clave = f"{sku}_{escenario_id}"
                         col1, col2 = st.columns(2)
@@ -875,7 +875,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         )
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                     #insight = elasticidad.genera_insight_op(precio=None,df=None)
-                    insight = genera_insight_op(res, df=None)
+                    insight = elasticidad.genera_insight_op(res, df=None)
 
                 
                 
