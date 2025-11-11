@@ -417,7 +417,8 @@ class ElasticidadCB:
                 self.sellout = self.sellout[~self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
 
         else:
-            if self.pais =='Colombia':
+            paises = ['Colombia','Brasil']
+            if self.pais in paises:
                 self.sellout = pd.read_sql(query_int_2, conn)
             else:
                 self.sellout = pd.read_sql(query_int, conn)
