@@ -183,18 +183,18 @@ class ElasticidadCB:
         data_medios = data_medios[data_medios['Producto base'] == self.producto_base ]
 
         if data_medios.empty:
-            print(f"⚠️ No se encontraron GRPs para '{self.producto_base }' ({self.pais}).")
+            print(f"No se encontraron GRPs para '{self.producto_base }' ({self.pais}).")
             self.grps = False
             return pd.DataFrame()
 
-        # --- 5. Agrupar
+        # Agrupar
         data_medios = (
             data_medios.groupby(['Año', 'Sem'], as_index=False)['Grps'].sum()
             .rename(columns={'Año': 'ANIO', 'Sem': 'SEMNUMERO'})
         )
         self.status = 3
 
-        print(f"✅ {len(data_medios)} filas de GRPs encontradas para {self.producto_base }.")
+        print(f"{len(data_medios)} filas de GRPs encontradas para {self.producto_base }.")
         return data_medios
 
 
@@ -325,8 +325,14 @@ class ElasticidadCB:
 
 
         else:
-            print(f"País {self.pais} no contemplado.")
-            return pd.DataFrame()
+            #print(f"País {self.pais} no contemplado.")
+            #return pd.DataFrame()
+             # Precio unitario
+            venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP']
+
+            
+
+            
 
         # --- Promedio semanal final ---
         precio = (
