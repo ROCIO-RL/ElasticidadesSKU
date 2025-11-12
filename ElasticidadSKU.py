@@ -618,7 +618,7 @@ class ElasticidadCB:
             .mean()
         )'''
 
-
+        #Ajuste
         grado = 3
         coef = np.polyfit(df['Precios'], df['FactorElastico_2'], grado)
         poly = np.poly1d(coef)
