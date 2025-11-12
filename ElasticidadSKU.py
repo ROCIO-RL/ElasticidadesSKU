@@ -17,6 +17,7 @@ import plotly.express as px
 import streamlit as st
 from openai import OpenAI, APIError, APIStatusError
 import re
+from sklearn.preprocessing import PolynomialFeatures
 
 
 
@@ -571,7 +572,8 @@ class ElasticidadCB:
         df = data.groupby(['ANIO','SEMNUMERO']).agg({'UNIDADESDESP':'sum','Precio':'mean'}).reset_index()
         lista_ventas=[]
         lista_dias=[]
-        pasos = 5
+        #pasos = 5
+        pasos = max(4, min(15, int(rango / (df['Precio'].mean() * 0.05))))
         delta=(df['Precio'].max()-df['Precio'].min())/pasos
         minimo=df['Precio'].min()
         precios=[(minimo+(i*delta)) for i in range(0,pasos+1)]
@@ -602,9 +604,22 @@ class ElasticidadCB:
         X = df['Precios'].values.reshape(-1, 1)
         y = df['FactorElastico_2'].values
 
-        model = LinearRegression()
+        '''model = LinearRegression()
         model.fit(X, y)
-        y_pred = model.predict(X)
+        y_pred = model.predict(X)'''
+
+
+        # --- Ajuste polinómico de grado 2 ---
+        poly = PolynomialFeatures(degree=2)
+        X_poly = poly.fit_transform(X)
+
+        model = LinearRegression()
+        model.fit(X_poly, y)
+        # Predicción ordenada por precios (para una línea suave)
+        X_fit = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
+        X_fit_poly = poly.transform(X_fit)
+        y_pred = model.predict(X_fit_poly)
+
 
         fig = go.Figure()
 
