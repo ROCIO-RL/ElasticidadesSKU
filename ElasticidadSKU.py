@@ -605,27 +605,12 @@ class ElasticidadCB:
         X = df['Precios'].values.reshape(-1, 1)
         y = df['FactorElastico_2'].values
 
-        '''model = LinearRegression()
-        model.fit(X, y)
-        y_pred = model.predict(X)'''
-
-
-        # --- Escalado y ajuste polinómico ---
-        scaler = StandardScaler()
-        X_scaled = scaler.fit_transform(X)
-
-        poly = PolynomialFeatures(degree=3)
-        X_poly = poly.fit_transform(X_scaled)
-
         model = LinearRegression()
-        model.fit(X_poly, y)
+        model.fit(X, y)
+        y_pred = model.predict(X)
 
-        # Generar puntos para la curva suavizada
-        X_fit = np.linspace(X.min(), X.max(), 200).reshape(-1, 1)
-        X_fit_scaled = scaler.transform(X_fit)
-        X_fit_poly = poly.transform(X_fit_scaled)
-        y_pred = model.predict(X_fit_poly)
 
+        
 
         fig = go.Figure()
 
