@@ -611,15 +611,18 @@ class ElasticidadCB:
 
         df = df.sort_values('Precios')  # importante para que la media móvil tenga sentido ordenada
 
-        # Calcular la media móvil del FactorElastico_2
+        '''# Calcular la media móvil del FactorElastico_2
         df['MediaMovil'] = (
             df['FactorElastico_2']
             .rolling(window=1, center=True, min_periods=1)
             .mean()
-        )
+        )'''
 
 
-
+        grado = 3
+        coef = np.polyfit(df['Precios'], df['FactorElastico_2'], grado)
+        poly = np.poly1d(coef)
+        df['TendenciaPolinomica'] = poly(df['Precios'])
         
 
         fig = go.Figure()
@@ -638,7 +641,7 @@ class ElasticidadCB:
         fig.add_trace(go.Scatter(
             x=df['Precios'],
             #y=y_pred,
-            y=df['MediaMovil'],
+            y=df['TendenciaPolinomica'],
             mode='lines',
             name='Tendencia',
             line=dict(color='red', width=2)
