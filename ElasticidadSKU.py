@@ -612,7 +612,12 @@ class ElasticidadCB:
         df = df.sort_values('Precios')  # importante para que la media móvil tenga sentido ordenada
 
         # Calcular la media móvil del FactorElastico_2
-        df['MediaMovil'] = df['FactorElastico_2'].rolling(window=5).mean()
+        df['MediaMovil'] = (
+            df['FactorElastico_2']
+            .rolling(window=5, center=True, min_periods=1)  # <--- clave
+            .mean()
+        )
+
 
 
         
