@@ -599,7 +599,7 @@ class ElasticidadCB:
     
     def grafica_factor_elastico(self):
         df = self.factor_elastico.copy()
-        X = df['Precio'].values.reshape(-1, 1)
+        X = df['Precios'].values.reshape(-1, 1)
         y = df['FactorElastico_2'].values
 
         model = LinearRegression()
@@ -610,17 +610,17 @@ class ElasticidadCB:
 
         # Scatter
         fig.add_trace(go.Scatter(
-            x=df['Precio'],
+            x=df['Precios'],
             y=df['FactorElastico_2'],
             mode='markers',
             name='Datos',
             marker=dict(color='royalblue', size=8, line=dict(width=0.5, color='gray')),
-            hovertemplate="Precio: %{x}<br>IE: %{y}<extra></extra>"
+            hovertemplate="Precios: %{x}<br>IE: %{y}<extra></extra>"
         ))
 
         # Línea de tendencia
         fig.add_trace(go.Scatter(
-            x=df['Precio'],
+            x=df['Precios'],
             y=y_pred,
             mode='lines',
             name='Tendencia',
@@ -628,8 +628,8 @@ class ElasticidadCB:
         ))
 
         fig.update_layout(
-            title="Dispersión: Precio vs Ventas",
-            xaxis_title="Precio",
+            title="Dispersión: Precios vs IE",
+            xaxis_title="Precios",
             yaxis_title="IE",
             template="plotly_white",
             height=500
