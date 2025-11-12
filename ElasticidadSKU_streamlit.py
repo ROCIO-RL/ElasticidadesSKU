@@ -717,7 +717,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         )
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                     insight = elasticidad.genera_insight_op(res, df=None)
-
+                #agregamos grafico
                 if clave in graficos_FE:
                     st.plotly_chart(
                         graficos_FE[clave],
