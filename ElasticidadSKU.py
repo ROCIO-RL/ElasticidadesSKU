@@ -614,7 +614,7 @@ class ElasticidadCB:
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
 
-        poly = PolynomialFeatures(degree=2)
+        poly = PolynomialFeatures(degree=3)
         X_poly = poly.fit_transform(X_scaled)
 
         model = LinearRegression()
