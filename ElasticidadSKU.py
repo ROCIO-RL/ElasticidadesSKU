@@ -574,7 +574,7 @@ class ElasticidadCB:
         lista_dias=[]
         #pasos = 5
         rango = df['Precio'].max() - df['Precio'].min()
-        pasos = max(9, min(15, int(rango / (df['Precio'].mean() * 0.05))))
+        pasos = max(5, min(15, int(rango / (df['Precio'].mean() * 0.05))))
         delta=(df['Precio'].max()-df['Precio'].min())/pasos
         minimo=df['Precio'].min()
         precios=[(minimo+(i*delta)) for i in range(0,pasos+1)]
@@ -609,7 +609,7 @@ class ElasticidadCB:
         model.fit(X, y)
         y_pred = model.predict(X)'''
 
-        df = df.sort_values('Precios')  # importante para que la media móvil tenga sentido ordenada
+        #df = df.sort_values('Precios')  # importante para que la media móvil tenga sentido ordenada
 
         '''# Calcular la media móvil del FactorElastico_2
         df['MediaMovil'] = (
@@ -619,7 +619,7 @@ class ElasticidadCB:
         )'''
 
         #Ajuste
-        grado = 2
+        grado = 5
         coef = np.polyfit(df['Precios'], df['FactorElastico_2'], grado)
         poly = np.poly1d(coef)
         df['TendenciaPolinomica'] = poly(df['Precios'])
