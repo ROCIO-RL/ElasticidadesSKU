@@ -585,8 +585,8 @@ class ElasticidadCB:
                 lista_ventas.append(suma)
         precios.pop(0)
         procesado=pd.DataFrame({'Precios':precios,'UNIDADESDESP':lista_ventas,'Semanas':lista_dias})
-        procesado['PromedioDia']=procesado['UNIDADESDESP']/procesado['Semanas']
-        procesado['PromedioDia'].fillna(0,inplace=True)
+        procesado['PromedioSemanas']=procesado['UNIDADESDESP']/procesado['Semanas']
+        procesado['PromedioSemanas'].fillna(0,inplace=True)
         try:
             pendiente, interseccion = np.polyfit(procesado['Precios'], procesado['PromedioSemanas'], 1)
         except Exception as e:
