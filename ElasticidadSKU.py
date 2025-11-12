@@ -17,7 +17,7 @@ import plotly.express as px
 import streamlit as st
 from openai import OpenAI, APIError, APIStatusError
 import re
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
 
 
@@ -610,15 +610,20 @@ class ElasticidadCB:
         y_pred = model.predict(X)'''
 
 
-        # --- Ajuste polinómico de grado 2 ---
+        # --- Escalado y ajuste polinómico ---
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+
         poly = PolynomialFeatures(degree=2)
-        X_poly = poly.fit_transform(X)
+        X_poly = poly.fit_transform(X_scaled)
 
         model = LinearRegression()
         model.fit(X_poly, y)
-        # Predicción ordenada por precios (para una línea suave)
-        X_fit = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
-        X_fit_poly = poly.transform(X_fit)
+
+        # Generar puntos para la curva suavizada
+        X_fit = np.linspace(X.min(), X.max(), 200).reshape(-1, 1)
+        X_fit_scaled = scaler.transform(X_fit)
+        X_fit_poly = poly.transform(X_fit_scaled)
         y_pred = model.predict(X_fit_poly)
 
 
