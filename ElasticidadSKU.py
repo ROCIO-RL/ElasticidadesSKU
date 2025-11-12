@@ -619,7 +619,7 @@ class ElasticidadCB:
         )'''
 
 
-        grado = 3
+        grado = 2
         coef = np.polyfit(df['Precios'], df['FactorElastico_2'], grado)
         poly = np.poly1d(coef)
         df['TendenciaPolinomica'] = poly(df['Precios'])
