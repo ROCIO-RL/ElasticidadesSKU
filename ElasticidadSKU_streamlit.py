@@ -337,6 +337,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
     resultados = []
     graficos = {}
     graficos_dispersion = {}
+    graficos_FE = {}
     layout = layout.reset_index(drop=True)
     layout["escenario_id"] = layout.index.astype(str)
 
@@ -371,9 +372,12 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 elasticidad.calcula_elasticidad()
                 fig = elasticidad.grafica()
                 dispersion = elasticidad.grafica_dispersion()
+                elasticidad.calcula_factor_elastico()
+                graf_factor_elastico = elasticidad.grafica_factor_elastico()
                 clave = f"{sku}_{id_escenario}"
                 graficos[clave] = fig
                 graficos_dispersion[clave] = dispersion
+                graficos_FE[clave]=graf_factor_elastico
 
                 def safe_round(value, dec=4):
                     return round(value, dec) if value is not None else None
@@ -713,6 +717,14 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         )
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                     insight = elasticidad.genera_insight_op(res, df=None)
+
+                if clave in graficos_FE:
+                    st.plotly_chart(
+                        graficos_FE[clave],
+                        use_container_width=True,
+                        key=f"fig_FE_{sku}_{res['Canal']}_{escenario_id}"
+                    )
+
 
                 if clave in graficos:
                     st.plotly_chart(

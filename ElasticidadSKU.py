@@ -85,6 +85,7 @@ class ElasticidadCB:
         self.status= None
         self.grps_actuales = 0
         self.columnas = None
+        self.factor_elastico = pd.DataFrame()
 
     
     def preparar_grps(self):
@@ -564,7 +565,79 @@ class ElasticidadCB:
         self.coeficientes = modelo.params
         self.pvalores = modelo.pvalues
     
+    def calcula_factor_elastico(self):
+        #Calculo para grafico
+        data = self.data_grafico.copy()
+        df = data.groupby(['ANIO','SEMNUMERO']).agg({'UNIDADESDESP':'sum','Precio':'mean'}).reset_index()
+        lista_ventas=[]
+        lista_dias=[]
+        pasos = 5
+        delta=(df['Precio'].max()-df['Precio'].min())/pasos
+        minimo=df['Precio'].min()
+        precios=[(minimo+(i*delta)) for i in range(0,pasos+1)]
+        for indice,precio in enumerate(precios):
+            if indice==0 :
+                continue
+            else:
+                suma=df[(df['Precio']<=precio) & (df['Precio']>precios[indice-1])]['UNIDADESDESP'].sum()
+                conteo=df[(df['Precio']<=precio) & (df['Precio']>precios[indice-1])].shape[0]
+                lista_dias.append(conteo)
+                lista_ventas.append(suma)
+        precios.pop(0)
+        procesado=pd.DataFrame({'Precios':precios,'UNIDADESDESP':lista_ventas,'Semanas':lista_dias})
+        procesado['PromedioDia']=procesado['UNIDADESDESP']/procesado['Semanas']
+        procesado['PromedioDia'].fillna(0,inplace=True)
+        try:
+            pendiente, interseccion = np.polyfit(procesado['Precios'], procesado['PromedioSemanas'], 1)
+        except Exception as e:
+            print("{e}")
+
+        procesado['FactorElastico']=pendiente*(procesado['Precios']/procesado['PromedioSemanas'])
+        procesado['FactorElastico_2']=procesado['FactorElastico']-1
+        procesado['SKU']=self.codbarras
+        self.factor_elastico = procesado.copy()
     
+    def grafica_factor_elastico(self):
+        df = self.factor_elastico.copy()
+        X = df['Precio'].values.reshape(-1, 1)
+        y = df['FactorElastico_2'].values
+
+        model = LinearRegression()
+        model.fit(X, y)
+        y_pred = model.predict(X)
+
+        fig = go.Figure()
+
+        # Scatter
+        fig.add_trace(go.Scatter(
+            x=df['Precio'],
+            y=df['FactorElastico_2'],
+            mode='markers',
+            name='Datos',
+            marker=dict(color='royalblue', size=8, line=dict(width=0.5, color='gray')),
+            hovertemplate="Precio: %{x}<br>IE: %{y}<extra></extra>"
+        ))
+
+        # Línea de tendencia
+        fig.add_trace(go.Scatter(
+            x=df['Precio'],
+            y=y_pred,
+            mode='lines',
+            name='Tendencia',
+            line=dict(color='red', width=2)
+        ))
+
+        fig.update_layout(
+            title="Dispersión: Precio vs Ventas",
+            xaxis_title="Precio",
+            yaxis_title="IE",
+            template="plotly_white",
+            height=500
+        )
+
+        return fig
+
+
     def grafica(self):
         df = self.data_grafico.copy()
 
