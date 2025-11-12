@@ -605,9 +605,14 @@ class ElasticidadCB:
         X = df['Precios'].values.reshape(-1, 1)
         y = df['FactorElastico_2'].values
 
-        model = LinearRegression()
+        '''model = LinearRegression()
         model.fit(X, y)
-        y_pred = model.predict(X)
+        y_pred = model.predict(X)'''
+
+        df = df.sort_values('Precios')  # importante para que la media móvil tenga sentido ordenada
+
+        # Calcular la media móvil del FactorElastico_2
+        df['MediaMovil'] = df['FactorElastico_2'].rolling(window=5, center=True).mean()
 
 
         
@@ -627,7 +632,8 @@ class ElasticidadCB:
         # Línea de tendencia
         fig.add_trace(go.Scatter(
             x=df['Precios'],
-            y=y_pred,
+            #y=y_pred,
+            y=df['MediaMovil'],
             mode='lines',
             name='Tendencia',
             line=dict(color='red', width=2)
