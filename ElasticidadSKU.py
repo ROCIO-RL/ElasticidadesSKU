@@ -614,7 +614,7 @@ class ElasticidadCB:
         # Calcular la media móvil del FactorElastico_2
         df['MediaMovil'] = (
             df['FactorElastico_2']
-            .rolling(window=2, center=True, min_periods=1)
+            .rolling(window=1, center=True, min_periods=1)
             .mean()
         )
 
