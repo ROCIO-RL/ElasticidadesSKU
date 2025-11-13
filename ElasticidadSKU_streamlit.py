@@ -439,7 +439,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     
                     #coeficientes
                     'Afectación Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
-                    'Afectación Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
+                    'Afectación Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4)*100,
                     'Pvalue Intercepto': safe_round(elasticidad.pvalores.get('Intercept'), 4),
                     'Pvalue Precio': safe_round(elasticidad.pvalores.get('Precio'), 4),
                     'Pvalue Clima': safe_round(elasticidad.pvalores.get('CLIMA'), 4),
@@ -458,7 +458,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                     #Grps
                     'Pvalue Grps':safe_round(elasticidad.pvalores.get('Grps'), 4),
-                    'Afectación Grps':safe_round(elasticidad.coeficientes.get('Grps'), 4),
+                    'Afectación Grps':safe_round(elasticidad.coeficientes.get('Grps'), 4)*100,
                     'Grps Actuales': grps_actuales,
 
                     'Id_unico': id_escenario
