@@ -534,8 +534,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                
                 if af_JR !=0:
                     st.markdown(f"""
-                    - 📈 **Impacto de promociones Julio Regalado (S21-S31):** {af_JR:.2f}.  
-                    Las promociones de Julio Regalado afectan en un **{af_JR:.2f}%** a la venta.
+                    - 📈 **Impacto de promociones Julio Regalado (S21-S31)**.  
+                    Las promociones de Julio Regalado afectan en un **{(np.exp(af_JR)-1)*100:.2f}%** a la venta.
                     """)
                     st.markdown(f"""Significacia: **{(1-pv_JR)*100}%**""")
 
