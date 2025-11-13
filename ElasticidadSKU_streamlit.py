@@ -439,7 +439,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     
                     #coeficientes
                     'Afectación Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
-                    'Afectación Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4)*100,
+                    'Afectación Clima': safe_round(elasticidad.coeficientes.get('CLIMA'), 4),
                     'Pvalue Intercepto': safe_round(elasticidad.pvalores.get('Intercept'), 4),
                     'Pvalue Precio': safe_round(elasticidad.pvalores.get('Precio'), 4),
                     'Pvalue Clima': safe_round(elasticidad.pvalores.get('CLIMA'), 4),
@@ -458,7 +458,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
                     #Grps
                     'Pvalue Grps':safe_round(elasticidad.pvalores.get('Grps'), 4),
-                    'Afectación Grps':safe_round(elasticidad.coeficientes.get('Grps'), 4)*100,
+                    'Afectación Grps':safe_round(elasticidad.coeficientes.get('Grps'), 4),
                     'Grps Actuales': grps_actuales,
 
                     'Id_unico': id_escenario
@@ -480,8 +480,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
             prod = res["Producto"]
             venta_base = res['Venta Base']
             af_precio = res['Afectación Precio']
+            pv_precio = res['Pvalue Precio']
             af_clima = res['Afectación Clima']
             af_clima = 0 if pd.isna(af_clima) else af_clima
+            pv_clima = res['Pvalue Clima']
             r2 = res['R cuadrada']
             precio = res['Precio Actual']
             intercepto = res['intercepto']
@@ -528,38 +530,34 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 
                 st.markdown(f"""- 💰 **Elasticidad precio:** {af_precio:.2f}.  
                             Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.""")
+                st.markdown(f"""Significacia: **{(1-pv_precio)*100}%**""")
                
                 if af_JR !=0:
-                    if pv_JR <= 0.05:
-                        st.markdown(f"""
-                        - 📈 **Impacto de promociones Julio Regalado (S21-S31):** {af_JR:.2f}.  
-                        Las promociones de Julio Regalado afectan en un **{af_JR:.2f}%** a la venta.
-                        """)
-                    if pv_JR > 0.05:
-                        st.markdown(f"""Promociones Julio Regalado NO tiene importancia estadisticamente (S21-S31)""")
+                    st.markdown(f"""
+                    - 📈 **Impacto de promociones Julio Regalado (S21-S31):** {af_JR:.2f}.  
+                    Las promociones de Julio Regalado afectan en un **{af_JR:.2f}%** a la venta.
+                    """)
+                    st.markdown(f"""Significacia: **{(1-pv_JR)*100}%**""")
 
                 if af_MP !=0:
-                    if pv_MP <= 0.05:
                         st.markdown(f"""
                         - 📈 **Impacto de Mega Pauta (S01-S06):** {af_MP:.2f}.  
                         La Mega Pauta afectan en un **{af_MP:.2f}%** a la venta.
                         """)
-                    if pv_MP > 0.05:
-                        st.markdown(f"""La Mega Pauta NO tiene importancia estadisticamente (S01-S06)""")
+                        st.markdown(f"""Significacia: **{(1-pv_MP)*100}%**""")
                 if temperatura:
                     st.markdown(f"""
-                        - 🌦️ **Impacto del clima:** {af_clima:.3f}.  
-                        Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima:.2f}**%.
+                        - 🌦️ **Impacto del clima:** {af_clima*100:.2f}.  
+                        Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima*100:.2f}**%.
                     """)
+                    st.markdown(f"""Significacia: **{(1-pv_clima)*100}%**""")
                 if grps:
-                    if pv_grps<= 0.05:
-                        st.markdown(f"""
-                            - 📈 **Grps:** {af_grps:.2f}.  
-                            Por cada 1% de incremento en los gprs el sellout cambia en un**{af_grps:.2f}**% .
-                            
-                        """)
-                    else:
-                        st.markdown(f"""Los grps NO tienen importancia estadisticamente""")
+                    st.markdown(f"""
+                        - 📈 **Grps:** {af_grps*100:.2f}.  
+                        Por cada 1% de incremento en los gprs el sellout cambia en un**{af_grps*100:.2f}**% .
+                        
+                    """)
+                    st.markdown(f"""Significacia: **{(1-pv_grps)*100}%**""")
                 st.markdown(f"""
                         - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                         El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
@@ -579,6 +577,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         - **{nombre_comp}**  
                         Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
                         """)
+                        st.markdown(f"""Significacia: **{(1-pv_comp)*100}%**""")
                 
                 if precio != "":
                     try:
