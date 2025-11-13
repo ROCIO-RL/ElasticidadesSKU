@@ -468,8 +468,8 @@ class ElasticidadCB:
             print("Variable dummy 'JULIO_REGALADO' agregada correctamente.")
 
             # Dummy de Mega Pauta
-            layout["MEGA_PAUTA"] = np.where(layout["SEMNUMERO"].between(1, 6), 1, 0)
-            print("Variable dummy 'MEGA_PAUTA' agregada correctamente.")
+            '''layout["MEGA_PAUTA"] = np.where(layout["SEMNUMERO"].between(1, 6), 1, 0)
+            print("Variable dummy 'MEGA_PAUTA' agregada correctamente.")'''
 
             #clima
             if self.temp:
@@ -555,9 +555,9 @@ class ElasticidadCB:
                 formula += ' + JULIO_REGALADO'
 
             # Agregamos la dummy de Julio Regalado
-            if 'MEGA_PAUTA' in data.columns:
+            '''if 'MEGA_PAUTA' in data.columns:
                 formula += ' + MEGA_PAUTA'
-
+'''
         print(f"Fórmula del modelo: {formula}")
         modelo = smf.ols(formula, data=data).fit()
 
@@ -903,7 +903,7 @@ class ElasticidadCB:
             "CLIMA": ("Afectación Clima", "Pvalue Clima"),
             "Grps": ("Afectación Grps", "Pvalue Grps"),
             "JULIO_REGALADO": ("Afectación Julio Regalado", "Pvalue Julio Regalado"),
-            "MEGA_PAUTA": ("Afectación Mega Pauta", "Pvalue Mega Pauta"),
+            #"MEGA_PAUTA": ("Afectación Mega Pauta", "Pvalue Mega Pauta"),
         }
 
         coeficientes, pvalores = {}, {}
@@ -1004,7 +1004,7 @@ class ElasticidadCB:
 
                     🌤️ Tarea 5: Otras Variables Significativas
 
-                    Si el modelo incluye CLIMA, JULIO_REGALADO, MEGA_PAUTA u otras:
+                    Si el modelo incluye CLIMA, JULIO_REGALADO u otras:
 
                     - Clima: Por cada aumento del 1% en temperatura, las ventas cambian en ~[β_clima*100]%
 
@@ -1027,7 +1027,7 @@ class ElasticidadCB:
         #status
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
-            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_Apagado"],
+            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"],
         )
 
 
