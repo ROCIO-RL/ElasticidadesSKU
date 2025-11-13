@@ -557,7 +557,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         Por cada 1% de incremento en los gprs el sellout cambia en un**{af_grps*100:.2f}**% .
                         
                     """)
-                    st.markdown(f"""Significacia: **{(1-pv_grps)*100}%**""")
+                    st.markdown(f"""Significacia: **{(1-pv_grps)*100:.2f}%**""")
                 st.markdown(f"""
                         - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                         El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
