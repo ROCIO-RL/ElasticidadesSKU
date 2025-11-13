@@ -573,8 +573,9 @@ class ElasticidadCB:
         lista_ventas=[]
         lista_dias=[]
         #pasos = 5
-        rango = df['Precio'].max() - df['Precio'].min()
-        pasos = max(5, min(15, int(rango / (df['Precio'].mean() * 0.05))))
+        #rango = df['Precio'].max() - df['Precio'].min()
+        #pasos = max(5, min(15, int(rango / (df['Precio'].mean() * 0.05))))
+        pasos = 20
         delta=(df['Precio'].max()-df['Precio'].min())/pasos
         minimo=df['Precio'].min()
         precios=[(minimo+(i*delta)) for i in range(0,pasos+1)]
