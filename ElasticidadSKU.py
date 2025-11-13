@@ -631,7 +631,7 @@ class ElasticidadCB:
         # Scatter
         fig.add_trace(go.Scatter(
             x=df['Precios'],
-            y=df['MediaMovil'],
+            y=df['FactorElastico_2'],
             mode='markers',
             name='Datos',
             marker=dict(color='royalblue', size=8, line=dict(width=0.5, color='gray')),
@@ -642,7 +642,7 @@ class ElasticidadCB:
         fig.add_trace(go.Scatter(
             x=df['Precios'],
             #y=y_pred,
-            y=df['TendenciaPolinomica'],
+            y=df['MediaMovil'],
             mode='lines',
             name='Tendencia',
             line=dict(color='red', width=2)
