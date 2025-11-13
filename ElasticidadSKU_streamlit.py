@@ -383,11 +383,11 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     return round(value, dec) if value is not None else None
                 # Definir rango de semanas de Julio Regalado
                 semanas_JR = list(range(21, 32))  # 21 a 31 
-                semanas_MP = list(range(1, 7))
+                #semanas_MP = list(range(1, 7))
 
                 # Indicador: 1 si está en ese rango, 0 si no
                 indicador_JR = 1 if elasticidad.ultima_semana in semanas_JR else 0
-                indicador_MP = 1 if elasticidad.ultima_semana in semanas_MP else 0
+                #indicador_MP = 1 if elasticidad.ultima_semana in semanas_MP else 0
 
                 competencias_resultados = []
                 for col in elasticidad.coeficientes.index:
@@ -420,7 +420,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             + 20 * (elasticidad.coeficientes.get('CLIMA', 0) or 0)
                             + grps_actuales *(elasticidad.coeficientes.get('Grps', 0) or 0)
                             + (indicador_JR * elasticidad.coeficientes.get('JULIO_REGALADO', 0) if indicador_JR else 0)
-                            + (indicador_MP * elasticidad.coeficientes.get('MEGA_PAUTA', 0) if indicador_MP else 0)
+                            #+ (indicador_MP * elasticidad.coeficientes.get('MEGA_PAUTA', 0) if indicador_MP else 0)
                         ),
                         0
                     )
@@ -452,9 +452,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Afectación Julio Regalado':safe_round(elasticidad.coeficientes.get('JULIO_REGALADO'), 4),
                     'Indicador Julio Regalado': indicador_JR,
                     #Mega Pauta
-                    'Pvalue Mega Pauta':safe_round(elasticidad.pvalores.get('MEGA_PAUTA'), 4),
-                    'Afectación Mega Pauta':safe_round(elasticidad.coeficientes.get('MEGA_PAUTA'), 4),
-                    'Indicador Mega Pauta': indicador_MP,
+                    #'Pvalue Mega Pauta':safe_round(elasticidad.pvalores.get('MEGA_PAUTA'), 4),
+                    #'Afectación Mega Pauta':safe_round(elasticidad.coeficientes.get('MEGA_PAUTA'), 4),
+                    #'Indicador Mega Pauta': indicador_MP,
 
                     #Grps
                     'Pvalue Grps':safe_round(elasticidad.pvalores.get('Grps'), 4),
@@ -502,10 +502,10 @@ if layout is not None and st.button("Ejecutar Análisis"):
 
 
             #Mega Pauta
-            af_MP = res['Afectación Mega Pauta']
-            pv_MP = res['Pvalue Mega Pauta']
-            af_MP = 0 if pd.isna(af_MP) else af_MP
-            indicador_MP = res['Indicador Mega Pauta']
+            #af_MP = res['Afectación Mega Pauta']
+            #pv_MP = res['Pvalue Mega Pauta']
+            #af_MP = 0 if pd.isna(af_MP) else af_MP
+            #indicador_MP = res['Indicador Mega Pauta']
  
             
             with st.expander(f" SKU {sku} - {prod} - Canal {res['Canal']}"):
@@ -539,12 +539,12 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     """)
                     st.markdown(f"""Significacia: **{(1-pv_JR)*100}%**""")
 
-                if af_MP !=0:
-                        st.markdown(f"""
-                        - 📈 **Impacto de Mega Pauta (S01-S06):** {af_MP:.2f}.  
-                        La Mega Pauta afectan en un **{af_MP:.2f}%** a la venta.
-                        """)
-                        st.markdown(f"""Significacia: **{(1-pv_MP)*100}%**""")
+                #if af_MP !=0:
+                #        st.markdown(f"""
+                #        - 📈 **Impacto de Mega Pauta (S01-S06):** {af_MP:.2f}.  
+                #        La Mega Pauta afectan en un **{af_MP:.2f}%** a la venta.
+                #        """)
+                #        st.markdown(f"""Significacia: **{(1-pv_MP)*100}%**""")
                 if temperatura:
                     st.markdown(f"""
                         - 🌦️ **Impacto del clima:** {af_clima*100:.2f}.  
@@ -606,7 +606,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 + (grps_actuales * af_grps)
                                 + comp_effect
                                 + (indicador_JR * af_JR if indicador_JR else 0)
-                                + (indicador_MP * af_MP if indicador_MP else 0)
+                                #+ (indicador_MP * af_MP if indicador_MP else 0)
                             )
                            
                         else:
@@ -616,7 +616,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 + (clima_valor * af_clima)
                                 + comp_effect
                                 + (indicador_JR * af_JR if indicador_JR else 0)
-                                + (indicador_MP * af_MP if indicador_MP else 0)
+                                #+ (indicador_MP * af_MP if indicador_MP else 0)
                             )
                             
 
