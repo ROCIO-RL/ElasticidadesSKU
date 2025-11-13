@@ -95,7 +95,7 @@ with col4:
         skus_filtrados.apply(lambda x: f"{x['SKU']} - {x['ProPstNombre']}", axis=1)
     )
 
-# Extraemos el SKU limpio y lo dejamos como texto
+
 sku_val_prov = str(sku_row.split(" - ")[0]).strip()   
 
 col1, col2, col3, col4 = st.columns(4)

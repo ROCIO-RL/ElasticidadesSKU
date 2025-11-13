@@ -649,7 +649,7 @@ class ElasticidadCB:
         ))
 
         fig.update_layout(
-            title="Dispersión: Precios vs IE",
+            title="Precios vs Indices de Elasticidad",
             xaxis_title="Precios",
             yaxis_title="IE",
             template="plotly_white",
@@ -1027,7 +1027,7 @@ class ElasticidadCB:
         #status
         client = OpenAI(
             base_url="https://router.huggingface.co/v1",
-            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_Apagado"],
+            api_key=st.secrets["HUGGINGFACE"]["HF_TOKEN_3"],
         )
 
 
