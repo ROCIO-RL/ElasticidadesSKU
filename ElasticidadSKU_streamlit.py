@@ -530,14 +530,14 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 
                 st.markdown(f"""- 💰 **Elasticidad precio:** {af_precio:.2f}.  
                             Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%.""")
-                st.markdown(f"""Significacia: **{(1-pv_precio)*100}%**""")
+                st.markdown(f"""Significacia: **{(1-pv_precio)*100:.2f}%**""")
                
                 if af_JR !=0:
                     st.markdown(f"""
                     - 📈 **Impacto de promociones Julio Regalado (S21-S31)**.  
                     Las promociones de Julio Regalado afectan en un **{(np.exp(af_JR)-1)*100:.2f}%** a la venta.
                     """)
-                    st.markdown(f"""Significacia: **{(1-pv_JR)*100}%**""")
+                    st.markdown(f"""Significacia: **{(1-pv_JR)*100:.2f}%**""")
 
                 #if af_MP !=0:
                 #        st.markdown(f"""
@@ -550,7 +550,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         - 🌦️ **Impacto del clima:** {af_clima*100:.2f}.  
                         Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima*100:.2f}**%.
                     """)
-                    st.markdown(f"""Significacia: **{(1-pv_clima)*100}%**""")
+                    st.markdown(f"""Significacia: **{(1-pv_clima)*100:.2f}%**""")
                 if grps:
                     st.markdown(f"""
                         - 📈 **Grps:** {af_grps*100:.2f}.  
