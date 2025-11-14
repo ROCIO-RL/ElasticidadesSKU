@@ -704,7 +704,7 @@ class ElasticidadCB:
                     y=df[col],
                     name=f'Competencia: {nombre_comp}',
                     mode='lines',
-                    line=dict(color=colores[i % len(colores)], width=2, dash='dot'),
+                    line=dict(color=colores[i % len(colores)], width=2),
                     yaxis='y2'
                 ))
 
@@ -760,7 +760,7 @@ class ElasticidadCB:
         return fig
 
 
-    def grafica_dispersion(self):
+    '''def grafica_dispersion(self):
         df = self.data_grafico.copy()
 
         if 'UNIDADESDESP' not in df.columns or 'Precio' not in df.columns:
@@ -803,7 +803,98 @@ class ElasticidadCB:
             height=500
         )
 
+        return fig'''
+    
+    def grafica_dispersion(self):
+        df = self.data_grafico.copy()
+        print(df.columns)
+        if 'UNIDADESDESP' not in df.columns or 'Precio' not in df.columns:
+            raise ValueError("El DataFrame debe contener las columnas 'UNIDADESDESP' y 'Precio'.")
+
+        # Obtener mes
+        if {'ANIO', 'SEMNUMERO'}.issubset(df.columns):
+            df['FECHA'] = pd.to_datetime(df['ANIO'].astype(str) + df['SEMNUMERO'].astype(str) + '1',
+                                        format='%G%V%u')
+            df['MES'] = df['FECHA'].dt.month
+        else:
+            raise ValueError("El DataFrame debe contener las columnas 'ANIO' y 'SEMNUMERO'.")
+
+        
+        X = df['Precio'].values.reshape(-1, 1)
+        y = df['UNIDADESDESP'].values
+
+        model = LinearRegression()
+        model.fit(X, y)
+        y_pred = model.predict(X)
+
+        # Colores por mes 
+        colores_meses = [
+            "#258fdb", "#fff30e", "#103910", "#853a3a",
+            "#9467bd", "#e1583d", "#3e2135", "#7f7f7f",
+            "#84bd22", "#172ccf", "#ffbb78", "#e509f9"
+        ]
+
+        def generar_degradado(base_rgb, pasos):
+            degradado = []
+            for i in range(pasos):
+                factor = i / (pasos - 1)  # 0 → 1 (oscuro → claro)
+                r = int(base_rgb[0] + (255 - base_rgb[0]) * factor)
+                g = int(base_rgb[1] + (255 - base_rgb[1]) * factor)
+                b = int(base_rgb[2] + (255 - base_rgb[2]) * factor)
+                degradado.append(f"rgb({r},{g},{b})")
+            return degradado
+
+
+        # color base Azul
+        base_color = (37, 143, 219)  
+
+        # 12 colores 
+        colores_meses = generar_degradado(base_color, 12)
+
+
+        fig = go.Figure()
+
+        # Crear un scatter por mes 
+        for mes in sorted(df['MES'].unique()):
+            df_mes = df[df['MES'] == mes]
+
+            fig.add_trace(go.Scatter(
+                x=df_mes['Precio'],
+                y=df_mes['UNIDADESDESP'],
+                mode='markers',
+                name=f'Mes {mes}',
+                marker=dict(
+                    color=colores_meses[(mes - 1) % 12],
+                    size=8,
+                    line=dict(width=0.5, color='gray')
+                ),
+                hovertemplate=(
+                    "Precio: %{x}<br>"
+                    "Unidades: %{y}<br>"
+                    f"Mes: {mes}"
+                    "<extra></extra>"
+                )
+            ))
+
+        #Línea de tendencia
+        fig.add_trace(go.Scatter(
+            x=df['Precio'],
+            y=y_pred,
+            mode='lines',
+            name='Tendencia',
+            line=dict(color='red', width=2)
+        ))
+
+        fig.update_layout(
+            title="Dispersión: Precio vs Ventas",
+            xaxis_title="Precio",
+            yaxis_title="Unidades vendidas",
+            template="plotly_white",
+            height=500
+        )
+
         return fig
+
 
 
     def grafico_demanda(self, precio_actual, variable_precio, pasos_atras=5, pasos_adelante=5, incremento=5, otras_vars=None):

@@ -562,6 +562,19 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         - 📈 **Calidad del modelo (R²):** {r2:.2f}.  
                         El modelo explica un **{r2*100:.2f}**% de la variación de la venta.
                     """)
+                if r2<.25:
+                    st.markdown(f"""
+                        **AJUSTE BAJO**   
+                    """)
+                elif r2>=.65:
+                    st.markdown(f"""
+                        **AJUSTE ALTO**   
+                    """)
+                else:
+                    st.markdown(f"""
+                        **AJUSTE MODERADO**   
+                    """)
+
                 concatenado_competencia = ""  
                 if res.get('Competencias'):
                     st.markdown("💰 **Elasticidades de Competencia**")
@@ -577,7 +590,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         - **{nombre_comp}**  
                         Si el precio de la competencia sube 1%, la venta cambia en **{af_comp:.2f}%**.
                         """)
-                        st.markdown(f"""Significacia: **{(1-pv_comp)*100}%**""")
+                        st.markdown(f"""Significacia: **{(1-pv_comp)*100:.2f}%**""")
                 
                 if precio != "":
                     try:
