@@ -65,6 +65,8 @@ else:
 
 df_productos = df_productos[df_productos['Pais']==pais].copy()
 df_productos = df_propstid.merge(df_productos,left_on='PROPST_ID',right_on='ProPstID',how='left')
+df_productos = df_productos.drop_duplicates(subset=['Pais', 'Marca', 'Agrupación Pauta', 'Producto Base', 'SKU'], keep='first')
+
 st.markdown("Agrega un SKU, selecciona canal y clima:")
 
 col1, col2, col3, col4 = st.columns(4)
@@ -686,7 +688,9 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 .apply(highlight_precio_actual, axis=1)
                             )
 
-                        insight = elasticidad.genera_insight_op(res, df=demanda_df)
+
+                       
+                        insight = elasticidad.genera_insight_op(res,df=demanda_df)
 
                         clave = f"{sku}_{escenario_id}"
                         col1, col2 = st.columns(2)
@@ -729,6 +733,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         )
                     st.info("⚠️ Agrega un precio actual para generar la curva de demanda.")
                     insight = elasticidad.genera_insight_op(res, df=None)
+                    
+
                 #agregamos grafico
                 if clave in graficos_FE:
                     st.plotly_chart(
