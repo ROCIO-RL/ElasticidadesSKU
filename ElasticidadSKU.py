@@ -570,6 +570,7 @@ class ElasticidadCB:
         #Calculo para grafico
         data = self.data_grafico.copy()
         df = data.groupby(['ANIO','SEMNUMERO']).agg({'UNIDADESDESP':'sum','Precio':'mean'}).reset_index()
+    
         lista_ventas=[]
         lista_dias=[]
         #pasos = 5
@@ -591,6 +592,7 @@ class ElasticidadCB:
         procesado=pd.DataFrame({'Precios':precios,'UNIDADESDESP':lista_ventas,'Semanas':lista_dias})
         procesado['PromedioSemanas']=procesado['UNIDADESDESP']/procesado['Semanas']
         procesado['PromedioSemanas'].fillna(0,inplace=True)
+        
         try:
             pendiente, interseccion = np.polyfit(procesado['Precios'], procesado['PromedioSemanas'], 1)
         except Exception as e:
@@ -606,9 +608,9 @@ class ElasticidadCB:
         X = df['Precios'].values.reshape(-1, 1)
         y = df['FactorElastico_2'].values
 
-        '''model = LinearRegression()
-        model.fit(X, y)
-        y_pred = model.predict(X)'''
+        #model = LinearRegression()
+        #model.fit(X, y)
+        #y_pred = model.predict(X)
 
         #df = df.sort_values('Precios')  # importante para que la media móvil tenga sentido ordenada
 
@@ -620,10 +622,10 @@ class ElasticidadCB:
         )
 
         #Ajuste
-        '''grado = 5
-        coef = np.polyfit(df['Precios'], df['FactorElastico_2'], grado)
-        poly = np.poly1d(coef)
-        df['TendenciaPolinomica'] = poly(df['Precios'])'''
+        #grado = 5
+        #coef = np.polyfit(df['Precios'], df['FactorElastico_2'], grado)
+        #poly = np.poly1d(coef)
+        #df['TendenciaPolinomica'] = poly(df['Precios'])
         
 
         fig = go.Figure()
@@ -658,6 +660,149 @@ class ElasticidadCB:
 
         return fig
 
+
+    '''def calcula_factor_elastico(self):
+
+
+
+        # 1. Preparar datos
+        data = self.data_grafico.copy()
+
+        df = data.groupby(['ANIO', 'SEMNUMERO']).agg({
+            'UNIDADESDESP': 'sum',
+            'Precio': 'mean'
+        }).reset_index()
+
+        # 2. Definir intervalos de precios
+        pasos = 20
+        max_precio = df['Precio'].max()
+        min_precio = df['Precio'].min()
+        delta = (max_precio - min_precio) / pasos
+
+        precios_limites = [(min_precio + i * delta) for i in range(pasos + 1)]
+
+        # 3. Listas de resultados
+        lista_precios = []
+        lista_ventas = []
+        lista_semanas = []
+        lista_elasticidades = []
+
+        # 4. Elasticidad LOG-LOG por intervalo
+        for i in range(1, len(precios_limites)):
+
+            lim_inf = precios_limites[i - 1]
+            lim_sup = precios_limites[i]
+
+            subset = df[(df['Precio'] > lim_inf) & (df['Precio'] <= lim_sup)]
+            subset = subset[(subset['Precio'] > 0) & (subset['UNIDADESDESP'] > 0)]
+
+            # Valores promedio del intervalo
+            precio_promedio = subset['Precio'].mean()
+            cantidad_promedio = subset['UNIDADESDESP'].mean()
+
+            lista_precios.append(precio_promedio)
+            lista_ventas.append(cantidad_promedio)
+            lista_semanas.append(len(subset))
+
+            # Calcular elasticidad LOG-LOG solo si hay datos suficientes
+            if len(subset) >= 3:
+                try:
+                    X = np.log(subset['Precio'].values)
+                    y = np.log(subset['UNIDADESDESP'].values)
+                    pendiente, _ = np.polyfit(X, y, 1)
+                    elasticidad = pendiente
+                except:
+                    elasticidad = np.nan
+            else:
+                elasticidad = np.nan
+
+            lista_elasticidades.append(elasticidad)
+
+        # 5. Armar DataFrame final
+        procesado = pd.DataFrame({
+            'Precios': lista_precios,
+            'CantidadPromedio': lista_ventas,
+            'Semanas': lista_semanas,
+            'Elasticidad': lista_elasticidades
+        })
+
+        procesado = procesado.sort_values('Precios')
+
+        # 6. Elasticidad principal (REGRESIÓN GLOBAL)
+        df_original = df[(df['Precio'] > 0) & (df['UNIDADESDESP'] > 0)]
+
+        if len(df_original) >= 3:
+            X = np.log(df_original['Precio'].values)
+            y = np.log(df_original['UNIDADESDESP'].values)
+            pendiente, _ = np.polyfit(X, y, 1)
+            elasticidad_principal = pendiente
+        else:
+            elasticidad_principal = 0
+
+        # 7. Limpieza de valores inválidos
+        procesado['Elasticidad'].replace([np.inf, -np.inf], np.nan, inplace=True)
+
+        # 8. Rellenar faltantes con elasticidad global
+        procesado['Elasticidad'].fillna(elasticidad_principal, inplace=True)
+
+        # 9. Guardar resultados
+        procesado['FactorElastico_2'] = procesado['Elasticidad']
+        procesado['SKU'] = self.codbarras
+
+        self.factor_elastico = procesado.copy()
+        self.elasticidad_principal = elasticidad_principal
+
+        return elasticidad_principal
+
+
+
+    def grafica_factor_elastico(self):
+        df = self.factor_elastico.copy()
+        
+        df = df.sort_values('Precios')
+        
+        fig = go.Figure()
+        
+        # Puntos de elasticidad
+        fig.add_trace(go.Scatter(
+            x=df['Precios'],
+            y=df['FactorElastico_2'],
+            mode='markers',
+            name='IE',
+            marker=dict(
+                color='royalblue',
+                size=8,
+                line=dict(width=1, color='darkblue')
+            ),
+            hovertemplate="Precio: %{x:.2f}<br>IE: %{y:.3f}<extra></extra>"
+        ))
+        
+        
+        df['MediaMovil'] = (
+            df['FactorElastico_2']
+            .rolling(window=1, center=True, min_periods=1)
+            .mean()
+        )
+        
+        fig.add_trace(go.Scatter(
+            x=df['Precios'],
+            y=df['MediaMovil'],
+            mode='lines',
+            name='Tendencia',
+            line=dict(color='red', width=2)
+        ))
+        
+     
+        fig.update_layout(
+            title=f"Precios vs Índices de Elasticidad",
+            xaxis_title="Precios",
+            yaxis_title="IE",
+            template="plotly_white",
+            height=500,
+            showlegend=True
+        )
+        
+        return fig'''
 
     def grafica(self):
         df = self.data_grafico.copy()
@@ -855,7 +1000,7 @@ class ElasticidadCB:
         fig = go.Figure()
 
         # Crear un scatter por mes 
-        for mes in sorted(df['MES'].unique()):
+        '''for mes in sorted(df['MES'].unique()):
             df_mes = df[df['MES'] == mes]
 
             fig.add_trace(go.Scatter(
@@ -874,7 +1019,38 @@ class ElasticidadCB:
                     f"Mes: {mes}"
                     "<extra></extra>"
                 )
+            ))'''
+        
+        # Colores por trimestre (se repiten cada 3 meses)
+        colores_trimestre = [
+            "#4e738e",  # Trimestre 1
+            "#87a394",  # Trimestre 2
+            "#a98766",  # Trimestre 3
+            "#614646"   # Trimestre 4
+        ]
+
+        # Crear scatter por mes
+        for mes in sorted(df['MES'].unique()):
+            df_mes = df[df['MES'] == mes]
+
+            fig.add_trace(go.Scatter(
+                x=df_mes['Precio'],
+                y=df_mes['UNIDADESDESP'],
+                mode='markers',
+                name=f'Mes {mes}',
+                marker=dict(
+                    color=colores_trimestre[(mes - 1) // 3],
+                    size=8,
+                    line=dict(width=0.5, color='gray')
+                ),
+                hovertemplate=(
+                    "Precio: %{x}<br>"
+                    "Unidades: %{y}<br>"
+                    f"Mes: {mes}"
+                    "<extra></extra>"
+                )
             ))
+
 
         #Línea de tendencia
         fig.add_trace(go.Scatter(
@@ -882,7 +1058,7 @@ class ElasticidadCB:
             y=y_pred,
             mode='lines',
             name='Tendencia',
-            line=dict(color='red', width=2)
+            line=dict(color='#5DADE2', width=2)
         ))
 
         fig.update_layout(

@@ -95,7 +95,7 @@ with col4:
 
 sku_val_prov = str(sku_row.split(" - ")[0]).strip()   
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4= st.columns(4)
 
 with col1:  
     if pais == 'Argentina':
@@ -208,14 +208,9 @@ with col3:
         # Asegurar que el valor sea string (Streamlit lo requiere)
         costo_act = st.text_input("Costo", value=str(costo_default))
 
-    
-with col4:  
-    st.markdown("Variables a considerar")
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        clima = st.checkbox("Clima", value=False)
-    with col2:
-        grps = st.checkbox("Grps", value=True)
+with col4:
+    variacion_precios = st.text_input("Variacion estimada del precio %: ") 
+
 
 
 
@@ -260,6 +255,13 @@ with col1:
 
     else:
         st.info("No hay información de competencia para este SKU.")
+with col2:  
+    st.markdown("Variables a considerar")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        clima = st.checkbox("Clima", value=False)
+    with col2:
+        grps = st.checkbox("Grps", value=True)
 
 # Inicializar lista en session_state
 if "manual_layout" not in st.session_state:
@@ -275,6 +277,7 @@ if st.button("Agregar SKU a la lista"):
     # Validamos que sea número
     if precio_act.replace(".", "", 1).isdigit():  
         precio = float(precio_act)
+        variacion = float(variacion_precios)
         # Solo convierte costo si tiene un valor numérico
         if costo_act and costo_act.replace(".", "", 1).isdigit():
             costo = float(costo_act)
@@ -292,12 +295,14 @@ if st.button("Agregar SKU a la lista"):
             "Grps": grps,
             "Precio Actual": precio,
             "Costo Actual": costo,
-            "DESC_COMPETENCIA": desc_competencia
+            "DESC_COMPETENCIA": desc_competencia,
+            'Variacion':variacion
         })
         st.success(f"SKU {sku_val} agregado a la lista.")
     elif precio_act == "":
         precio =""
         costo =""
+        variacion = ""
         prod = sku_row.split(" - ")[1] 
         sku_val = sku_row.split(" - ")[0]  # extraer el código de barras
         st.session_state.manual_layout.append({
@@ -310,7 +315,8 @@ if st.button("Agregar SKU a la lista"):
             "Grps": grps,
             "Precio Actual": precio,
             "Costo Actual": costo,
-            "DESC_COMPETENCIA": desc_competencia
+            "DESC_COMPETENCIA": desc_competencia,
+            'Variacion':variacion
         })
         st.success(f"SKU {sku_val} agregado a la lista.")
     else:
@@ -383,6 +389,92 @@ if layout is not None and st.button("Ejecutar Análisis"):
     layout = layout.reset_index(drop=True)
     layout["escenario_id"] = layout.index.astype(str)
 
+    def reglas_predeterminadas_pasos_precio(precio_actual, var_precio, metodo="scott_precios"):
+        """
+        Aplica reglas predeterminadas similares a Sturges/Scott para variación de precios
+        
+        Métodos disponibles:
+        - "sturges_precios": Adaptación de Sturges para pricing
+        - "scott_precios": Adaptación de Scott para pricing  
+        - "freedman_precios": Adaptación de Freedman-Diaconis para pricing
+        - "regla_empirica": Regla empírica de pricing
+        """
+        
+        # Rango total de variación (en unidades monetarias)
+        rango_total = precio_actual * (var_precio * 2) / 100
+        
+        if metodo == "sturges_precios":
+            # Adaptación de Sturges: n_bins = 1 + log2(n) → para pricing usamos log del rango
+            n_pasos = int(1 + 3.322 * np.log10(rango_total + 1))
+            n_pasos = max(5, min(n_pasos, 15))
+            
+        elif metodo == "scott_precios":
+            # Adaptación de Scott: bin_width = 3.5 * σ / n^(1/3)
+            # Para pricing: asumimos desviación estándar relativa del 5-15%
+            std_relativa = 0.10  # 10% de desviación típica en precios
+            std_absoluta = precio_actual * std_relativa
+            ancho_paso = 3.5 * std_absoluta / (var_precio ** (1/3))
+            n_pasos = int(rango_total / ancho_paso)
+            n_pasos = max(6, min(n_pasos, 20))
+            
+        elif metodo == "freedman_precios":
+            # Adaptación de Freedman-Diaconis: bin_width = 2 * IQR / n^(1/3)
+            # Para pricing: asumimos IQR relativo del 8-20%
+            iqr_relativo = 0.15  # 15% de rango intercuartílico típico
+            iqr_absoluto = precio_actual * iqr_relativo
+            ancho_paso = 2 * iqr_absoluto / (var_precio ** (1/3))
+            n_pasos = int(rango_total / ancho_paso)
+            n_pasos = max(7, min(n_pasos, 18))
+            
+        elif metodo == "regla_empirica":
+            # Regla empírica de pricing basada en benchmarks de industria
+            if var_precio <= 10:
+                n_pasos = 8   # Variación pequeña: alta granularidad
+            elif var_precio <= 20:
+                n_pasos = 12  # Variación media: granularidad media
+            elif var_precio <= 30:
+                n_pasos = 15  # Variación grande: granularidad baja
+            else:
+                n_pasos = 18  # Variación muy grande: mínima granularidad
+        
+        else:
+            # Método por defecto
+            n_pasos = 12
+        
+        return n_pasos
+
+    def metodo_hibrido_inteligente(precio_actual, var_precio, datos_historicos=None):
+        """
+        Método híbrido que combina reglas predeterminadas con datos históricos
+        """
+        # Obtener sugerencia de reglas predeterminadas
+        n_sturges = reglas_predeterminadas_pasos_precio(precio_actual, var_precio, "sturges_precios")
+        n_scott = reglas_predeterminadas_pasos_precio(precio_actual, var_precio, "scott_precios")
+        n_empirica = reglas_predeterminadas_pasos_precio(precio_actual, var_precio, "regla_empirica")
+        n_freedman = reglas_predeterminadas_pasos_precio(precio_actual, var_precio, "freedman_precios")
+        
+        # Promediar las sugerencias
+        n_sugerido = int(np.mean([n_sturges, n_scott, n_empirica,n_freedman]))
+        
+        #Ajustar basado en datos históricos si están disponibles
+        if datos_historicos is not None and 'Precio' in datos_historicos.columns:
+            precios_hist = datos_historicos['Precio'].dropna()
+            if len(precios_hist) > 10:
+                # Calcular densidad natural de precios
+                precios_unicos = len(precios_hist.unique())
+                densidad = precios_unicos / len(precios_hist)
+                
+                # Ajustar según densidad (más densidad → más pasos)
+                if densidad > 0.8:  # Alta variabilidad de precios
+                    n_sugerido = min(n_sugerido + 3, 20)
+                elif densidad < 0.3:  # Baja variabilidad
+                    n_sugerido = max(n_sugerido - 2, 8)
+        
+        #  Asegurar límites razonables
+        n_sugerido = max(8, min(n_sugerido, 25))
+        
+        return n_sugerido
+
     with st.spinner("Calculando elasticidades"):
         for _, row in layout.iterrows():
             pais = row['Pais']
@@ -396,6 +488,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
             desc_competencia = row['DESC_COMPETENCIA']
             id_escenario = row['escenario_id']
             productobase = row['Producto base']
+            variacionprecio = row['Variacion']
 
             try:
                 # instancia Elasticidad
@@ -484,6 +577,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Grps': grps,
                     'Precio Actual': precioact,
                     'Costo Actual': costoact,
+                    'Variacion': variacionprecio,
                     'intercepto': safe_round(elasticidad.coeficientes.get('Intercept'), 4),
                     'Venta Base': venta_base,
                     'Afectación Precio': safe_round(elasticidad.coeficientes.get('Precio'), 4),
@@ -499,7 +593,8 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     'Pvalue Grps': safe_round(elasticidad.pvalores.get('Grps'), 4),
                     'Afectación Grps': safe_round(elasticidad.coeficientes.get('Grps'), 4),
                     'Grps Actuales': grps_actuales,
-                    'Id_unico': id_escenario
+                    'Id_unico': id_escenario,
+                    'Variacion':variacionprecio
                 }
 
                 # Generar simulación siempre (si hay precio)
@@ -512,13 +607,64 @@ if layout is not None and st.button("Ejecutar Análisis"):
                     grps_actuales = res['Grps Actuales'] or 0
                     intercepto = res['intercepto'] or 0
                     costoact_local = res['Costo Actual']
+                    var_precio = res['Variacion']
 
                     if precio != "" and precio is not None:
                         precio_actual = float(precio)
                         clima_valor = 20
-                        precios = np.linspace(precio_actual * 0.85, precio_actual * 1.15, num=31)
-                        precios = np.unique(np.append(precios, precio_actual))
-                        precios = np.round(precios, 2)
+                        #limit_min = (100-var_precio)/100
+                        #limit_max = (100+var_precio)/100
+                        #precios = np.linspace(precio_actual * limit_min, precio_actual * limit_max, num=31)
+                        #precios = np.unique(np.append(precios, precio_actual))
+                        #precios = np.round(precios, 2)
+
+                        def generar_precios_optimizados(precio_actual, var_precio, datos_historicos=None):
+                            """
+                            Genera array de precios optimizado usando reglas estadísticas
+                            """
+                            # Determinar número óptimo de pasos
+                            n_pasos = metodo_hibrido_inteligente(precio_actual, var_precio, datos_historicos)
+                            
+                            # Calcular límites
+                            limite_inferior = precio_actual * (100 - var_precio) / 100
+                            limite_superior = precio_actual * (100 + var_precio) / 100
+                            
+                            # Generar precios
+                            precios = np.linspace(limite_inferior, limite_superior, num=n_pasos)
+                            precios = np.round(precios, 2)
+                            
+                            # Asegurar que el precio actual esté incluido y sea exacto
+                            idx_mas_cercano = np.argmin(np.abs(precios - precio_actual))
+                            precios[idx_mas_cercano] = precio_actual
+                            
+                            return precios, n_pasos
+
+                  
+                        try:
+                            # Obtener datos históricos si están disponibles
+                            datos_historicos = None
+                            if hasattr(elasticidad, 'data_grafico') and elasticidad.data_grafico is not None:
+                                datos_historicos = elasticidad.data_grafico
+                            
+                            # Generar precios optimizados
+                            precios, n_pasos = generar_precios_optimizados(
+                                precio_actual=float(precio_actual),
+                                var_precio=float(var_precio),
+                                datos_historicos=datos_historicos
+                            )
+                            
+                            # Mensaje informativo
+                            #st.success(f"🎯 **Configuración óptima aplicada**: {n_pasos} puntos de precio calculados usando reglas estadísticas de pricing")
+                            
+                        except Exception as e:
+                            # Fallback al método actual
+                            #st.warning(f"⚠️ Usando configuración estándar: {e}")
+                            limit_min = (100-var_precio)/100
+                            limit_max = (100+var_precio)/100
+                            precios = np.linspace(precio_actual * limit_min, precio_actual * limit_max, num=15)
+                            precios = np.unique(np.append(precios, precio_actual))
+                            precios = np.round(precios, 2)
+
 
                         comp_effect_local = 0
                         if res.get('Competencias'):
@@ -601,7 +747,7 @@ if not st.session_state.skus_store:
 
 # UI: Selectbox y paneles
 
-col1_gen, col2_gen = st.columns([5, 3])
+#col1_gen, col2_gen = st.columns([5, 3])
 
 # Lista de claves a mostrar (orden natural)
 keys_list = list(st.session_state.skus_store.keys())
@@ -611,194 +757,223 @@ def format_key(k):
     d = st.session_state.skus_store[k]["result"]
     return f"{d['SKU']} - {d['Producto']} - Canal {d['Canal']} - {d['Id_unico']}"
 
-with col1_gen:
-    st.header("Analítica")
-    seleccion = st.selectbox(
-        "Selecciona un SKU / Escenario",
-        keys_list,
-        format_func=format_key
-    )
+#with col1_gen:
+st.header("Analítica")
+seleccion = st.selectbox(
+    "Selecciona un SKU / Escenario",
+    keys_list,
+    format_func=format_key
+)
 
-    data = st.session_state.skus_store[seleccion]["result"]
-    demanda_df = st.session_state.skus_store[seleccion].get("demanda_df", None)
-    grafs = st.session_state.skus_store[seleccion].get("graficos", {})
-    elasticidad_inst = st.session_state.skus_store[seleccion].get("elasticidad_obj", None)
-    #default_insight = st.session_state.skus_store[seleccion].get("default_insight", "")
+data = st.session_state.skus_store[seleccion]["result"]
+demanda_df = st.session_state.skus_store[seleccion].get("demanda_df", None)
+grafs = st.session_state.skus_store[seleccion].get("graficos", {})
+elasticidad_inst = st.session_state.skus_store[seleccion].get("elasticidad_obj", None)
+#default_insight = st.session_state.skus_store[seleccion].get("default_insight", "")
 
-    # Mostrar resumen
-    st.markdown("## Resumen")
-    venta_base = data.get('Venta Base', 0)
-    st.markdown(f"""
-        📦 **Producto:** {data.get('Producto')}  
-        🆔 **SKU:** {data.get('SKU')}  
-        🏬 **Canal:** {data.get('Canal')}  
+# Mostrar resumen
+st.markdown("---")
+st.markdown("## Resumen")
+venta_base = data.get('Venta Base', 0)
+st.markdown(f"""
+    📦 **Producto:** {data.get('Producto')}  
+    🆔 **SKU:** {data.get('SKU')}  
+    🏬 **Canal:** {data.get('Canal')}  
 
-        - 📊 **Ventas base:** {int(venta_base):,} unidades.
-        Venta esperada semanal en el canal {data.get('Canal')} dado el precio actual y el promedio del clima y GRPs.
-    """)
+    - 📊 **Ventas base:** {int(venta_base):,} unidades.
+    Venta esperada semanal en el canal {data.get('Canal')} dado el precio actual y el promedio del clima y GRPs.
+""")
 
-    af_precio = data.get('Afectación Precio', 0) or 0
-    pv_precio = data.get('Pvalue Precio', 1) or 1
-    if abs(af_precio) >= 1:
-        st.markdown("**PRODUCTO ELÁSTICO**")
-    else:
-        st.markdown("**PRODUCTO INELÁSTICO**")
+af_precio = data.get('Afectación Precio', 0) or 0
+pv_precio = data.get('Pvalue Precio', 1) or 1
+if abs(af_precio) >= 1:
+    st.info("**PRODUCTO ELÁSTICO**")
+else:
+    st.info("**PRODUCTO INELÁSTICO**")
 
-    st.markdown(f"- 💰 **Elasticidad precio:** {af_precio:.2f}.  Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%. Significacia: **{(1-pv_precio)*100:.2f}%**")
+st.markdown(f"- 💰 **Elasticidad precio:** {af_precio:.2f}.  Esto significa que si el precio aumenta 1%, la venta cambia en aproximadamente **{af_precio:.2f}**%. Significacia: **{(1-pv_precio)*100:.2f}%**")
+#st.markdown(f"")
+
+# Julio Regalado
+af_JR = data.get('Afectación Julio Regalado', 0) or 0
+pv_JR = data.get('Pvalue Julio Regalado', 1) or 1
+if af_JR != 0:
+    st.markdown(f"- 📈 **Impacto de promociones Julio Regalado (S21-S31)**. Afectan en **{(np.exp(af_JR)-1)*100:.2f}%** a la venta. Significacia: **{(1-pv_JR)*100:.2f}%**")
     #st.markdown(f"")
 
-    # Julio Regalado
-    af_JR = data.get('Afectación Julio Regalado', 0) or 0
-    pv_JR = data.get('Pvalue Julio Regalado', 1) or 1
-    if af_JR != 0:
-        st.markdown(f"- 📈 **Impacto de promociones Julio Regalado (S21-S31)**. Afectan en **{(np.exp(af_JR)-1)*100:.2f}%** a la venta. Significacia: **{(1-pv_JR)*100:.2f}%**")
-        #st.markdown(f"")
+# Clima
+af_clima = data.get('Afectación Clima', 0) or 0
+pv_clima = data.get('Pvalue Clima', 1) or 1
+if data.get('Temperatura'):
+    st.markdown(f"- 🌦️ **Impacto del clima:** {af_clima*100:.2f}. Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima*100:.2f}**%. Significacia: **{(1-pv_clima)*100:.2f}%**")
+    #st.markdown(f"")
 
-    # Clima
-    af_clima = data.get('Afectación Clima', 0) or 0
-    pv_clima = data.get('Pvalue Clima', 1) or 1
-    if data.get('Temperatura'):
-        st.markdown(f"- 🌦️ **Impacto del clima:** {af_clima*100:.2f}. Por cada 1% de incremento en la temperatura el sellout cambia en un **{af_clima*100:.2f}**%. Significacia: **{(1-pv_clima)*100:.2f}%**")
-        #st.markdown(f"")
+# Grps
+if data.get('Grps'):
+    af_grps = data.get('Afectación Grps', 0) or 0
+    pv_grps = data.get('Pvalue Grps', 1) or 1
+    st.markdown(f"- 📈 **Grps:** {af_grps*100:.2f}. Por cada 1% de incremento en los GRPs el sellout cambia en un **{af_grps*100:.2f}**%. Significacia: **{(1-pv_grps)*100:.2f}%**")
+    #st.markdown(f"")
 
-    # Grps
-    if data.get('Grps'):
-        af_grps = data.get('Afectación Grps', 0) or 0
-        pv_grps = data.get('Pvalue Grps', 1) or 1
-        st.markdown(f"- 📈 **Grps:** {af_grps*100:.2f}. Por cada 1% de incremento en los GRPs el sellout cambia en un **{af_grps*100:.2f}**%. Significacia: **{(1-pv_grps)*100:.2f}%**")
-        #st.markdown(f"")
+# Calidad del modelo
+r2 = data.get('R cuadrada', 0) or 0
+st.markdown(f"- 📈 **Calidad del modelo (R²):** {r2:.2f}. El modelo explica un **{r2*100:.2f}%** de la variación de la venta.")
+if r2 < 0.25:
+    st.info("**AJUSTE BAJO**")
+elif r2 >= 0.65:
+    st.info("**AJUSTE ALTO**")
+else:
+    st.info("**AJUSTE MODERADO**")
 
-    # Calidad del modelo
-    r2 = data.get('R cuadrada', 0) or 0
-    st.markdown(f"- 📈 **Calidad del modelo (R²):** {r2:.2f}. El modelo explica un **{r2*100:.2f}%** de la variación de la venta.")
-    if r2 < 0.25:
-        st.markdown("**AJUSTE BAJO**")
-    elif r2 >= 0.65:
-        st.markdown("**AJUSTE ALTO**")
-    else:
-        st.markdown("**AJUSTE MODERADO**")
+# Elasticidades de competencia
+if data.get('Competencias'):
+    st.markdown("💰 **Elasticidades de Competencia**")
+    for comp_info in data['Competencias']:
+        nombre_comp = comp_info['Nombre Competencia']
+        af_comp = comp_info['Afectación Competencia'] or 0
+        pv_comp = comp_info['Pvalue Competencia'] or 1
+        st.markdown(f"- **{nombre_comp}**: si el precio sube 1%, la venta cambia en **{af_comp:.2f}%**. Significacia: **{(1-pv_comp)*100:.2f}%**")
 
-    # Elasticidades de competencia
-    if data.get('Competencias'):
-        st.markdown("💰 **Elasticidades de Competencia**")
-        for comp_info in data['Competencias']:
-            nombre_comp = comp_info['Nombre Competencia']
-            af_comp = comp_info['Afectación Competencia'] or 0
-            pv_comp = comp_info['Pvalue Competencia'] or 1
-            st.markdown(f"- **{nombre_comp}**: si el precio sube 1%, la venta cambia en **{af_comp:.2f}%**. Significacia: **{(1-pv_comp)*100:.2f}%**")
+# Mostrar gráfica de demanda si existe
+if demanda_df is not None and not demanda_df.empty:
+    def highlight_precio_actual(row):
+        return [
+            "background-color: red; color: white;"
+            if row["Precio"] == precio_actual else ""
+            for _ in row
+        ]
 
-    # Mostrar gráfica de demanda si existe
-    if demanda_df is not None and not demanda_df.empty:
-        def highlight_precio_actual(row):
-            return [
-                "background-color: red; color: white;"
-                if row["Precio"] == precio_actual else ""
-                for _ in row
-            ]
+    def highlight_max(s):
+        is_max = s == s.max()
+        return ["background-color: green; color: white;" if v else "" for v in is_max]
+    st.markdown("---")
+    
+    # Mostrar tabla con estilos (streamlit acepta .style but will render as static table)
+    try:
+        precio_actual = float(data.get('Precio Actual'))
 
-        def highlight_max(s):
-            is_max = s == s.max()
-            return ["background-color: green; color: white;" if v else "" for v in is_max]
-
-        st.markdown("### Simulación de Demanda, Precio y Utilidad")
-        # Mostrar tabla con estilos (streamlit acepta .style but will render as static table)
-        try:
-            precio_actual = float(data.get('Precio Actual'))
-
-            # Aplicar estilos
-            styled_df = demanda_df.style.format({
-                "Precio": "{:,.2f}",
-                "Demanda Estimada": "{:,.0f}",
-                "Δ Demanda %": "{:+.1f}%",
-                "Utilidad": "{:,.2f}"
-            }).apply(highlight_precio_actual, axis=1) \
-            .apply(highlight_max, subset=["Utilidad"])
-
+        # Aplicar estilos
+        styled_df = demanda_df.style.format({
+            "Precio": "{:,.2f}",
+            "Demanda Estimada": "{:,.0f}",
+            "Δ Demanda %": "{:+.1f}%",
+            "Utilidad": "{:,.2f}"
+        }).apply(highlight_precio_actual, axis=1) \
+        .apply(highlight_max, subset=["Utilidad"])
+        colaux1,colaux2,colaux3 = st.columns([1,4,1])
+        with colaux2:
+            st.markdown("### Simulación de Demanda, Precio y Utilidad")
             st.dataframe(styled_df, use_container_width=True)
-        except Exception:
-            st.dataframe(demanda_df)
+    except Exception:
+        st.dataframe(demanda_df)
 
-        # Gráfico de curva de demanda
-        try:
-            precio_actual_val = float(data.get('Precio Actual'))
-            idx = (np.abs(demanda_df["Precio"] - precio_actual_val)).argmin()
+    # Gráfico de curva de demanda
+    try:
+        precio_actual_val = float(data.get('Precio Actual'))
+        idx = (np.abs(demanda_df["Precio"] - precio_actual_val)).argmin()
 
-            fig_demanda = px.line(
-                demanda_df,
-                x="Precio",
-                y="Demanda Estimada",
-                markers=True,
-                title=f"Curva de Demanda - {data.get('Producto')}",
-            )
+        fig_demanda = px.line(
+            demanda_df,
+            x="Precio",
+            y="Demanda Estimada",
+            markers=True,
+            title=f"Curva de Demanda - {data.get('Producto')}",
+        )
 
-            # punto rojo
-            fig_demanda.add_scatter(
-                x=[precio_actual_val],
-                y=[demanda_df.loc[idx, "Demanda Estimada"]],
-                mode="markers+text",
-                marker=dict(color="red", size=12),
-                text=["Precio Actual"],
-                textposition="top center"
-            )
-
+        # punto rojo
+        fig_demanda.add_scatter(
+            x=[precio_actual_val],
+            y=[demanda_df.loc[idx, "Demanda Estimada"]],
+            mode="markers+text",
+            marker=dict(color="red", size=12),
+            text=["Precio Actual"],
+            textposition="top center"
+        )
+        colaux1,colaux2,colaux3 = st.columns([1,4,1])
+        with colaux2:
             st.plotly_chart(fig_demanda, use_container_width=True, key=f"fig_demanda_{seleccion}")
-        except Exception as e:
-            st.warning(f"No se pudo generar gráfico de demanda: {e}")
+    except Exception as e:
+        st.warning(f"No se pudo generar gráfico de demanda: {e}")
 
-    else:
-        st.info("⚠️ No hay precio válido para generar la simulación de demanda.")
+else:
+    st.info("⚠️ No hay precio válido para generar la simulación de demanda.")
 
-    # Mostrar gráficos que generaste originalmente (base, dispersion, factor elastico)
-    if grafs.get("disp") is not None:
-        try:
+# Mostrar gráficos que generaste originalmente (base, dispersion, factor elastico)
+if grafs.get("disp") is not None:
+    try:
+        colaux1,colaux2,colaux3 = st.columns([1,4,1])
+        with colaux2:
             st.plotly_chart(grafs["disp"], use_container_width=True, key=f"fig_disp_{seleccion}")
-        except Exception:
-            pass
-    if grafs.get("fe") is not None:
-        try:
+    except Exception:
+        pass
+#if grafs.get("fe") is not None:
+#    try:
+#        st.plotly_chart(grafs["fe"], use_container_width=True, key=f"fig_fe_{seleccion}")
+#    except Exception:
+#        pass
+
+
+# Agregar esta sección después de mostrar el gráfico de factor elástico
+if grafs.get("fe") is not None:
+    try:
+        colaux1,colaux2,colaux3 = st.columns([1,4,1])
+        with colaux2:
             st.plotly_chart(grafs["fe"], use_container_width=True, key=f"fig_fe_{seleccion}")
-        except Exception:
-            pass
+        
+        
+    except Exception as e:
+        st.error(f"Error al mostrar la calculadora de precios: {e}")
+
+
     if grafs.get("base") is not None:
         try:
+            st.markdown("---")
             st.plotly_chart(grafs["base"], use_container_width=True, key=f"fig_base_{seleccion}")
         except Exception:
             pass
 
-with col2_gen:
+#with col2_gen:
+st.markdown("---")
+col1, col2,col3 = st.columns([1, 1,20])
+
+with col1:
     st.header("IA")
-    st.subheader("Insight por SKU")
+    
+with col2:
+    st.image("Logo_v2.png", width=70) 
+st.subheader("Insight por SKU")
 
-    # Recuperar insight ya generado (si existe)
-    if st.session_state.insights_cache.get(seleccion):
-        st.markdown("**Insight previamente generado**")
-        st.markdown(
-            f"<div style='border: .05px solid gray; padding: 8px; border-radius:6px'>{st.session_state.insights_cache[seleccion]}</div>",
-            unsafe_allow_html=True
-        )
+# Recuperar insight ya generado (si existe)
+if st.session_state.insights_cache.get(seleccion):
+    st.markdown("**Insight previamente generado**")
+    st.markdown(
+        f"<div style='border: .05px solid gray; padding: 8px; border-radius:6px, background-color: #f2f2f2; color: #6e6e6e;',>{st.session_state.insights_cache[seleccion]}</div>",
+        unsafe_allow_html=True
+    )
 
-    st.markdown("---")
-    complemento = st.text_area("Complemento (opcional)", placeholder="Agregar dirección al insight...")
 
-    gen_key = f"gen_insight_{seleccion}"
-    if st.button("Generar Insight", key=gen_key):
-        try:
-            elasticidad_inst = st.session_state.skus_store[seleccion].get("elasticidad_obj", None)
-            demanda_local = st.session_state.skus_store[seleccion].get("demanda_df", None)
-            res_local = st.session_state.skus_store[seleccion].get("result")
+complemento = st.text_area("Complemento (opcional)", placeholder="Agregar una pregunta adicional...")
 
-            generated = elasticidad_inst.genera_insight_op(res_local, df=demanda_local, complemento=complemento)
+gen_key = f"gen_insight_{seleccion}"
+if st.button("Generar Insight", key=gen_key):
+    try:
+        elasticidad_inst = st.session_state.skus_store[seleccion].get("elasticidad_obj", None)
+        demanda_local = st.session_state.skus_store[seleccion].get("demanda_df", None)
+        res_local = st.session_state.skus_store[seleccion].get("result")
 
-            st.session_state.insights_cache[seleccion] = generated
-            st.success("Insight generado y guardado")
+        generated = elasticidad_inst.genera_insight_op(res_local, df=demanda_local, complemento=complemento)
 
-        except Exception as e:
-            st.error(f"Error al generar insight: {e}")
+        st.session_state.insights_cache[seleccion] = generated
+        st.success("Insight generado y guardado")
+        # Si ya existe insight generado, lo mostramos
+        if st.session_state.insights_cache.get(seleccion):
+            st.markdown("**Insight generado**")
+            st.markdown(
+                f"<div style='border: .05px solid gray; padding: 8px; border-radius:6px'>{st.session_state.insights_cache[seleccion]}</div>",
+                unsafe_allow_html=True
+            )
 
-    # Si ya existe insight generado, lo mostramos
-    if st.session_state.insights_cache.get(seleccion):
-        st.markdown("**Insight generado**")
-        st.markdown(
-            f"<div style='border: .05px solid gray; padding: 8px; border-radius:6px'>{st.session_state.insights_cache[seleccion]}</div>",
-            unsafe_allow_html=True
-        )
+
+    except Exception as e:
+        st.error(f"Error al generar insight: {e}")
+
