@@ -138,7 +138,7 @@ class ElasticidadCB:
                     (venta['MONTORETAIL'] > 0) &
                     (venta['UNIDADESDESP'] > 0)
                 ].copy()
-            elif self.canal == 'WM':
+            elif self.canal == 'Wal-Mart de México':
                 venta = venta[
                     (venta['CADID'].isin([2,3,4,5])) &
                     (venta['MONTORETAIL'] > 0) &
@@ -370,7 +370,7 @@ class ElasticidadCB:
             # Filtro de cadenas según canal
             if self.canal == 'Autoservicios':
                 self.sellout = self.sellout[self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
-            elif self.canal == 'WM':
+            elif self.canal == 'Wal-Mart de México':
                 self.sellout = pd.read_sql(query_wm, conn)
             elif self.canal == 'Farmacias':
                 self.sellout = self.sellout[~self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]

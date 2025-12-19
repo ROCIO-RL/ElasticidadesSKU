@@ -103,7 +103,7 @@ with col1:
     if pais == 'Argentina':
         canal = st.selectbox("Canal", ["Autoservicios"])
     elif pais == 'México':
-        canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias","WM"])
+        canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias","Wal-Mart de México"])
     else:
         canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
 with col2:
