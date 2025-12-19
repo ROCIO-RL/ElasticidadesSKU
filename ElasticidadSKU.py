@@ -138,6 +138,13 @@ class ElasticidadCB:
                     (venta['MONTORETAIL'] > 0) &
                     (venta['UNIDADESDESP'] > 0)
                 ].copy()
+            elif self.canal == 'WM':
+                venta = venta[
+                    (venta['CADID'].isin([2,3,4,5])) &
+                    (venta['MONTORETAIL'] > 0) &
+                    (venta['UNIDADESDESP'] > 0)
+                ].copy()
+
 
             # Precio unitario
             venta['Precio'] = venta['MONTORETAIL'] / venta['UNIDADESDESP']
@@ -304,6 +311,20 @@ class ElasticidadCB:
           AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
           AND c.TIPOCLIENTE='Monitoreado'
         """
+        query_wm = f"""SELECT t.ANIO, t.SEMNUMERO, p.propstcodbarras, c.cadid,
+               m.UnidadesDesp, NVL(m.MontoDesp,0) AS MontoDespNeto,
+               NVL(m.montodespcte,0) AS MontoRetail
+        FROM PRD_CNS_MX.DM.FACT_DESPLAZAMIENTOSEMANALCADENASKU AS m
+        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_CLIENTE AS c ON m.CteID = c.CteID
+        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_PRODUCTO AS p ON m.ProdID = p.ProdID
+        LEFT JOIN PRD_CNS_MX.DM.VW_DIM_TIEMPO AS t ON m.TMPID = t.TMPID
+        WHERE t.anio >= 2023
+          AND p.propstcodbarras = '{self.codbarras}'
+          --AND c.TIPOESTNOMBRE IN ('Autoservicios','Cadenas de farmacia')
+          AND c.grpnombre='Wal-Mart de México'
+          AND c.TIPOCLIENTE='Monitoreado'"""
+        
+        
 
         query_int = f"""SELECT 
             s.SEMANIO AS ANIO, 
@@ -345,13 +366,15 @@ class ElasticidadCB:
 
         if self.pais=='México':
             self.sellout = pd.read_sql(query, conn)
-            conn.close()
+            
             # Filtro de cadenas según canal
             if self.canal == 'Autoservicios':
                 self.sellout = self.sellout[self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
+            elif self.canal == 'WM':
+                self.sellout = pd.read_sql(query_wm, conn)
             elif self.canal == 'Farmacias':
                 self.sellout = self.sellout[~self.sellout['CADID'].isin([1,10,100,102,15,16,18,19,2,20,21,25,3,342,380,4,5,593,652,11,12,13,381,493,6,9])]
-
+            conn.close()
         else:
             paises = ['Colombia','Brasil']
             if self.pais in paises:

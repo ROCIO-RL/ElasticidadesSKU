@@ -9,7 +9,6 @@ import plotly.express as px
 
 
 
-
 st.set_page_config(page_title="Elasticidades SKU", layout="wide")
 
 st.title("Elasticidades por SKU")
@@ -67,7 +66,10 @@ st.markdown("Agrega un SKU, selecciona canal y clima:")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    marca = st.selectbox("Marca", sorted(df_productos["Marca"].unique()))
+    #marca = st.selectbox("Marca", sorted(df_productos["Marca"].unique()))
+    marcas = df_productos["Marca"].dropna().unique()
+    marca = st.selectbox("Marca", sorted(marcas))
+
 
 with col2:
     agrupaciones = df_productos[df_productos["Marca"] == marca]["Agrupación Pauta"].unique()
@@ -100,6 +102,8 @@ col1, col2, col3, col4= st.columns(4)
 with col1:  
     if pais == 'Argentina':
         canal = st.selectbox("Canal", ["Autoservicios"])
+    elif pais == 'México':
+        canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias","WM"])
     else:
         canal = st.selectbox("Canal", ["Moderno", "Autoservicios", "Farmacias"])
 with col2:
@@ -332,6 +336,7 @@ if st.session_state.manual_layout:
         lambda x: x if isinstance(x, list)
         else ([] if pd.isna(x) or x == "" else [x])
     )
+    st.session_state["layout_df"] = layout  
     st.dataframe(layout)
 
 
@@ -639,7 +644,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                             
                             return precios, n_pasos
 
-                  
+                
                         try:
                             # Obtener datos históricos si están disponibles
                             datos_historicos = None
@@ -742,7 +747,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
 # Si no hay datos procesados, avisar
 
 if not st.session_state.skus_store:
-    st.info("No hay resultados analíticos disponibles. Pulsa 'Ejecutar Análisis' o carga el layout con datos.")
+    st.info("No hay resultados analíticos disponibles. Pulsa 'Ejecutar Análisis' una vez seleccionados los SKUs.")
     st.stop()
 
 # UI: Selectbox y paneles
