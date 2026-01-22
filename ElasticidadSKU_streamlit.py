@@ -513,6 +513,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                 dispersion = elasticidad.grafica_dispersion()
                 elasticidad.calcula_factor_elastico()
                 graf_factor_elastico = elasticidad.grafica_factor_elastico()
+               
                 #clave = f"{sku}_{id_escenario}"
                 def escenario_key(row):
                     parts = [
@@ -658,6 +659,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                                 datos_historicos=datos_historicos
                             )
                             
+                            
                             # Mensaje informativo
                             #st.success(f"🎯 **Configuración óptima aplicada**: {n_pasos} puntos de precio calculados usando reglas estadísticas de pricing")
                             
@@ -737,6 +739,7 @@ if layout is not None and st.button("Ejecutar Análisis"):
                         "fe": graficos_FE.get(clave)
                     },
                     "elasticidad_obj": elasticidad,
+                    "historico_df":datos_historicos
                     #"default_insight": default_insight
                 }
 
@@ -942,11 +945,52 @@ st.markdown("---")
 col1, col2,col3 = st.columns([1, 1,20])
 
 with col1:
-    st.header("IA")
+    st.image("LogoGemini.png", width=50) 
+    
     
 with col2:
-    st.image("Logo_v2.png", width=70) 
+    st.header("IA")
+
 st.subheader("Insight por SKU")
+
+#RECOMENDACION DE PRECIO
+
+if "reco_cache" not in st.session_state:
+    st.session_state.reco_cache = {}
+
+reco_key = f"gen_reco_{seleccion}"
+
+if st.button("Recomendacion de precio", key=reco_key):
+    if seleccion in st.session_state.reco_cache:
+        st.info("La recomendación ya fue generada")
+    else:
+        try:
+            df_hist = st.session_state.skus_store[seleccion]["historico_df"]
+            elasticidad_inst = st.session_state.skus_store[seleccion]["elasticidad_obj"]
+            demanda_local = st.session_state.skus_store[seleccion].get("demanda_df")
+            res_local = st.session_state.skus_store[seleccion].get("result")
+
+            reco = elasticidad_inst.generar_recomendacion(
+                df_hist,
+                res_local,
+                df=demanda_local
+            )
+
+            st.session_state.reco_cache[seleccion] = reco
+            st.success("Recomendación generada y guardada")
+
+        except Exception as e:
+            st.error(f"Error al generar recomendación: {e}")
+if seleccion in st.session_state.reco_cache:
+    st.markdown("**PRECIO RECOMENDADO**")
+    st.markdown(
+        f"<div style='border: .05px solid gray; padding: 8px; border-radius:6px'>"
+        f"{st.session_state.reco_cache[seleccion]}</div>",
+        unsafe_allow_html=True
+    )
+
+
+
 
 # Recuperar insight ya generado (si existe)
 if st.session_state.insights_cache.get(seleccion):
@@ -962,13 +1006,30 @@ complemento = st.text_area("Complemento (opcional)", placeholder="Agregar una pr
 gen_key = f"gen_insight_{seleccion}"
 if st.button("Generar Insight", key=gen_key):
     try:
+
+
+        
+        #df_hist = st.session_state.skus_store[seleccion]["historico_df"]
+
+       
+
         elasticidad_inst = st.session_state.skus_store[seleccion].get("elasticidad_obj", None)
         demanda_local = st.session_state.skus_store[seleccion].get("demanda_df", None)
         res_local = st.session_state.skus_store[seleccion].get("result")
 
         generated = elasticidad_inst.genera_insight_op(res_local, df=demanda_local, complemento=complemento)
+        generated = str(generated)
 
+        #reco = elasticidad_inst.generar_recomendacion(df_hist,res_local, df=demanda_local, complemento=complemento)
+        #st.markdown("**PRECIO RECOMENDADO**")
+        #st.markdown(
+        #    f"<div style='border: .05px solid gray; padding: 8px; border-radius:6px'>{reco}</div>",
+        #    unsafe_allow_html=True
+        #)
         st.session_state.insights_cache[seleccion] = generated
+        
+        
+
         st.success("Insight generado y guardado")
         # Si ya existe insight generado, lo mostramos
         if st.session_state.insights_cache.get(seleccion):

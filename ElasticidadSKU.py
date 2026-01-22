@@ -18,6 +18,8 @@ import streamlit as st
 from openai import OpenAI, APIError, APIStatusError
 import re
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from google import genai
+from google.genai import types
 
 
 
@@ -1170,7 +1172,7 @@ class ElasticidadCB:
         return fig, df_pred
         
     
-    def genera_insight_op(self,res,complemento="",df=None,model_name="deepseek-ai/DeepSeek-V3.1-Terminus"):
+    def genera_insight_op_deep(self,res,complemento="",df=None,model_name="deepseek-ai/DeepSeek-V3.1-Terminus"):
         #DeepSeek-V3.1-Terminus
         #DeepSeek-V3.1-Base
         '''if not hasattr(self, 'r2') or not hasattr(self, 'coeficientes') or not hasattr(self, 'pvalores'):
@@ -1400,6 +1402,247 @@ class ElasticidadCB:
             )
 
     
+    def genera_insight_op(self,res,complemento="",df=None):
 
+                # Valores base
+        r2 = res.get("R cuadrada", 0)
+        precio = res.get("Precio Actual")
+
+        # Armar diccionarios solo con las variables que existan
+        posibles_vars = {
+            "Intercept": ("intercepto", "Pvalue Intercepto"),
+            "Precio": ("Afectación Precio", "Pvalue Precio"),
+            "CLIMA": ("Afectación Clima", "Pvalue Clima"),
+            "Grps": ("Afectación Grps", "Pvalue Grps"),
+            "JULIO_REGALADO": ("Afectación Julio Regalado", "Pvalue Julio Regalado"),
+            #"MEGA_PAUTA": ("Afectación Mega Pauta", "Pvalue Mega Pauta"),
+        }
+
+        coeficientes, pvalores = {}, {}
+
+        for nombre, (coef_key, pval_key) in posibles_vars.items():
+            if res.get(coef_key) is not None:
+                coeficientes[nombre] = res.get(coef_key)
+                pvalores[nombre] = res.get(pval_key, None)
+
+        # Competencias dinámicas
+        if res.get("Competencias"):
+            for comp in res["Competencias"]:
+                nombre = comp.get("Nombre Competencia", "Competencia_SinNombre")
+                coef = comp.get("Afectación Competencia")
+                pval = comp.get("Pvalue Competencia")
+                if coef is not None:
+                    coeficientes[f"PRECIO_COMPETENCIA_{nombre}"] = coef
+                    pvalores[f"PRECIO_COMPETENCIA_{nombre}"] = pval
+
+        # Generar texto limpio de coeficientes
+        if coeficientes:
+            coef_pval = "\n".join(
+                f"- {var}: coef = {coeficientes[var]:.4f}, p = {pvalores.get(var, float('nan')):.4g}"
+                for var in coeficientes
+            )
+        else:
+            coef_pval = "No se encontraron variables con coeficientes válidos."
+        
+    
+
+        user_prompt = f"""# CONTEXTO Y ROL
+                Eres un Econometrista Senior especializado en transformar resultados estadísticos complejos en recomendaciones de negocio claras, accionables y ejecutivas para equipos de dirección comercial. Tu lenguaje es directo, ejecutivo y basado en evidencia cuantitativa.
+                Recibiras los resultados de un modelo log log de elasticidad.
+
+                # DATOS DEL MODELO
+                - R²: {r2:.4f}
+                - Coeficientes: {coef_pval}
+                - Demanda simulada: {df if df is not None else "No disponible"}
+
+                # INSTRUCCIONES PRINCIPALES
+                ## Formato de respuesta:
+                • Usa EXCLUSIVAMENTE viñetas (°)
+                • Máximo 6 viñetas por respuesta
+                • Sin introducciones ni conclusiones extensas
+                • No uses jerga inecesaria
+                • Lenguaje: español con términos técnicos explicados brevemente
+
+                ## ADVERTENCIAS CRÍTICAS:
+                • La demanda simulada es una PROYECCIÓN alrededor del precio actual, no datos reales
+                • Múltiples países → usar solo símbolo $ sin especificar moneda
+                • Las recomendaciones deben ser estrategicas, son para negocio por eso es importante cuidar la demanda, la utilidad y el precio.
+                
+                # TAREAS OBLIGATORIAS (seleccionar las más relevantes):
+
+                ° **Recomendación de Precio** (solo si hay datos):
+                - Rango Alternativo: [$X-$Y] → Ventaja: [beneficio clave]
+
+                ° **Interpretación del Modelo**:
+                - Variables significativas (p-value < 0.05): [lista]
+                - Impacto principal: [variable con mayor |coeficiente|]
+                - Calidad del modelo: R² = {r2:.4f} → [clasificación]
+
+                ° **Estrategia de Precio**:
+                - Elasticidad: [Elástica/Inelástica] → [estrategia correspondiente]
+
+                ° **Análisis Competitivo**:
+                - [Competidor]: [Relación] → [interpretación práctica]
+
+                ° **Variables Contextuales**:
+                - [Variable]: [Impacto] → [recomendación operativa]
+
+                ° **Consideraciones Analíticas**:
+                - [Recomendación avanzada específica para este caso]
+
+                # MANEJO DE PREGUNTAS ADICIONALES
+                Para cualquier consulta complementaria:
+                • Mantener el formato de viñetas
+                • Referenciar los datos del modelo cuando sea relevante  
+                • Priorizar aplicabilidad ejecutiva sobre tecnicismos
+                • Limitar a máximo 6 viñetas en total
+
+                {complemento + " → " if complemento.strip() else ""}Respuesta:"""
+        #model="gemini-2.5-flash", 
+        client = genai.Client(api_key=st.secrets["GEMINI"]["api_key"])
+        #response = client.models.generate_content(
+        #    model="gemini-2.5-flash", contents=user_prompt
+        #    )
+        response = client.models.generate_content(
+                model="gemini-2.5-flash-lite",
+                contents=user_prompt
+            )
+
+        try:
+           
+            texto_respuesta = response.candidates[0].content.parts[0].text
+            return texto_respuesta
+
+        except (APIStatusError, APIError, Exception) as e:
+            # Aquí atrapamos cualquier error de la API (por falta de créditos, timeouts, etc.)
+            print(f"[ADVERTENCIA] Error generando insight con HuggingFace: {e}")
+            return (
+                "⚠️ **No se pudo generar el insight automático** debido a un error con el modelo "
+                "(posiblemente créditos agotados o problema de conexión). "
+                "Puedes continuar usando las gráficas sin inconveniente."
+            )
+
+
+    def generar_recomendacion(self,df_hist,res,df=None):
+
+                # Valores base
+        r2 = res.get("R cuadrada", 0)
+        precio = res.get("Precio Actual")
+
+        # Armar diccionarios solo con las variables que existan
+        posibles_vars = {
+            "Intercept": ("intercepto", "Pvalue Intercepto"),
+            "Precio": ("Afectación Precio", "Pvalue Precio"),
+            "CLIMA": ("Afectación Clima", "Pvalue Clima"),
+            "Grps": ("Afectación Grps", "Pvalue Grps"),
+            "JULIO_REGALADO": ("Afectación Julio Regalado", "Pvalue Julio Regalado"),
+            #"MEGA_PAUTA": ("Afectación Mega Pauta", "Pvalue Mega Pauta"),
+        }
+
+        coeficientes, pvalores = {}, {}
+
+        for nombre, (coef_key, pval_key) in posibles_vars.items():
+            if res.get(coef_key) is not None:
+                coeficientes[nombre] = res.get(coef_key)
+                pvalores[nombre] = res.get(pval_key, None)
+
+        # Competencias dinámicas
+        if res.get("Competencias"):
+            for comp in res["Competencias"]:
+                nombre = comp.get("Nombre Competencia", "Competencia_SinNombre")
+                coef = comp.get("Afectación Competencia")
+                pval = comp.get("Pvalue Competencia")
+                if coef is not None:
+                    coeficientes[f"PRECIO_COMPETENCIA_{nombre}"] = coef
+                    pvalores[f"PRECIO_COMPETENCIA_{nombre}"] = pval
+
+        # Generar texto limpio de coeficientes
+        if coeficientes:
+            coef_pval = "\n".join(
+                f"- {var}: coef = {coeficientes[var]:.4f}, p = {pvalores.get(var, float('nan')):.4g}"
+                for var in coeficientes
+            )
+        else:
+            coef_pval = "No se encontraron variables con coeficientes válidos."
+        
+        # ===== HISTORIA =====
+        df_histdf = df_hist.groupby(['ANIO','SEMNUMERO']).agg({'UNIDADESDESP':'sum','Precio':'mean'}).reset_index()
+
+        # ===== PRECIO ACTUAL =====
+        precio_actual = precio
+
+
+        user_prompt = f"""
+                        # ROL
+                        Eres un Econometrista Senior responsable de pricing semanal en una empresa real.
+                        Tu responsabilidad principal es proteger estabilidad de demanda y credibilidad del modelo,
+                        priorizando decisiones defendibles ante comité comercial y financiero.
+
+                        # INSUMOS DISPONIBLES (NO CALCULAR)
+                        - Precios históricos observados: {df_hist}
+                        - R² del modelo: {r2:.4f}
+                        - Coeficientes y significancia estadística:
+                        {coef_pval}
+                        - Simulación de demanda y precio óptimo del modelo (si existe):
+                        {df if df is not None else "No disponible"}
+
+                        # REGLAS DURAS (OBLIGATORIAS)
+                        - Evita variaciones superiores al rango históricamente observado.
+                        - Si el beneficio incremental del modelo no es claramente superior,
+                        prioriza estabilidad sobre captura de valor.
+                        - Si el R² es moderado o bajo, el histórico debe pesar más que el modelo.
+                        - Si precio óptimo del modelo se aleja del histórico reciente,
+                        solo considera un ajuste parcial y conservador.
+                        - Nunca recomiendes un precio que implique alto riesgo de ruptura de demanda.
+                        - Ante la duda, elige el precio más seguro.
+
+                        # CRITERIOS DE DECISIÓN
+                        Evalúa explícitamente:
+                        - Coherencia con precios históricos recientes
+                        - Robustez del modelo (R² y significancia)
+                        - Magnitud del cambio vs. beneficio esperado
+                        - Riesgo operativo y comercial
+
+                        # OPCIONES PERMITIDAS
+                        Selecciona SOLO una de estas opciones:
+                        - Mantener el precio actual
+                        - Ajustar ligeramente hacia el óptimo del modelo
+                        - Elegir un punto intermedio prudente
+
+                        # TAREA ÚNICA
+                        Recomienda el mejor precio para la próxima semana,
+                        maximizando valor sostenible y minimizando riesgo.
+
+                        # FORMATO OBLIGATORIO (UNA SOLA LÍNEA)
+                        Devuelve EXACTAMENTE una línea, sin texto adicional:
+
+                        "Precio recomendado próxima semana: $X → decisión conservadora basada en [histórico / modelo / equilibrio], priorizando estabilidad y control de riesgo."
+                        """
+
+
+
+        #model="gemini-2.5-flash", 
+        client = genai.Client(api_key=st.secrets["GEMINI"]["api_key"])
+        #response = client.models.generate_content(
+        #    model="gemini-2.5-flash", contents=user_prompt
+        #    )
+        response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=user_prompt
+            )
+
+        try:
+           
+            texto_respuesta = response.candidates[0].content.parts[0].text
+            return texto_respuesta
+
+        except (APIStatusError, APIError, Exception) as e:
+            # Aquí atrapamos cualquier error de la API (por falta de créditos, timeouts, etc.)
+            print(f"[ADVERTENCIA] Error generando insight con HuggingFace: {e}")
+            return (
+                "⚠️ **No se pudo generar el insight automático** debido a un error con el modelo "
+                "(posiblemente créditos agotados o problema de conexión). "
+                "Puedes continuar usando las gráficas sin inconveniente."
+            )
 
 
